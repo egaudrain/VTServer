@@ -1,0 +1,16 @@
+[Unit]
+Description=Voice Transformation Server
+Documentation=file:/usr/local/lib/vt_server/README.md
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/vt_server
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+User=vt_server
+KillSignal=SIGINT
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
