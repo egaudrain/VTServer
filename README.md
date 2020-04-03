@@ -9,12 +9,51 @@ The server receives instructions as JSON encoded objects and returns a JSON enco
 that, upon success, points to a file. The VTServer does not serve the file itself. This
 is up to a web-server, for instance, to do so.
 
-The VTServer can be deployed as a `systemd` service (on Linux) using the provided
-install script (see below).
+You can run the VTServer directly from the command-line, or it can be deployed as a `systemd` service (on Linux) using the provided install script (see below).
 
 A basic PHP client is also provided in `/php-client`. It can be used as a relay to pass a JSON request
 sent through a web-server.
 
+Full documentation can be found in the [`/docs`](https://egaudrain.github.io/VTServer/) folder. Here's an
+example of processing instruction you can send:
+
+```json
+{
+    "action": "process",
+    "file": "/home/egaudrain/vt_server/test/sound.wav",
+    "stack":
+        [
+            {"module": "world", "f0": "-12st", "vtl": "*1"},
+            {
+                "module": "vocoder",
+                "fs": 44100,
+                "analysis_filters": {
+                    "f": { "fmin": 100, "fmax": 8000, "n": 16, "scale": "greenwood" },
+                    "method": { "family": "butterworth", "order": 6, "zero-phase": true }
+                    },
+                "synthesis_filters": "analysis_filters",
+                "envelope": {
+                    "method": "low-pass",
+                    "rectify": "half-wave",
+                    "order": 2,
+                    "fc": 160
+                    },
+                "synthesis": {
+                    "carrier": "noise",
+                    "filter_before": false,
+                    "filter_after": true
+                    }
+            }
+        ]
+}
+
+```
+
+To get some information about the server, send:
+
+```json
+{ "action": "status" }
+```
 
 Installation
 ------------
@@ -47,5 +86,4 @@ access to it.
 Usage
 -----
 
-Check the document in the `/doc` folder to see how instructions can be sent to the server.
-Each module has its own set of instructions.
+Check the document in the [`/docs`](https://egaudrain.github.io/VTServer/) folder to see how instructions can be sent to the server. Each module has its own set of instructions.
