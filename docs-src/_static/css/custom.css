@@ -1,0 +1,28 @@
+
+/* dl.class>dt {
+    background-color: red;
+} */
+
+div.section > dl {
+    border: 1px solid #f0f0f0;
+    border-radius: 5px;
+    margin: 5pt 0;
+    padding: 0 5pt;
+}
+
+span.pre {
+    padding: 0 2pt;
+}
+
+h2 span.pre {
+    padding: 0;
+}
+
+div.body h4 {
+    background: none;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 100%;
+    margin-left: 0;
+    padding-left: 0;
+}
