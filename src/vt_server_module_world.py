@@ -150,6 +150,9 @@ def process_world(in_filename, m, out_filename):
     * ``duration``: either an absolute duration in seconds {### s} or a ratio {* ###}.
     """
 
+    created_files = list()
+    used_files    = list()
+
     # Analaysis
     dat_folder   = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
     if not os.path.exists(dat_folder):
@@ -171,6 +174,8 @@ def process_world(in_filename, m, out_filename):
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Loaded f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, dat_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
+        used_files.append(dat_filename)
+
     except:
         t1 = time.time()
         tp1 = time.process_time()
@@ -190,6 +195,8 @@ def process_world(in_filename, m, out_filename):
         t2 = time.time()
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Extracted f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, in_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
+
+        created_files.append(dat_filename)
 
     # Modification of decomposition
     m = parse_arguments(m)
@@ -283,7 +290,7 @@ def process_world(in_filename, m, out_filename):
 
     sf.write(out_filename, y, fs)
 
-    return out_filename
+    return out_filename, created_files, used_files
 
 
 def regularize_arrays(*args):

@@ -45,7 +45,7 @@ import vt_server_logging as vsl
 import vt_server_common_tools as vsct
 import vt_server_modules as vsm
 
-import os, datetime
+import os, datetime, pickle
 from multiprocessing import Process, Manager, active_children
 from threading import Event, Thread
 
@@ -179,12 +179,26 @@ def process(req):
     return {'out': 'error', 'details': "Huuuu... we shouldn't find ourselves here... %s" % repr(req)}
 
 def process_async(req, h, out_filename):
+    """
+    This is the function that is threaded to run the core of the module. It dispatches
+    calls to the appropriate modules, and deals with their cache.
+
+    It also updates the ``JOB`` list when a job is finished, and create a job file
+    with some information about the job (useful for cache cleaning).
+    """
 
     vsl.LOG.debug("[%s] Processing request %s." % (h, repr(req)))
 
     f = req['file']
 
     j = JOBS[h]
+
+    job_info = dict()
+    job_info['original_file'] = f
+    job_info['created_files'] = list()
+    job_info['used_files'] = list()
+    job_info['stack'] = req['stack']
+    job_filename = os.path.splitext(out_filename)[0]+".job"
 
     for i, m in enumerate(req['stack']):
 
@@ -210,9 +224,19 @@ def process_async(req, h, out_filename):
 
                 if os.access(cache_filename, os.R_OK):
                     f = cache_filename
+                    job_info['used_files'].append(f)
                 else:
-                    f = vsm.PATCH[m['module']](f, m, cache_filename)
+                    o = vsm.PATCH[m['module']](f, m, cache_filename)
+                    if type(o) is tuple:
+                        f = o[0]
+                        if len(o)>=3:
+                            job_info['used_files'].extend(o[2])
+                        if len(o)>=2:
+                            job_info['created_files'].extend(o[1])
+                    else:
+                        f = o
                     vsl.LOG.debug("[%s] Done with module '%s'" % (h, m['module']))
+                    job_info['created_files'].append(f)
 
             except Exception as err:
                 err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))
@@ -221,6 +245,8 @@ def process_async(req, h, out_filename):
                 j['finished'] = True
                 JOBS[h] = j
                 vsl.LOG.critical(err_msg)
+                job_info['error'] = err_msg
+                pickle.dump(job_info, open(job_filename, "wb"))
                 return
         else:
             err_msg = "Calling unknown module '%' while processing '%s'." % (m['module'], f)
@@ -229,6 +255,8 @@ def process_async(req, h, out_filename):
             j['finished'] = True
             JOBS[h] = j
             vsl.LOG.critical(err_msg)
+            job_info['error'] = err_msg
+            pickle.dump(job_info, open(job_filename, "wb"))
             return
 
     if os.path.splitext(f)[1] == os.path.splitext(out_filename)[1]:
@@ -236,6 +264,9 @@ def process_async(req, h, out_filename):
     else:
         x, fs = sf.read(f)
         sf.write(out_filename, x, fs)
+
+    job_info['created_files'].append(out_filename)
+    pickle.dump(job_info, open(job_filename, "wb"))
 
     j['out'] = 'ok'
     j['details'] = out_filename

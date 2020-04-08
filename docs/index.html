@@ -182,7 +182,11 @@ process that is finished and needs removing.</p>
 <dl class="function">
 <dt id="vt_server_brain.process_async">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process_async</code><span class="sig-paren">(</span><em class="sig-param">req</em>, <em class="sig-param">h</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process_async" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This is the function that is threaded to run the core of the module. It dispatches
+calls to the appropriate modules, and deals with their cache.</p>
+<p>It also updates the <code class="docutils literal notranslate"><span class="pre">JOB</span></code> list when a job is finished, and create a job file
+with some information about the job (useful for cache cleaning).</p>
+</dd></dl>
 
 </div>
 <span class="target" id="module-vt_server_modules"></span><div class="section" id="vt-server-modules">
