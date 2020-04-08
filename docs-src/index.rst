@@ -45,6 +45,11 @@ This is a the Voice Transformation Server's documentation.
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: vt_server_cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 Indices and tables
 ==================
 

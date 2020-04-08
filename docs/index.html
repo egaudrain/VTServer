@@ -590,6 +590,63 @@ it is formatted using formatException() and appended to the message.</p>
 <dd></dd></dl>
 
 </div>
+<span class="target" id="module-vt_server_cache"></span><div class="section" id="cache-clean-up">
+<h2><code class="docutils literal notranslate"><span class="pre">Cache</span> <span class="pre">clean-up</span></code><a class="headerlink" href="#cache-clean-up" title="Permalink to this headline">¶</a></h2>
+<p>The cache can become big and obsolete, so it is a good idea to clean it up regularly.
+In particular, if the original file does not exist anymore, all the processed files
+should be removed.</p>
+<p>For that, we use the job file that is created by the <a class="reference internal" href="#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a>.
+The job file lists all the files that were created (or used) during a specific job.
+If no job file exist for a specific cache file, we erase it. Note, that we may be
+missing cache files from individual modules with this approach.</p>
+<p>The <a class="reference internal" href="#module-vt_server_cache" title="vt_server_cache"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_cache</span></code></a> module has a command line interface so you can easily
+put it in your crontab.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">vt_server_cache</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LEVEL</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span><span class="p">]</span> <span class="p">[</span><span class="n">folder</span><span class="p">]</span>
+
+<span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="n">folder</span>                <span class="n">The</span> <span class="n">cache</span> <span class="n">folder</span> <span class="n">to</span> <span class="n">cleanse</span><span class="o">.</span> <span class="n">If</span> <span class="n">none</span> <span class="ow">is</span> <span class="n">provided</span><span class="p">,</span> <span class="n">we</span>
+                        <span class="n">will</span> <span class="k">try</span> <span class="n">to</span> <span class="n">read</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">default</span> <span class="n">option</span> <span class="n">file</span><span class="o">.</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">-</span><span class="n">l</span> <span class="n">LEVEL</span><span class="p">,</span> <span class="o">--</span><span class="n">level</span> <span class="n">LEVEL</span>
+                        <span class="n">Level</span> <span class="n">of</span> <span class="n">cleansing</span> <span class="p">[</span><span class="n">default</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span> <span class="mi">0</span> <span class="n">will</span> <span class="n">remove</span> <span class="nb">all</span>
+                        <span class="n">files</span> <span class="n">created</span> <span class="n">by</span> <span class="n">jobs</span> <span class="n">that</span> <span class="n">are</span> <span class="n">related</span> <span class="n">to</span> <span class="n">files</span> <span class="n">that</span>
+                        <span class="n">do</span> <span class="ow">not</span> <span class="n">exist</span> <span class="n">anymore</span><span class="o">.</span> <span class="mi">1</span> <span class="n">will</span> <span class="n">also</span> <span class="n">remove</span> <span class="n">files</span> <span class="n">that</span>
+                        <span class="n">were</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">process</span><span class="o">.</span> <span class="mi">1996</span> <span class="n">will</span> <span class="n">remove</span> <span class="o">*</span><span class="n">ALL</span><span class="o">*</span> <span class="n">files</span>
+                        <span class="kn">from</span> <span class="nn">the</span> <span class="n">cache</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="n">simulate</span>        <span class="n">Will</span> <span class="ow">not</span> <span class="n">do</span> <span class="n">anything</span><span class="p">,</span> <span class="n">but</span> <span class="n">will</span> <span class="n">show</span> <span class="n">what</span> <span class="n">it</span> <span class="n">would</span> <span class="n">do</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="vt_server_cache.cleanup_cache">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold=None</em>, <em class="sig-param">level=0</em>, <em class="sig-param">simulate=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.cleanup_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function that cleans up the cache. The <code class="docutils literal notranslate"><span class="pre">level</span></code> argument is used to specify
+how spooky clean you want your cache:</p>
+<ul class="simple">
+<li><p>0 is the standard (and default) level, it will scoure the cache folder for
+generated files. If a file does not have an eponym .job file, it will be deleted.
+Otherwise, the job file is opened, and, if the original sound file does not exist
+any more, all files listed as “created” are deleted. The final sound file
+(or symlinks) created are deleted as well as the job file.</p></li>
+<li><p>1 is slightly more aggressive, where all files that are “created” or “used”
+will be deleted.</p></li>
+<li><p>1996 will make your cache spooky clean by eliminating all files (but preserving
+the directory structure).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_cache.delete_file">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_cache.spooky_cleanup_cache">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">spooky_cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.spooky_cleanup_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="indices-and-tables">
 <h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -627,6 +684,7 @@ it is formatted using formatException() and appended to the message.</p>
 </li>
 <li><a class="reference internal" href="#vt-server-config"><code class="docutils literal notranslate"><span class="pre">vt_server_config</span></code></a></li>
 <li><a class="reference internal" href="#vt-server-logging"><code class="docutils literal notranslate"><span class="pre">vt_server_logging</span></code></a></li>
+<li><a class="reference internal" href="#cache-clean-up"><code class="docutils literal notranslate"><span class="pre">Cache</span> <span class="pre">clean-up</span></code></a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>

@@ -17,6 +17,25 @@ missing cache files from individual modules with this approach.
 The :py:mod:`vt_server_cache` module has a command line interface so you can easily
 put it in your crontab.
 
+.. code-block::
+
+    usage: vt_server_cache.py [-h] [-l LEVEL] [-s] [folder]
+
+    positional arguments:
+      folder                The cache folder to cleanse. If none is provided, we
+                            will try to read from the default option file.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -l LEVEL, --level LEVEL
+                            Level of cleansing [default 0]. 0 will remove all
+                            files created by jobs that are related to files that
+                            do not exist anymore. 1 will also remove files that
+                            were used in the process. 1996 will remove *ALL* files
+                            from the cache.
+      -s, --simulate        Will not do anything, but will show what it would do.
+
+
 """
 
 import vt_server_config as vsc
@@ -149,9 +168,9 @@ def cleanup_cache(fold=None, level=0, simulate=False):
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--level", help="Level of cleansing. [default 0]", type=int, default=0)
+    parser.add_argument("-l", "--level", help="Level of cleansing [default 0]. 0 will remove all files created by jobs that are related to files that do not exist anymore. 1 will also remove files that were used in the process. 1996 will remove *ALL* files from the cache.", type=int, default=0)
     parser.add_argument("-s", "--simulate", help="Will not do anything, but will show what it would do.", action="store_true")
-    parser.add_argument("folder", help="The cache folder to cleanse.", default=None, nargs='?')
+    parser.add_argument("folder", help="The cache folder to cleanse. If none is provided, we will try to read from the default option file.", default=None, nargs='?')
 
     args = parser.parse_args()
 
