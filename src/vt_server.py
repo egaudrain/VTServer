@@ -42,13 +42,22 @@ class VTHandler(socketserver.StreamRequestHandler):
           the files if ``file`` is an array (otherwise, the same stack is applied
           to all files before concatenation).
 
-    The following field is optional:
+    The following fields are optional:
 
         * ``mode``: ``"sync"`` [default], ``"async"`` or ``"hash"``. In ``sync`` mode, the server will only
-          send a response when the file processed. In `async` mode, the server
+          send a response when the file is processed. In `async` mode, the server
           will respond immediately with a `"wait"`` response. The client can probe
           periodically with the same request until the file is returned. ``"hash"`` only
           returns the hash of the request that is used as identifier.
+
+        * ``format``: Specifies the output format of the sound files. Can be ``"flac"``, ``"wav"``
+          (or anything else supported by `libsndfile <http://www.mega-nerd.com/libsndfile/>`_, or ``"mp3"``
+          (if `LAME <http://www.mega-nerd.com/libsndfile/>`_ is installed). If none is provided,
+          then the default cache format is used (see vt_server_config_).
+
+        * ``format_options``: Specifies options (as a dictionary) for the selected
+          format. At the moment, only ``bitrate`` is specified (as an integer in kbps)
+          for format ``"mp3"`` (see :py:func:`vt_server_brain.encode_to_format` for details).
 
     The response is also JSON and has the following form:
 

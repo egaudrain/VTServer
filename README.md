@@ -63,7 +63,7 @@ The server is written for Python 3.5+.
 For `pysoundfile` you will need to install `libsndfile1` directly:
 
 ```
-$sudo apt install libsndfile1 python3-pip
+$ sudo apt install libsndfile1 python3-pip
 ```
 
 The Numpy and Scipy packages of the current Ubuntu 18.04 LTS are not new enough, so just get the latest
@@ -82,6 +82,14 @@ do everything that's needed. Note that this is a very rudimentary script. It wil
 The configuration for the server can be found in `/usr/local/etc/vt_server/vt_server.conf.json`. Watchout
 if you modify the cache folder, make sure that the folder exists and that the user `vt_serve` has read/write
 access to it.
+
+To use 'mp3' as an output format, you need to install [LAME](https://lame.sourceforge.io/):
+
+```
+$ sudo apt install lame
+```
+
+There is a line in the `vt_server.conf.json` that indicates where the executable is located.
 
 Usage
 -----

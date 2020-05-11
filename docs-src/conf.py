@@ -28,7 +28,8 @@ author = 'Etienne Gaudrain'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    # 'sphinx.ext.linkcode'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -40,6 +41,18 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 show_authors = True
+
+# -- Options for linkcode -- -------------------------------------------------
+
+# def linkcode_resolve(domain, info):
+#     if domain!='py':
+#         return None
+#
+#     return 'https://github.com/{project}/{view}/{branch}/{path}'.format(
+#                 project='egaudrain/VTServer',
+#                 view='blob',
+#                 branch='master',
+#                 path="src/"+info['module']+'.py')
 
 # -- Options for HTML output -------------------------------------------------
 

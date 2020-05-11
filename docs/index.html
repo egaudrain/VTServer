@@ -67,14 +67,21 @@ the files if <code class="docutils literal notranslate"><span class="pre">file</
 to all files before concatenation).</p></li>
 </ul>
 </div></blockquote>
-<p>The following field is optional:</p>
+<p>The following fields are optional:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;sync&quot;</span></code> [default], <code class="docutils literal notranslate"><span class="pre">&quot;async&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;hash&quot;</span></code>. In <code class="docutils literal notranslate"><span class="pre">sync</span></code> mode, the server will only
-send a response when the file processed. In <cite>async</cite> mode, the server
+send a response when the file is processed. In <cite>async</cite> mode, the server
 will respond immediately with a <cite>“wait”`</cite> response. The client can probe
 periodically with the same request until the file is returned. <code class="docutils literal notranslate"><span class="pre">&quot;hash&quot;</span></code> only
 returns the hash of the request that is used as identifier.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format</span></code>: Specifies the output format of the sound files. Can be <code class="docutils literal notranslate"><span class="pre">&quot;flac&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;wav&quot;</span></code>
+(or anything else supported by <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">libsndfile</a>, or <code class="docutils literal notranslate"><span class="pre">&quot;mp3&quot;</span></code>
+(if <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">LAME</a> is installed). If none is provided,
+then the default cache format is used (see <a class="reference internal" href="#vt-server-config">vt_server_config</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">format_options</span></code>: Specifies options (as a dictionary) for the selected
+format. At the moment, only <code class="docutils literal notranslate"><span class="pre">bitrate</span></code> is specified (as an integer in kbps)
+for format <code class="docutils literal notranslate"><span class="pre">&quot;mp3&quot;</span></code> (see <a class="reference internal" href="#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).</p></li>
 </ul>
 </div></blockquote>
 <p>The response is also JSON and has the following form:</p>
