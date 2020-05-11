@@ -55,11 +55,16 @@ to process sound files that are local on the server, and returns a pointer to th
 <p>If <code class="docutils literal notranslate"><span class="pre">action</span></code> is  <code class="docutils literal notranslate"><span class="pre">&quot;process&quot;</span></code>, then the following fields are required:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: the sound file that will be processed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: the sound file(s) that will be processed. This can be an array
+of files, in which case they are all processed and then concatenated. This
+can also be a string where the files are separated with a pipe <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">&gt;&gt;</span> <span class="pre">&quot;</span></code>
+(note that this includes a space before, and a space after).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stack</span></code>: the list of processes that will be run on the file. Each item
 in the stack is an object that is specific to the type of processing.
 Each object must have a <cite>module</cite> attribute that is used to dispatch the
-processing.</p></li>
+processing. This can also be a list of stacks that apply to everyone of
+the files if <code class="docutils literal notranslate"><span class="pre">file</span></code> is an array (otherwise, the same stack is applied
+to all files before concatenation).</p></li>
 </ul>
 </div></blockquote>
 <p>The following field is optional:</p>
@@ -170,14 +175,27 @@ process that is finished and needs removing.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="vt_server_brain.encode_to_format">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">encode_to_format</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">out_filename</em>, <em class="sig-param">fmt</em>, <em class="sig-param">fmt_options</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.encode_to_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes the file to the required format. This is for formats that are not supported by libsndfile (yet), like mp3.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="vt_server_brain.job_signature">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">job_signature</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.job_signature" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="vt_server_brain.multi_process">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">multi_process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.multi_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called from <a class="reference internal" href="#vt_server_brain.process" title="vt_server_brain.process"><code class="xref py py-func docutils literal notranslate"><span class="pre">process()</span></code></a> if multiple files have been provided as input.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="vt_server_brain.process">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates JOB, checks on cache and dispatches thread.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="vt_server_brain.process_async">
@@ -196,14 +214,35 @@ the other process modules and defines the <code class="docutils literal notransl
 process module names to the right process function.</p>
 <dl class="data">
 <dt id="vt_server_modules.PATCH">
-<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'time-reverse': &lt;function process_time_reverse&gt;, 'vocoder': &lt;function process_vocoder&gt;, 'world': &lt;function process_world&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'pad': &lt;function process_pad&gt;, 'ramp': &lt;function process_ramp&gt;, 'time-reverse': &lt;function process_time_reverse&gt;, 'vocoder': &lt;function process_vocoder&gt;, 'world': &lt;function process_world&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">PATCH</span></code> is used to dispatch stack item modules to their corresponding function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_pad">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_pad</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">pad</span></code> adds silence before and/or after the sound. It takes <cite>‘before’</cite> and/or <cite>‘after’</cite>
+as arguments, specifying the duration of silence in seconds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_ramp">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_ramp</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ramp</span></code> smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘duration’: in seconds. If a single number, it is applied to both onset and offset.
+If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of zero means no ramp.</p></li>
+<li><p>‘shape’: Either ‘linear’ (default) or ‘cosine’.</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="vt_server_modules.process_time_reverse">
 <code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_time_reverse</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_time_reverse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p><code class="docutils literal notranslate"><span class="pre">time-reverse</span></code> flips temporally the input. It doesn’t take any argument.</p>
+</dd></dl>
 
 </div>
 <span class="target" id="module-vt_server_module_world"></span><div class="section" id="vt-server-module-world">
@@ -540,7 +579,7 @@ the <code class="docutils literal notranslate"><span class="pre">freq</span></co
 <p>VTServer configuration file management.</p>
 <dl class="data">
 <dt id="vt_server_config.CONFIG">
-<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">CONFIG</code><em class="property"> = {'cachefolder': '/var/cache/vt_server', 'cacheformat': 'flac', 'host': 'localhost', 'logfile': '/var/log/vt_server.log', 'port': 1996}</em><a class="headerlink" href="#vt_server_config.CONFIG" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">CONFIG</code><em class="property"> = {'cachefolder': '/var/cache/vt_server', 'cacheformat': 'flac', 'cacheformatoptions': None, 'host': 'localhost', 'logfile': '/var/log/vt_server.log', 'port': 1996}</em><a class="headerlink" href="#vt_server_config.CONFIG" title="Permalink to this definition">¶</a></dt>
 <dd><p>The dictionary holding the current configuration (used in other modules).
 It is instanciated with <a class="reference internal" href="#vt_server_config.read_configuration" title="vt_server_config.read_configuration"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_configuration()</span></code></a>.</p>
 </dd></dl>

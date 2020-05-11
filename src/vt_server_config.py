@@ -68,6 +68,10 @@ def read_configuration(config_filename=None):
         config['cacheformat'] = "flac"
         vsl.LOG.warning("Hey watchout, the 'cacheformat' wasn't defined! Setting to default '%s'." % config['cacheformat'])
 
+    if 'cacheformatoptions' not in config:
+        config['cacheformatoptions'] = None
+        vsl.LOG.warning("Hey watchout, the 'cacheformatoptions' wasn't defined! Setting to default '%s'." % config['cacheformatoptions'])
+
     return config
 
 #: The dictionary holding the current configuration (used in other modules).

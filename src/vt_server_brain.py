@@ -45,11 +45,13 @@ import vt_server_logging as vsl
 import vt_server_common_tools as vsct
 import vt_server_modules as vsm
 
-import os, datetime, pickle
+import os, datetime, pickle, copy
 from multiprocessing import Process, Manager, active_children
 from threading import Event, Thread
+import subprocess
 
 import soundfile as sf
+import numpy as np
 
 manager = Manager()
 JOBS = manager.dict()
@@ -117,9 +119,20 @@ class Janitor():
 JOB_JANITOR = None # now instantiated manually
 
 def job_signature(req):
-    return vsct.signature((os.path.abspath(req['file']), req['stack']))
+    if "|" in req['file']:
+        files = req['file'].split("|")
+        return _job_signature_multi(files, req['stack'])
+    else:
+        return vsct.signature((os.path.abspath(req['file']), req['stack']))
+
+def _job_signature_multi(files, stack):
+    return vsct.signature(("|".join([os.path.abspath(x) for x in files]), stack))
 
 def process(req):
+    """
+    Creates JOB, checks on cache and dispatches thread.
+    """
+
     global N_REQUESTS
     N_REQUESTS += 1
 
@@ -129,14 +142,31 @@ def process(req):
     if 'file' not in req:
         return {'out': 'error', 'details':  "The 'file' field is missing"}
 
+    if 'stack' not in req:
+        req['stack'] = list()
+
+    if 'format' not in req:
+        req['format'] = vsc.CONFIG['cacheformat']
+
+    if 'format_options' not in req:
+        req['format_options'] = vsc.CONFIG['cacheformatoptions']
+
+    if type(req['file'])==type([]) or (' >> ' in req['file']):
+        # Send to multi-process if there are multiple input files
+        return multi_process(req)
+
     req['file'] = os.path.abspath(req['file'])
 
     if not os.access(req['file'], os.R_OK):
         vsl.LOG.debug("File '%s' was requested but cannot be accessed." % req['file'])
         return {'out': 'error', 'details': "File '%s' cannot be accessed" % req['file']}
 
-    if 'stack' not in req:
-        req['stack'] = list()
+    # For compatibility with multi-file queries
+    if len(req['stack'])!=0 and type(req['stack'][0])==type([]):
+        if len(req['stack'])>1:
+            # We have a list of stacks with more than one stack...
+            return {'out': 'error', 'details': "Cannot have a list of stacks (with more than one stack) when passing in a single file."}
+        req['stack'] = req['stack'][0]
 
     #----------------------------
     # From here on, we are ready to call job_signature
@@ -146,7 +176,7 @@ def process(req):
     if req['mode'] == 'hash':
         return {'out': 'ok', 'details': h}
 
-    out_filename = os.path.join(vsc.CONFIG['cachefolder'], h+"."+vsc.CONFIG['cacheformat'])
+    out_filename = os.path.join(vsc.CONFIG['cachefolder'], h+"."+req['format'])
 
     if os.access(out_filename, os.R_OK):
         # The file already exists and is accessible, we return it
@@ -177,6 +207,90 @@ def process(req):
 
 
     return {'out': 'error', 'details': "Huuuu... we shouldn't find ourselves here... %s" % repr(req)}
+
+def multi_process(req):
+    """
+    This is called from :py:func:`process` if multiple files have been provided as input.
+    """
+
+    if type(req['file'])==type([]):
+        files = req['file']
+    else:
+        files = req['file'].split(' >> ')
+        # TODO: if files are separated with "<" they are concatenated prior to being passed in the stack
+        # Note that as much as possible, this is not desirable for caching reasons, but that could be useful.
+
+    if len(req['stack'])!=0:
+        if type(req['stack'][0])==type({}):
+            # We are dealing with a single stack applied to all elements: we duplicate it
+            req['stack'] = [req['stack']]
+        if len(req['stack'])==1 and len(files)>1:
+            # We are dealing with a list of stacks, but of length 1
+            req['stack'] = [ copy.deepcopy(req['stack'][0]) for f in files ]
+        if len(req['stack'])!=len(files):
+            return {'out': 'error', 'details': 'If a stack list is used, it must be of length 1 or of length equal to the number of files.'}
+
+    h = _job_signature_multi(files, req['stack'])
+
+    if req['mode'] == 'hash':
+        return {'out': 'ok', 'details': h}
+
+    out_filename = os.path.join(vsc.CONFIG['cachefolder'], "M"+h+"."+req['format'])
+
+    if os.access(out_filename, os.R_OK):
+        # The file already exists and is accessible, we return it
+        return {"out": "ok", "details": out_filename}
+
+    else:
+        #vsl.LOG.debug("Adding multi job %s to the job list." % h)
+        resp = dict()
+        o = list()
+        for i,f in enumerate(files):
+            r = dict()
+            r['action'] = req['action']
+            r['file'] = f
+            r['mode'] = req['mode']
+            r['stack'] = req['stack'][i]
+            r['format'] = vsc.CONFIG['cacheformat']
+            r['format_options'] = vsc.CONFIG['cacheformatoptions']
+            o.append(process(r))
+
+        if any([x['out']=='error' for x in o]):
+            return {'out': 'error', 'details': "\n".join([x['details'] for x in o])}
+
+        elif any([x['out']=='wait' for x in o]):
+            return {'out': 'wait', 'details': "\n".join([x['details'] for x in o])}
+
+        elif all([x['out']=='ok' for x in o]):
+            resp['out'] = 'ok'
+            y    = None
+            fs_y = None
+            for j in o:
+                x, fs = sf.read(j['details'])
+                if y is None:
+                    y = x
+                    fs_y = fs
+                else:
+                    if fs!=fs_y:
+                        return {'out': 'error', 'details': 'Mismatching sampling frequencies in ['+(", ".join(files))+'] (actually from ['+(", ".join([x['details'] for x in o]))+'])'}
+                    y = np.concatenate((y, x), axis=0)
+
+            if req['format'] == 'mp3':
+                tmp_filename = os.path.join(vsc.CONFIG['cachefolder'], "M"+h+".wav")
+                sf.write(tmp_filename, y, fs)
+                try:
+                    encode_to_format(tmp_filename, out_filename, req['format'], req['format_options'])
+                except Exception as err:
+                    err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (tmp_filename, req['format'], err, err.output.decode('utf-8'))
+                    vsl.LOG.critical(err_msg)
+                    return {'out': 'error', 'details': err_msg}
+            else:
+                sf.write(out_filename, x, fs)
+            return {'out': 'ok', 'details': out_filename}
+
+        else:
+            return {'out': 'error', 'details': "Huuuu... we multiple times shouldn't find ourselves here... %s" % repr(req)}
+
 
 def process_async(req, h, out_filename):
     """
@@ -216,8 +330,11 @@ def process_async(req, h, out_filename):
             try:
                 # Do we have this already in cache?
                 hm = vsct.signature((os.path.abspath(f), m))
-                module_cache_path = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
-                cache_filename = os.path.join(module_cache_path, hm+"."+vsc.CONFIG['cacheformat'])
+                module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
+                if req['format']=='mp3':
+                    cache_filename = os.path.join(module_cache_path, hm+".wav")
+                else:
+                    cache_filename = os.path.join(module_cache_path, hm+"."+vsc.CONFIG['cacheformat'])
 
                 if not os.path.exists(module_cache_path):
                     os.makedirs(module_cache_path)
@@ -262,8 +379,21 @@ def process_async(req, h, out_filename):
     if os.path.splitext(f)[1] == os.path.splitext(out_filename)[1]:
         os.symlink(f, out_filename)
     else:
-        x, fs = sf.read(f)
-        sf.write(out_filename, x, fs)
+        if req['format'] == 'mp3':
+            try:
+                encode_to_format(f, out_filename, req['format'], req['format_options'])
+            except Exception as err:
+                err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (f, req['format'], err, err.output.decode('utf-8'))
+                j['out'] = 'error'
+                j['details'] = err_msg
+                j['finished'] = True
+                JOBS[h] = j
+                vsl.LOG.critical(err_msg)
+                job_info['error'] = err_msg
+                return
+        else:
+            x, fs = sf.read(f)
+            sf.write(out_filename, x, fs)
 
     job_info['created_files'].append(out_filename)
     pickle.dump(job_info, open(job_filename, "wb"))
@@ -274,6 +404,19 @@ def process_async(req, h, out_filename):
     JOBS[h] = j
 
     vsl.LOG.debug("[%s] Finished with processing the stack." % (h))
+
+def encode_to_format(in_filename, out_filename, fmt, fmt_options):
+    """
+    Encodes the file to the required format. This is for formats that are not supported by libsndfile (yet), like mp3.
+    """
+    if fmt=='mp3':
+        if fmt_options is None:
+            fmt_options = dict()
+        if 'bitrate' not in fmt_options:
+            fmt_options['bitrate'] = 160
+        cmd = [vsc.CONFIG['lame'], '--noreplaygain', '--cbr', '-b '+str(int(fmt_options['bitrate'])), in_filename, out_filename]
+
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
 if __name__=="__main__":

@@ -3,5 +3,7 @@
     "port": 1996,
     "logfile": "/var/log/vt_server.log",
     "cachefolder": "/var/cache/vt_server",
-    "cacheformat": "flac"
+    "cacheformat": "flac",
+    "cacheformatoptions": {},
+    "lame": "/usr/bin/lame"
 }

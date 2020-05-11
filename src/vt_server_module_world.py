@@ -246,7 +246,7 @@ def process_world(in_filename, m, out_filename):
                 # We extend the duration with a certain offset
                 new_duration = m['duration']['v'] + len(t)/pyworld.default_frame_period
                 if new_duration<=0:
-                    raise ValueError("This is not good, the new duration is negative or null (%.3f s)... This is what we parsed: %s." % (new_duration, repr(m['duration'])))
+                    raise ValueError("[world] This is not good, the new duration is negative or null (%.3f s)... This is what we parsed: %s." % (new_duration, repr(m['duration'])))
                 new_t = np.linspace(t[0], t[-1], int(new_duration*pyworld.default_frame_period))
 
     # Now we rescale f0, sp and ap if necessary

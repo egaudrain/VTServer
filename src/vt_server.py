@@ -30,12 +30,17 @@ class VTHandler(socketserver.StreamRequestHandler):
 
     If ``action`` is  ``"process"``, then the following fields are required:
 
-        * ``file``: the sound file that will be processed
+        * ``file``: the sound file(s) that will be processed. This can be an array
+          of files, in which case they are all processed and then concatenated. This
+          can also be a string where the files are separated with a pipe ``" >> "``
+          (note that this includes a space before, and a space after).
 
         * ``stack``: the list of processes that will be run on the file. Each item
           in the stack is an object that is specific to the type of processing.
           Each object must have a `module` attribute that is used to dispatch the
-          processing.
+          processing. This can also be a list of stacks that apply to everyone of
+          the files if ``file`` is an array (otherwise, the same stack is applied
+          to all files before concatenation).
 
     The following field is optional:
 
@@ -81,13 +86,15 @@ class VTHandler(socketserver.StreamRequestHandler):
         #vsl.LOG.debug("Sent.")
 
 class VTServer(socketserver.ThreadingTCPServer):
+    __version__ = '1.0'
+
     def server_activate(self):
         super().server_activate()
 
         # Instanciating the janitor for periodic 400s check
         vt_server_brain.JOB_JANITOR = vt_server_brain.Janitor(400)
 
-        vsl.LOG.info("Running VTServer on {}:{}.".format(self.server_address[0], self.server_address[1]))
+        vsl.LOG.info("Running VTServer version {} on {}:{}.".format(self.__version__, self.server_address[0], self.server_address[1]))
 
     def server_close(self):
         super().server_close()
