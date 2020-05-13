@@ -492,7 +492,7 @@ def process_vocoder(in_filename, m, out_filename):
 
     y, s = vsct.clipping_prevention(y)
     if s!=1:
-        vsl.LOG.info("[vocoder] Clipping was avoided during processing of '%s' to '%s' by rescaling with a factor of %.3f (%.1 dB)." % (in_filename, out_filename, s, 20*np.log10(s)))
+        vsl.LOG.info("[vocoder] Clipping was avoided during processing of '%s' to '%s' by rescaling with a factor of %.3f (%.1f dB)." % (in_filename, out_filename, s, 20*np.log10(s)))
 
     sf.write(out_filename, y, fs)
 
