@@ -45,7 +45,7 @@ import vt_server_logging as vsl
 import vt_server_common_tools as vsct
 import vt_server_modules as vsm
 
-import os, datetime, pickle, copy
+import os, datetime, pickle, copy, traceback
 from multiprocessing import Process, Manager, active_children
 from threading import Event, Thread
 import subprocess
@@ -356,7 +356,8 @@ def process_async(req, h, out_filename):
                     job_info['created_files'].append(f)
 
             except Exception as err:
-                err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))
+                #err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))
+                err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, traceback.format_exc())
                 j['out'] = 'error'
                 j['details'] = err_msg
                 j['finished'] = True

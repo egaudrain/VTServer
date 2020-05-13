@@ -46,6 +46,9 @@ If a key is missing (here, ``duration``) it is considered as ``None``, which mea
 
     * the absolute duration can be set using ``~`` followed by a value and the ``s`` unit.
 
+Note that in v0.2.8, WORLD is making the sounds 1 frame (5 ms) too long if no duration is specified. If you
+specify the duration, it is generated accurately.
+
 .. Created on 2020-03-20.
 """
 
@@ -64,9 +67,9 @@ import soundfile as sf
 RE = dict()
 RE['f0'] = re.compile(r"([*+-~]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(Hz|st)?")
 RE['vtl'] = re.compile(r"([*+-]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(st)?")
-RE['duration'] = re.compile(r"([*+-]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(s)?")
+RE['duration'] = re.compile(r"([*+-~]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(s)?")
 
-def check_arguments(mo):
+def check_arguments(mo, purpose):
     """
     Receives an ``re`` match object from parsing module arguments and do some basic checking.
     Return a tuple ``(args_ok, args)``. ``args_ok`` is True or False depending on whether
@@ -99,8 +102,10 @@ def check_arguments(mo):
         return True, {'v': v_f, 'u': None, '~': False} # r for ratio
 
     if s=='~':
-        if unit!='Hz':
+        if purpose=='f0' and unit!='Hz':
             return False, "If an average is given, the unit has to be 'Hz' (got '%s')." % unit
+        elif purpose=='duration' and unit!='s':
+            return False, "If fixed duration is given, the unit has to be 's' (got '%s')." % unit
 
         try:
             v_f = float(v)
@@ -125,7 +130,7 @@ def parse_arguments(m):
         if k not in m:
             m[k] = None
         else:
-            args_ok, args = check_arguments(RE[k].match(m[k]))
+            args_ok, args = check_arguments(RE[k].match(m[k]), k)
             if not args_ok:
                 raise ValueError("[world] Error while parsing argument %s (%s): %s" % (k, m[k], args))
             else:
@@ -147,16 +152,19 @@ def process_world(in_filename, m, out_filename):
 
     * ``vtl``: same for vocal-tract length (only semitones and ratio).
 
-    * ``duration``: either an absolute duration in seconds {### s} or a ratio {* ###}.
+    * ``duration``: either an absolute duration in seconds {~###s}, an offset in seconds {+/-###s}, or a ratio {*###}.
     """
 
     created_files = list()
     used_files    = list()
 
-    # Analaysis
+    # Analysis
     dat_folder   = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
     if not os.path.exists(dat_folder):
         os.makedirs(dat_folder)
+
+    # To change the frame period, the default_frame_period has to be changed
+    # pyworld.default_frame_period
 
     dat_filename = os.path.join(dat_folder, "dat_"+vsct.signature((os.path.abspath(in_filename), 'world v'+pyworld.__version__))+'.pickle')
     try:
@@ -169,6 +177,9 @@ def process_world(in_filename, m, out_filename):
         # be builtin the file signature.
         #f0, sp, ap, fs, rms_x, sp_interp, ap_interp = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms'], dat['sp_interp'], dat['ap_interp']
         f0, sp, ap, fs, rms_x = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms']
+
+        if 'frame_period' in dat and pyworld.default_frame_period != dat['frame_period']:
+            raise Exception("The frame period in the pickled file does not match that of the version of pyworld. We regenerate it.")
 
         t2 = time.time()
         tp2 = time.process_time()
@@ -183,14 +194,10 @@ def process_world(in_filename, m, out_filename):
         rms_x = vsct.rms(x)
         f0, sp, ap = pyworld.wav2world(x, fs)
 
-        nfft = (sp.shape[1]-1)*2
-        f = np.arange( sp.shape[1] ) / nfft * fs
-        t = np.arange( sp.shape[0] ) / pyworld.default_frame_period
-
         # Note: I thought of keeping the interpolant in the pickle file, but it
         # makes it way too big and the processing gain is relatively small
 
-        pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__}, open(dat_filename, 'wb'))
+        pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__, 'frame_period': pyworld.default_frame_period}, open(dat_filename, 'wb'))
 
         t2 = time.time()
         tp2 = time.process_time()
@@ -203,7 +210,7 @@ def process_world(in_filename, m, out_filename):
 
     nfft = (sp.shape[1]-1)*2
     f = np.arange( sp.shape[1] ) / nfft * fs
-    t = np.arange( sp.shape[0] ) / pyworld.default_frame_period
+    t = np.arange( sp.shape[0] ) * pyworld.default_frame_period / 1e3
 
     # F0
     if (m['f0'] is None) or (m['f0']['u'] is None and m['f0']['v']==1) or (m['f0']['u'] is not None and m['f0']['v']==0 and not m['f0']['~']):
@@ -241,13 +248,13 @@ def process_world(in_filename, m, out_filename):
         elif m['duration']['u']=='s':
             if m['duration']['~']:
                 # We assign a new duration
-                new_t = np.linspace(t[0], t[-1], int(m['duration']['v']*pyworld.default_frame_period))
+                new_t = np.linspace(t[0], t[-1], int(m['duration']['v']/pyworld.default_frame_period*1e3))
             else:
                 # We extend the duration with a certain offset
-                new_duration = m['duration']['v'] + len(t)/pyworld.default_frame_period
+                new_duration = m['duration']['v'] + t[-1] #len(t)/pyworld.default_frame_period
                 if new_duration<=0:
                     raise ValueError("[world] This is not good, the new duration is negative or null (%.3f s)... This is what we parsed: %s." % (new_duration, repr(m['duration'])))
-                new_t = np.linspace(t[0], t[-1], int(new_duration*pyworld.default_frame_period))
+                new_t = np.linspace(t[0], t[-1], int(new_duration/pyworld.default_frame_period*1e3))
 
     # Now we rescale f0, sp and ap if necessary
     if new_f is None and new_t is None:
@@ -371,19 +378,19 @@ class Fast2DInterp():
 if __name__=="__main__":
     # test parse_arguments
 
-    vsc.CONFIG['cachefolder'] = 'test/cache'
-    vsc.CONFIG['logfile'] = 'test/vt_server.log'
+    vsc.CONFIG['cachefolder'] = '../test/cache'
+    vsc.CONFIG['logfile'] = '../test/vt_server.log'
 
     if not os.path.exists(vsc.CONFIG['cachefolder']):
         os.makedirs(vsc.CONFIG['cachefolder'])
 
     vsl.LOG.addHandler(vsl.get_FileHandler(vsc.CONFIG['logfile']))
 
-    m = {'module': 'world', 'f0': '+12st', 'vtl': '-3.8st', 'duration': '*2'}
+    m = {'module': 'world', 'duration': '~.2s'}
     #in_file  = "test/Beer.wav"
     #out_file = "test/Beer_test_cubic.wav"
-    in_file  = "test/Man480.wav"
-    out_file = "test/Man480_test.wav"
+    in_file  = "../test/Man480.wav"
+    out_file = "../test/Man480_test.wav"
     print("Starting to process files...")
     vsl.LOG.debug("Starting to process files...")
 
