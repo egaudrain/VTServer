@@ -229,6 +229,8 @@ def multi_process(req):
             req['stack'] = [ copy.deepcopy(req['stack'][0]) for f in files ]
         if len(req['stack'])!=len(files):
             return {'out': 'error', 'details': 'If a stack list is used, it must be of length 1 or of length equal to the number of files.'}
+    else:
+        req['stack'] = [[]]*len(files)
 
     h = _job_signature_multi(files, req['stack'])
 
@@ -246,14 +248,18 @@ def multi_process(req):
         resp = dict()
         o = list()
         for i,f in enumerate(files):
-            r = dict()
-            r['action'] = req['action']
-            r['file'] = f
-            r['mode'] = req['mode']
-            r['stack'] = req['stack'][i]
-            r['format'] = vsc.CONFIG['cacheformat']
-            r['format_options'] = vsc.CONFIG['cacheformatoptions']
-            o.append(process(r))
+            if len(req['stack'][i]) == 0:
+                # If there is no stack, we bypass process altogether
+                o.append( {'out': 'ok', 'details': f} )
+            else:
+                r = dict()
+                r['action'] = req['action']
+                r['file'] = f
+                r['mode'] = req['mode']
+                r['stack'] = req['stack'][i]
+                r['format'] = vsc.CONFIG['cacheformat']
+                r['format_options'] = vsc.CONFIG['cacheformatoptions']
+                o.append(process(r))
 
         if any([x['out']=='error' for x in o]):
             return {'out': 'error', 'details': "\n".join([x['details'] for x in o])}

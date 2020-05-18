@@ -13,7 +13,7 @@ to process sound files that are local on the server, and returns a pointer to th
 
 import socketserver
 import json
-import os
+import os, traceback
 import vt_server_logging as vsl
 import vt_server_brain
 # optional
@@ -84,9 +84,9 @@ class VTHandler(socketserver.StreamRequestHandler):
                 msg['out'] = 'error'
                 msg['details'] = "The 'action' field of your request is not correct."
         except Exception as err:
-            vsl.LOG.debug("This request is not valid JSON: {}".format(repr(err)))
+            vsl.LOG.debug("There was a problem while handling the query: {}".format(traceback.format_exc()))
             msg['out'] = 'error'
-            msg['details'] = repr(err)
+            msg['details'] = traceback.format_exc()
 
         msg_b = json.dumps(msg).encode('utf-8')+b"\n"
         #vsl.LOG.debug("Sending: {}".format(repr(msg_b)))
