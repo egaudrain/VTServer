@@ -245,6 +245,14 @@ def multi_process(req):
 
     else:
         #vsl.LOG.debug("Adding multi job %s to the job list." % h)
+
+        job_info = dict()
+        job_info['original_file'] = files
+        job_info['created_files'] = list()
+        job_info['used_files'] = list()
+        job_info['stack'] = req['stack']
+        job_filename = os.path.splitext(out_filename)[0]+".job"
+
         resp = dict()
         o = list()
         for i,f in enumerate(files):
@@ -272,6 +280,7 @@ def multi_process(req):
             y    = None
             fs_y = None
             for j in o:
+                job_info['used_files'].append(j['details'])
                 x, fs = sf.read(j['details'])
                 if y is None:
                     y = x
@@ -292,10 +301,15 @@ def multi_process(req):
                     return {'out': 'error', 'details': err_msg}
             else:
                 sf.write(out_filename, x, fs)
+
+            job_info['created_files'].append(out_filename)
+            pickle.dump(job_info, open(job_filename, "wb"))
+            
             return {'out': 'ok', 'details': out_filename}
 
         else:
             return {'out': 'error', 'details': "Huuuu... we multiple times shouldn't find ourselves here... %s" % repr(req)}
+
 
 
 def process_async(req, h, out_filename):

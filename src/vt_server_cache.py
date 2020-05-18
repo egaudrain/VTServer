@@ -123,33 +123,41 @@ def cleanup_cache(fold=None, level=0, simulate=False):
                 delete_file(job_file, simulate)
 
             else:
-                if os.path.exists(job['original_file']):
+                if type(job['original_file'])==type([]):
+                    all_there = True
+                    for f in job['original_file']:
+                        all_there &= os.path.exists(f)
+                    if all_there:
+                        print("   Original files for job %s still exist. Skipping." % job['original_file'])
+                        continue
+
+                elif os.path.exists(job['original_file']):
                     # The original file still exists, we do nothing
                     print("   Original file for job %s still exist. Skipping." % job['original_file'])
                     continue
 
-                else:
-                    try:
-                        for cf in job['created_files']:
-                            print("   Deleting created file " + cf)
-                            delete_file(cf, simulate)
+                # Some files are missing
+                try:
+                    for cf in job['created_files']:
+                        print("   Deleting created file " + cf)
+                        delete_file(cf, simulate)
 
-                        if level>=1:
-                            for uf in job['used_files']:
-                                print("   Deleting used file " + uf)
-                                delete_file(uf, simulate)
+                    if level>=1:
+                        for uf in job['used_files']:
+                            print("   Deleting used file " + uf)
+                            delete_file(uf, simulate)
 
-                    except Exception as err:
-                        print(err)
+                except Exception as err:
+                    print(err)
 
-                    finally:
-                        print("   Deleting the job file "+job_file)
-                        delete_file(job_file, simulate)
+                finally:
+                    print("   Deleting the job file "+job_file)
+                    delete_file(job_file, simulate)
 
-                        # If something went wrong, we try to delete the output file again
-                        if os.path.exists(f.path):
-                            print("   Deleting output file " + f.name)
-                            delete_file(f.path, simulate)
+                    # If something went wrong, we try to delete the output file again
+                    if os.path.exists(f.path):
+                        print("   Deleting output file " + f.name)
+                        delete_file(f.path, simulate)
 
         else:
             # The file doesn't really anything to do here

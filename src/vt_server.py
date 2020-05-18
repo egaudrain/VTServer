@@ -106,6 +106,7 @@ class VTServer(socketserver.ThreadingTCPServer):
         vsl.LOG.info("Running VTServer version {} on {}:{}.".format(self.__version__, self.server_address[0], self.server_address[1]))
 
     def server_close(self):
+        print('\nTerminating.')
         super().server_close()
         if vt_server_brain.JOB_JANITOR is not None:
             vt_server_brain.JOB_JANITOR.kill()
