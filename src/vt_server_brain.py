@@ -155,6 +155,7 @@ def process(req):
         # Send to multi-process if there are multiple input files
         return multi_process(req)
 
+    # TODO: Handle generators for file
     req['file'] = os.path.abspath(req['file'])
 
     if not os.access(req['file'], os.R_OK):
@@ -304,7 +305,7 @@ def multi_process(req):
 
             job_info['created_files'].append(out_filename)
             pickle.dump(job_info, open(job_filename, "wb"))
-            
+
             return {'out': 'ok', 'details': out_filename}
 
         else:
@@ -319,10 +320,14 @@ def process_async(req, h, out_filename):
 
     It also updates the ``JOB`` list when a job is finished, and create a job file
     with some information about the job (useful for cache cleaning).
+
+    If a module takes a 'file' as argument, the file can be a query. It will be executed in sync mode from the
+    current ``process_async`` process.
     """
 
     vsl.LOG.debug("[%s] Processing request %s." % (h, repr(req)))
 
+    # TODO: handle generators for file
     f = req['file']
 
     j = JOBS[h]
@@ -363,6 +368,18 @@ def process_async(req, h, out_filename):
                     f = cache_filename
                     job_info['used_files'].append(f)
                 else:
+                    if 'file' in m and type(m['file'])==type(dict()):
+                        # This is a module that takes a file as argument, and the file is a query
+                        # We run the query first and substitute the file with the result
+                        q = copy.deepcopy(m['file'])
+                        q['mode'] = 'sync'
+                        res = process(q)
+                        if res['out']=='ok':
+                            m['file'] = res['details']
+                        else:
+                            raise Exception(res['details'])
+
+                    # Calling the right module
                     o = vsm.PATCH[m['module']](f, m, cache_filename)
                     if type(o) is tuple:
                         f = o[0]
