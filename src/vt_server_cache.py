@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``Cache clean-up``
-==================
+Cache clean-up
+==============
 
 The cache can become big and obsolete, so it is a good idea to clean it up regularly.
 In particular, if the original file does not exist anymore, all the processed files
@@ -17,7 +17,7 @@ missing cache files from individual modules with this approach.
 The :py:mod:`vt_server_cache` module has a command line interface so you can easily
 put it in your crontab.
 
-.. code-block::
+.. code-block:: text
 
     usage: vt_server_cache.py [-h] [-l LEVEL] [-s] [folder]
 
@@ -70,7 +70,7 @@ def spooky_cleanup_cache(fold, simulate):
 
 def cleanup_cache(fold=None, level=0, simulate=False):
     """
-    The function that cleans up the cache. The ``level`` argument is used to specify
+    The function that cleans up the cache. The **level** argument is used to specify
     how spooky clean you want your cache:
 
     * 0 is the standard (and default) level, it will scoure the cache folder for

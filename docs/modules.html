@@ -1,0 +1,953 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Modules &mdash; VT Server  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to make a module" href="module_howto.html" />
+    <link rel="prev" title="VT Server" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> VT Server
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server">vt_server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-brain">vt_server_brain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-modules">vt_server_modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-module-world">vt_server_module_world</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-module-vocoder">vt_server_module_vocoder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-filters">analysis_filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#f-filterbank-frequencies"><em>f</em>: Filterbank frequencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-method">Filtering <em>method</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesis-filters">synthesis_filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#envelope">envelope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesis">synthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#content">Content</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-config">vt_server_config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-logging">vt_server_logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cache-clean-up">Cache clean-up</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">VT Server</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Modules</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-vt_server"></span><div class="section" id="vt-server">
+<h2>vt_server<a class="headerlink" href="#vt-server" title="Permalink to this headline">¶</a></h2>
+<p>This is a Voice Transformation server. It receives command stacks as JSON arrays
+to process sound files that are local on the server, and returns a pointer to the processed file.</p>
+<dl class="class">
+<dt id="vt_server.VTHandler">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server.</code><code class="sig-name descname">VTHandler</code><span class="sig-paren">(</span><em class="sig-param">request</em>, <em class="sig-param">client_address</em>, <em class="sig-param">server</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.VTHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.StreamRequestHandler</span></code></p>
+<p>The handler for the server requests.</p>
+<p>Requests are JSON encoded. It is required that they contain the following field
+<cite>action</cite> which can receive one of two values: <cite>“status”</cite> or <cite>“process”</cite>.</p>
+<p>If <strong>action</strong> is  <cite>“status”</cite>, then no other field is required.</p>
+<p>If <strong>action</strong> is  <cite>“process”</cite>, then the following fields are required:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>file</dt><dd><p>The sound file(s) that will be processed. This can be an array
+of files, in which case they are all processed and then concatenated. This
+can also be a string where the files are separated with a pipe <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">&gt;&gt;</span> <span class="pre">&quot;</span></code>
+(note that this includes a space before, and a space after).</p>
+</dd>
+<dt>stack</dt><dd><p>The list of processes that will be run on the file. Each item
+in the stack is an object that is specific to the type of processing.
+Each object must have a <cite>module</cite> attribute that is used to dispatch the
+processing. This can also be a list of stacks that apply to everyone of
+the files if <strong>file</strong> is an array (otherwise, the same stack is applied
+to all files before concatenation).</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>The following fields are optional:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>mode</dt><dd><p><cite>“sync”</cite> [default], <cite>“async”</cite> or <cite>“hash”</cite>. In <cite>sync</cite> mode, the server will only
+send a response when the file is processed. In <cite>async</cite> mode, the server
+will respond immediately with a <cite>“wait”</cite> response. The client can probe
+periodically with the same request until the file is returned. <cite>hash</cite> only
+returns the hash of the request that is used as identifier.</p>
+</dd>
+<dt>format</dt><dd><p>Specifies the output format of the sound files. Can be <cite>“flac”</cite>, <cite>“wav”</cite>
+(or anything else supported by <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">libsndfile</a>, or <cite>“mp3”</cite>
+(if <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">LAME</a> is installed). If none is provided,
+then the default cache format is used (see <a class="reference internal" href="#module-vt_server_config" title="vt_server_config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_config</span></code></a>).</p>
+</dd>
+<dt>format_options</dt><dd><p>Specifies options (as a dictionary) for the selected
+format. At the moment, only <cite>bitrate</cite> is specified (as an integer in kbps)
+for format <cite>“mp3”</cite> (see <a class="reference internal" href="#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>The response is also JSON and has the following form:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>out</dt><dd><p><cite>“ok”</cite> or <cite>“error”</cite></p>
+</dd>
+<dt>details</dt><dd><p>In case of success, this contains the outcome of the processing
+(or <cite>“wait”</cite> for the <cite>“async”</cite> mode). In case of error, this has some
+details about the error.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="vt_server.VTHandler.handle">
+<code class="sig-name descname">handle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.VTHandler.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>The handler function. It basically receives the query in JSON, tries to parse it and then
+dispatch to <a class="reference internal" href="#vt_server_brain.process" title="vt_server_brain.process"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.process()</span></code></a> if it worked. Then sends the response back
+to the client.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="vt_server.VTServer">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server.</code><code class="sig-name descname">VTServer</code><span class="sig-paren">(</span><em class="sig-param">server_address</em>, <em class="sig-param">RequestHandlerClass</em>, <em class="sig-param">bind_and_activate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.VTServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">socketserver.ThreadingTCPServer</span></code></p>
+<dl class="method">
+<dt id="vt_server.VTServer.server_activate">
+<code class="sig-name descname">server_activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.VTServer.server_activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by constructor to activate the server.</p>
+<p>May be overridden.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt_server.VTServer.server_close">
+<code class="sig-name descname">server_close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.VTServer.server_close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called to clean-up the server.</p>
+<p>May be overridden.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server.main">
+<code class="sig-prename descclassname">vt_server.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports the configuration, instantiates a <a class="reference internal" href="#vt_server.VTServer" title="vt_server.VTServer"><code class="xref py py-class docutils literal notranslate"><span class="pre">VTServer</span></code></a> and starts
+the <a class="reference internal" href="#vt_server_brain.Janitor" title="vt_server_brain.Janitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">vt_server_brain.Janitor</span></code></a> before starting the server itself.</p>
+<p>Runs forever until the server receives SIGINT.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_brain"></span><div class="section" id="vt-server-brain">
+<h2>vt_server_brain<a class="headerlink" href="#vt-server-brain" title="Permalink to this headline">¶</a></h2>
+<p>Dispatches the processing to the right underlings. The brain also manages the
+various processes and the main cache. Each request is dispatched to its own
+process as a <strong>job</strong>.</p>
+<p>Jobs have a signature that is based on the task at hand:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the <strong>file</strong> it applies to,</p></li>
+<li><p>and the process instruction stack list.</p></li>
+</ul>
+</div></blockquote>
+<p>These are serialized (using pickle) and then hashed (in md5) to create the job
+signature. The job signature is also used for the name of the cache file.</p>
+<p>Everytime a job is submitted, the brain first checks if the file already exists.
+If the file exists, it is returned right away. If the file does not exist, then
+we check if the job is in the <a class="reference internal" href="#vt_server_brain.JOBS" title="vt_server_brain.JOBS"><code class="xref py py-data docutils literal notranslate"><span class="pre">JOBS</span></code></a> list (a managed dictionary). If it is in
+the list, then we just reply <cite>‘wait’</cite> to the client. If not, then the brain
+creates the job and starts the process.</p>
+<p>In <cite>‘sync’</cite> mode, the dispatcher waits for the process to be completed.</p>
+<p>In <cite>‘async’</cite> mode it returns right away and sends a <cite>‘wait’</cite> message. The client can
+send the same request a bit later. If the job is still being processed, the server
+sends the same <cite>‘wait’</cite> response. If the job is completed, then the job target file
+exists and is returned right away.</p>
+<p>Individual tasks listed in the task list can have their own cache system, but
+they need to manage it themselves.</p>
+<p>A <a class="reference internal" href="#vt_server_brain.Janitor" title="vt_server_brain.Janitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Janitor</span></code></a> is scouring the <a class="reference internal" href="#vt_server_brain.JOBS" title="vt_server_brain.JOBS"><code class="xref py py-data docutils literal notranslate"><span class="pre">JOBS</span></code></a> list to check on jobs that may be finished,
+and remove them from the list.</p>
+<dl class="data">
+<dt id="vt_server_brain.JOBS">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">JOBS</code><em class="property"> = &lt;DictProxy object, typeid 'dict'&gt;</em><a class="headerlink" href="#vt_server_brain.JOBS" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the list of current jobs (actually a managed dict).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="vt_server_brain.Janitor">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">Janitor</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The janitor periodically checks the job list to see if there are any finished jobs, and then gets rid of them.</p>
+<dl class="method">
+<dt id="vt_server_brain.Janitor.call_repeatedly">
+<code class="sig-name descname">call_repeatedly</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor.call_repeatedly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vt_server_brain.Janitor.janitor_job">
+<em class="property">static </em><code class="sig-name descname">janitor_job</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor.janitor_job" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks periodically on the <a class="reference internal" href="#vt_server_brain.JOBS" title="vt_server_brain.JOBS"><code class="xref py py-data docutils literal notranslate"><span class="pre">JOBS</span></code></a> list to see if there are any
+process that is finished and needs removing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vt_server_brain.Janitor.kill">
+<code class="sig-name descname">kill</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor.kill" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_brain.encode_to_format">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">encode_to_format</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">out_filename</em>, <em class="sig-param">fmt</em>, <em class="sig-param">fmt_options</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.encode_to_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes the file to the required format. This is for formats that are not supported by libsndfile (yet), like mp3.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_brain.job_signature">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">job_signature</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.job_signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_brain.multi_process">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">multi_process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.multi_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called from <a class="reference internal" href="#vt_server_brain.process" title="vt_server_brain.process"><code class="xref py py-func docutils literal notranslate"><span class="pre">process()</span></code></a> if multiple files have been provided as input.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_brain.process">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates jobs (populating the <a class="reference internal" href="#vt_server_brain.JOBS" title="vt_server_brain.JOBS"><code class="xref py py-data docutils literal notranslate"><span class="pre">JOBS</span></code></a> list), checks on cache and dispatches processing threads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>req</strong> (<em>dict</em>) – The query received by the server.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_brain.process_async">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process_async</code><span class="sig-paren">(</span><em class="sig-param">req</em>, <em class="sig-param">h</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function that is threaded to run the core of the module. It dispatches
+calls to the appropriate modules, and deals with their cache.</p>
+<p>It also updates the <code class="xref py py-data docutils literal notranslate"><span class="pre">JOB</span></code> list when a job is finished, and create a job file
+with some information about the job (useful for cache cleaning).</p>
+<p>If a module takes a <cite>‘file’</cite> as argument, the file can be a query. It will be executed in sync mode from the
+current <a class="reference internal" href="#vt_server_brain.process_async" title="vt_server_brain.process_async"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_async()</span></code></a> process.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_modules"></span><div class="section" id="vt-server-modules">
+<h2>vt_server_modules<a class="headerlink" href="#vt-server-modules" title="Permalink to this headline">¶</a></h2>
+<p>This module contains a number of <code class="docutils literal notranslate"><span class="pre">process_...</span></code> functions, imports
+the other process modules and defines the <a class="reference internal" href="#vt_server_modules.PATCH" title="vt_server_modules.PATCH"><code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code></a> that dispatches
+process module names to the right process function.</p>
+<dl class="data">
+<dt id="vt_server_modules.PATCH">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'mixin': &lt;function process_mixin&gt;, 'pad': &lt;function process_pad&gt;, 'ramp': &lt;function process_ramp&gt;, 'time-reverse': &lt;function process_time_reverse&gt;, 'vocoder': &lt;function process_vocoder&gt;, 'world': &lt;function process_world&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="#vt_server_modules.PATCH" title="vt_server_modules.PATCH"><code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code></a> is used to dispatch stack item modules to their corresponding function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_mixin">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_mixin</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_mixin" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>“mixin”</cite> adds another sound file (B) to the input file (A). The arguments are:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – The file that needs to be added to the input file.</p></li>
+<li><p><strong>levels</strong> – A 2-element array containing the gains in dB applied to the A and B.</p></li>
+<li><p><strong>pad</strong> – A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
+Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.</p></li>
+<li><p><strong>align</strong> – ‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
+the shorter one will be padded so as to be aligned as described with the other one. This is
+applied after padding.</p></li>
+</ul>
+</dd>
+</dl>
+<p>If the two sound files are not of the same sampling frequency, they are resampled to the max of the two.</p>
+<p>If the two sound files are not the same shape (number of channels), the one with fewer channels is duplicated to have the same number of channels as the one with the most.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_pad">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_pad</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_pad" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>“pad”</cite> adds silence before and/or after the sound. It takes <strong>before</strong> and/or <strong>after</strong>
+as arguments, specifying the duration of silence in seconds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_ramp">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_ramp</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>“ramp”</cite> smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>duration</strong> – In seconds. If a single number, it is applied to both onset and offset.
+If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of zero means no ramp.</p></li>
+<li><p><strong>shape</strong> – Either ‘linear’ (default) or ‘cosine’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_time_reverse">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_time_reverse</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_time_reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>“time-reverse”</cite> flips temporally the input. It doesn’t take any argument.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_module_world"></span><div class="section" id="vt-server-module-world">
+<h2>vt_server_module_world<a class="headerlink" href="#vt-server-module-world" title="Permalink to this headline">¶</a></h2>
+<p>This module defines the <em>world</em> processor based on <a class="reference external" href="https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder">pyworld</a>,
+a module wrapping <a class="reference external" href="https://github.com/mmorise/World">Morise’s WORLD vocoder</a>.</p>
+<p>Here are some examples of module instructions:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;f0&quot;</span><span class="p">:</span>     <span class="s2">&quot;*2&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;vtl&quot;</span><span class="p">:</span>    <span class="s2">&quot;-3.8st&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If a key is missing (here, <strong>duration</strong>) it is considered as <code class="docutils literal notranslate"><span class="pre">None</span></code>, which means this part is left unchanged.</p>
+<p><strong>f0</strong> can take the following forms:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> followed by a number, in which case it is multiplicating ratio applied to the
+whole f0 contour. For instance <code class="docutils literal notranslate"><span class="pre">*2</span></code>.</p></li>
+<li><p>a positive or negative number followed by a unit (<code class="docutils literal notranslate"><span class="pre">Hz</span></code> or <code class="docutils literal notranslate"><span class="pre">st</span></code>). This will behave
+like an offset, adding so many Hertz or so many semitones to the f0 contour.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~</span></code> followed by a number, followed by a unit (only <code class="docutils literal notranslate"><span class="pre">Hz</span></code>). This will
+set the <em>average</em> f0 to the defined value.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>vtl</strong> is defined similarly:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> represents a multiplier for the vocal-tract length. Beware, this is not a multiplier
+for the spectral envelope, but its inverse.</p></li>
+<li><p>offsets are defined using the unit <code class="docutils literal notranslate"><span class="pre">st</span></code> only.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>duration</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">*</span></code> multiplier can also be used.</p></li>
+<li><p>an offset can be defined in seconds (using unit <code class="docutils literal notranslate"><span class="pre">s</span></code>).</p></li>
+<li><p>the absolute duration can be set using <code class="docutils literal notranslate"><span class="pre">~</span></code> followed by a value and the <code class="docutils literal notranslate"><span class="pre">s</span></code> unit.</p></li>
+</ul>
+</div></blockquote>
+<p>Note that in v0.2.8, WORLD is making the sounds 1 frame (5 ms) too long if no duration is specified. If you
+specify the duration, it is generated accurately.</p>
+<dl class="class">
+<dt id="vt_server_module_world.Fast2DInterp">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">Fast2DInterp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">z</em>, <em class="sig-param">ofrv=None</em>, <em class="sig-param">type='linear'</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.Fast2DInterp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates an interpolant object based on <code class="docutils literal notranslate"><span class="pre">scipy.interpolate.RectBivariateSpline</span></code> but
+dealing with out of range values.</p>
+<p>The constructor is: <code class="docutils literal notranslate"><span class="pre">Fast2DInterp(x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">ofrv=None)</span></code> where <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
+are 1D arrays and <code class="docutils literal notranslate"><span class="pre">z</span></code> is a 2D array. The optional argument <code class="docutils literal notranslate"><span class="pre">ofrv</span></code> defines
+the value used for out of range inputs. If <code class="docutils literal notranslate"><span class="pre">ofrv</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, then the
+default behaviour of <code class="docutils literal notranslate"><span class="pre">RectBivariateSpline</span></code> is kept, i.e. the closest value is
+returned.</p>
+<p>The default type is <code class="docutils literal notranslate"><span class="pre">linear</span></code>, which then makes use of <code class="docutils literal notranslate"><span class="pre">scipy.interpolate.interp2d</span></code>.
+With <code class="docutils literal notranslate"><span class="pre">cubic</span></code>, the <code class="docutils literal notranslate"><span class="pre">RectBivariateSpline</span></code> is used.</p>
+<p>Note that the class is not so useful in the end when used with <code class="docutils literal notranslate"><span class="pre">linear</span></code>, but
+is useful if you want to use cubic-splines.</p>
+<dl class="method">
+<dt id="vt_server_module_world.Fast2DInterp.interp">
+<code class="sig-name descname">interp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.Fast2DInterp.interp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vt_server_module_world.Fast2DInterp.interp_">
+<code class="sig-name descname">interp_</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.Fast2DInterp.interp_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vt_server_module_world.Fast2DInterp.is_in_range">
+<code class="sig-name descname">is_in_range</code><span class="sig-paren">(</span><em class="sig-param">w</em>, <em class="sig-param">r</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.Fast2DInterp.is_in_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_world.check_arguments">
+<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">check_arguments</code><span class="sig-paren">(</span><em class="sig-param">mo</em>, <em class="sig-param">purpose</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.check_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives an <code class="xref py py-mod docutils literal notranslate"><span class="pre">re</span></code> match object from parsing module arguments and do some basic checking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mo</strong> (<em>re.Match</em>) – The argument to parse.</p></li>
+<li><p><strong>purpose</strong> – Purpose is <cite>‘f0’</cite>, <cite>‘vtl’</cite> or <cite>‘duration’</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>A tuple of the form <code class="docutils literal notranslate"><span class="pre">(args_ok,</span> <span class="pre">args)</span></code>: <code class="docutils literal notranslate"><span class="pre">args_ok</span></code> is True or False depending on whether
+the argument is fine or not. <code class="docutils literal notranslate"><span class="pre">args</span></code> contains a dictionary with the parsed out argument:</p>
+<blockquote>
+<div><dl class="simple">
+<dt><cite>v</cite></dt><dd><p>is the value as a float.</p>
+</dd>
+<dt><cite>u</cite></dt><dd><p>is the unit for offsets, or None for ratios.</p>
+</dd>
+<dt><cite>~</cite></dt><dd><p>if <code class="docutils literal notranslate"><span class="pre">True</span></code>, then it denotes an absolute (average) value instead of an offset.</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_world.parse_arguments">
+<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">parse_arguments</code><span class="sig-paren">(</span><em class="sig-param">m</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.parse_arguments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_world.process_world">
+<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">process_world</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.process_world" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the file <strong>in_filename</strong> according to parameters <strong>m</strong>, and stores results in <strong>out_filename</strong>.</p>
+<p>The first step is to analyse the sound file to extract its f0, spectral envelope and
+aperiodicity map. The results of this operation are cached in a pickle file.</p>
+<p>The parameters for this module are:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f0</strong> – Either an absolute f0 value in Hertz <code class="docutils literal notranslate"><span class="pre">{###</span> <span class="pre">Hz}</span></code>, a change in semitones <code class="docutils literal notranslate"><span class="pre">{###</span> <span class="pre">st}</span></code> or a ratio <code class="docutils literal notranslate"><span class="pre">{\*###}</span></code>.</p></li>
+<li><p><strong>vtl</strong> – Same for vocal-tract length (only semitones and ratio).</p></li>
+<li><p><strong>duration</strong> – Either an absolute duration in seconds <code class="docutils literal notranslate"><span class="pre">{~###s}</span></code>, an offset in seconds <code class="docutils literal notranslate"><span class="pre">{+/-###s}</span></code>, or a ratio <code class="docutils literal notranslate"><span class="pre">{\*###}</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Just to be clear, these parameters must be keys of the dictionary <strong>m</strong>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_world.regularize_arrays">
+<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">regularize_arrays</code><span class="sig-paren">(</span><em class="sig-param">*args</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.regularize_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Making sure the arrays passed as arguments are in the right format for pyworld.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_module_vocoder"></span><div class="section" id="vt-server-module-vocoder">
+<h2>vt_server_module_vocoder<a class="headerlink" href="#vt-server-module-vocoder" title="Permalink to this headline">¶</a></h2>
+<p>This module defines the <em>world</em> processor based on <a class="reference external" href="https://github.com/egaudrain/vocoder">vocoder</a>,
+a MATLAB vocoder designed to be highly programmable.</p>
+<p>Here is and example of module instructions:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;vocoder&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;fs&quot;</span><span class="p">:</span> <span class="mi">44100</span><span class="p">,</span>
+    <span class="nt">&quot;analysis_filters&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;f&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;fmin&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="nt">&quot;fmax&quot;</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span> <span class="nt">&quot;n&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="nt">&quot;scale&quot;</span><span class="p">:</span> <span class="s2">&quot;greenwood&quot;</span> <span class="p">},</span>
+        <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;butterworth&quot;</span><span class="p">,</span> <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nt">&quot;zero-phase&quot;</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span>
+        <span class="p">},</span>
+    <span class="nt">&quot;synthesis_filters&quot;</span><span class="p">:</span> <span class="s2">&quot;analysis_filters&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;envelope&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;low-pass&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;rectify&quot;</span><span class="p">:</span> <span class="s2">&quot;half-wave&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nt">&quot;fc&quot;</span><span class="p">:</span> <span class="mi">160</span>
+        <span class="p">},</span>
+    <span class="nt">&quot;synthesis&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;carrier&quot;</span><span class="p">:</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;filter_before&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nt">&quot;filter_after&quot;</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <strong>fs</strong> attribute is optional but can be used to speed up processing. The filter
+definitions that are generated depend on the sampling frequency, so the it has to
+be known to generate the filters. If the argument is not passed, it will be read from
+the file that needs processing. Passing the sampling frequency as an attribute will
+speed things up as we don’t need to open the sound file to check its sampling rate.
+However, beware that if the <strong>fs</strong> does not match that of the file, you will get an
+error.</p>
+<p>The other attributes are as follows:</p>
+<div class="section" id="analysis-filters">
+<h3>analysis_filters<a class="headerlink" href="#analysis-filters" title="Permalink to this headline">¶</a></h3>
+<p><strong>analysis_filters</strong> is a dictionary defining the filterbank used to analyse the
+input signal. It defines both the cutoff frequencies <strong>f</strong> and the filtering <strong>method</strong>.</p>
+<div class="section" id="f-filterbank-frequencies">
+<h4><em>f</em>: Filterbank frequencies<a class="headerlink" href="#f-filterbank-frequencies" title="Permalink to this headline">¶</a></h4>
+<p>These can either be specified as an array of values, using a predefined setting, or
+by using a regular method.</p>
+<p>If <strong>f</strong> is a numerical array, the values are used as frequencies in Hertz.</p>
+<p>If <strong>f</strong> is a string, it refers to a predefined setting. The predefined values are:
+<cite>ci24</cite> and <cite>hr90k</cite> refering to the default map of cochlear implant manufacturers
+Cochlear and Advanced Bionics, respectively.</p>
+<p>Otherwise <strong>f</strong> is a dictionary with the following items:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>fmin</dt><dd><p>The starting frequency of the filterbank.</p>
+</dd>
+<dt>fmax</dt><dd><p>The end frequency of the filterbank.</p>
+</dd>
+<dt>n</dt><dd><p>The number of channels.</p>
+</dd>
+<dt>scale</dt><dd><p><cite>[optional]</cite> The scale on which the frequencies are divided into channels. Default is
+<cite>log</cite>. Possible values are <cite>greenwood</cite>, <cite>log</cite> and <cite>linear</cite>.</p>
+</dd>
+<dt>shift</dt><dd><p><cite>[optional]</cite> A shift in millimiters, towards the base. Note that the shift is applied
+after all other calculations so the <cite>fmin</cite> and <cite>fmax</cite> boundaries will
+not be respected anymore.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="filtering-method">
+<h4>Filtering <em>method</em><a class="headerlink" href="#filtering-method" title="Permalink to this headline">¶</a></h4>
+<p>A dictionary with the following elements:</p>
+<blockquote>
+<div><dl>
+<dt>family</dt><dd><p>The type of filter. At the moment only <cite>butterworth</cite> is implemented.</p>
+<p>For <cite>butterworth</cite>, the following parameters have to be provided:</p>
+<dl class="simple">
+<dt>order</dt><dd><p>The actual order of the filter. Watch out, that this is the order that
+is actually achieved. Choosing <cite>true</cite> for <cite>zero-phase</cite> means only
+even numbers can be provided.</p>
+</dd>
+<dt>zero-phase</dt><dd><p>Whether a zero-phase filter is being used. If <cite>true</cite>, then <code class="xref py py-func docutils literal notranslate"><span class="pre">filtfilt()</span></code>
+is used instead of <code class="xref py py-func docutils literal notranslate"><span class="pre">filt()</span></code>.</p>
+</dd>
+</dl>
+<p>Unlike in the MATLAB version, this is implemented with second-order section
+filters (<code class="xref py py-func docutils literal notranslate"><span class="pre">sosfiltfilt()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">sosfilt()</span></code>).</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="synthesis-filters">
+<h3>synthesis_filters<a class="headerlink" href="#synthesis-filters" title="Permalink to this headline">¶</a></h3>
+<p>It can be the string <cite>“analysis_filters”</cite> to make them identical to the analysis filters.
+This is also what happens if the element is omitted or <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p>
+<p>Otherwise it can be a dictionary similar to <a class="reference internal" href="#analysis-filters">analysis_filters</a>. The number of channels
+has to be the same. If it differs, an error will be returned.</p>
+</div>
+<div class="section" id="envelope">
+<h3>envelope<a class="headerlink" href="#envelope" title="Permalink to this headline">¶</a></h3>
+<p>That specifies how the envelope is extracted.</p>
+<blockquote>
+<div><dl>
+<dt>method</dt><dd><p>Can be <cite>low-pass</cite> or <cite>hilbert</cite>.</p>
+<p>For <cite>low-pass</cite>, the envelope is extracted with rectification and low-pass
+filtering. The following parameters are required:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>rectify</dt><dd><p>The wave rectification method: <cite>half-wave</cite> or <cite>full-wave</cite>.</p>
+</dd>
+<dt>order</dt><dd><p>The order of the filter used for envelope extraction. Again, this
+is the effective order, so only even numbered are accepted because
+the envelope is extracted with a zero-phase filter.</p>
+</dd>
+<dt>fc</dt><dd><p>The cutoff of the envelope extraction in Hertz. Can be a single
+value or a value per channel.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="synthesis">
+<h3>synthesis<a class="headerlink" href="#synthesis" title="Permalink to this headline">¶</a></h3>
+<p>The <strong>synthesis</strong> field describes how the resynthesis should be performed.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>carrier</dt><dd><p>Can be <cite>noise</cite> or <cite>sin</cite> (<cite>low-noise</cite> and <cite>pshc</cite> are not implemented).</p>
+</dd>
+<dt>filter_before</dt><dd><p>If <cite>true</cite>, the carrier is filtered before multiplication with the envelope (default is <cite>false</cite>).</p>
+</dd>
+<dt>filter_after</dt><dd><p>If <cite>true</cite>, the modulated carrier is refiltered in the band to suppress sidebands
+(default is <cite>true</cite>). Keep in mind that if you filter broadband carriers both
+before and after modulation you may alter the spectral shape of your signal.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>If the <cite>carrier</cite> is <cite>noise</cite>, then a random seed can be provided in <cite>random_seed</cite>
+to have frozen noise. If not the random number generator will be initialized with the
+current clock. Note that for multi-channel audio files, the seed is used for each
+channel. If no seed is given, the various chennels will have different noises as
+carriers. To have correlated noise across chennels, pass in a (random) seed.</p>
+<p>If the <cite>carrier</cite> is <cite>sin</cite>, the geometric mean of the band’s cutoffs are used unless
+attribute <cite>f</cite> is provided, in which case it defines the frequencies.</p>
+</div>
+<div class="section" id="content">
+<h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="vt_server_module_vocoder.FB_PRESETS">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FB_PRESETS</code><em class="property"> = {'ci24': [188, 313, 438, 563, 688, 813, 938, 1063, 1188, 1313, 1563, 1813, 2063, 2313, 2688, 3063, 3563, 4063, 4688, 5313, 6063, 6938, 7938], 'hr90k': [250, 416, 494, 587, 697, 828, 983, 1168, 1387, 1648, 1958, 2326, 2762, 3281, 3898, 4630, 8700]}</em><a class="headerlink" href="#vt_server_module_vocoder.FB_PRESETS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Presets for manufacturers’ filterbanks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.env_hilbert">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">env_hilbert</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.env_hilbert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.env_lowpass">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">env_lowpass</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">rectif</em>, <em class="sig-param">filter</em>, <em class="sig-param">filter_function</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.env_lowpass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.freq2mm">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">freq2mm</code><span class="sig-paren">(</span><em class="sig-param">frq</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.freq2mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts frequency to millimeters from apex using Greenwood’s formula.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.mm2freq">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">mm2freq</code><span class="sig-paren">(</span><em class="sig-param">mm</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.mm2freq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts millimeters from apex to frequency using Greenwood’s formula.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_arguments">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_arguments</code><span class="sig-paren">(</span><em class="sig-param">m</em>, <em class="sig-param">in_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses arguments for the vocoder module. Unlike some other modules, it is important to know the
+sampling frequency we will be operating at. The filename can be read from the <cite>in_filename</cite> or
+it can be provided to speed-up things. Watchout, though, if the passed <cite>fs</cite> does not match that
+of <cite>in_filename</cite>, you’ll get an error.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_carrier_definition">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_carrier_definition</code><span class="sig-paren">(</span><em class="sig-param">carrier</em>, <em class="sig-param">synth_fbd</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_carrier_definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a carrier definition for the <a class="reference internal" href="#synthesis">synthesis</a> block.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_envelope_definition">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_envelope_definition</code><span class="sig-paren">(</span><em class="sig-param">env_def</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_envelope_definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses an envelope definition.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_filterbank_definition">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_filterbank_definition</code><span class="sig-paren">(</span><em class="sig-param">fbd</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_filterbank_definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a filterbank definition, used for <a class="reference internal" href="#analysis-filters">analysis_filters</a> and <a class="reference internal" href="#synthesis-filters">synthesis_filters</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_filterbank_method">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_filterbank_method</code><span class="sig-paren">(</span><em class="sig-param">method</em>, <em class="sig-param">freq</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_filterbank_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the method part of the filterbank definition and creates the filters based on
+the <cite>freq</cite> array and the sampling frequency <cite>fs</cite>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.parse_frequency_array">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_frequency_array</code><span class="sig-paren">(</span><em class="sig-param">fa</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_frequency_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a frequency array definition as part of a filter bank definition.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.process_vocoder">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">process_vocoder</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.process_vocoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main processing function for the module.</p>
+</dd></dl>
+
+</div>
+</div>
+<span class="target" id="module-vt_server_config"></span><div class="section" id="vt-server-config">
+<h2>vt_server_config<a class="headerlink" href="#vt-server-config" title="Permalink to this headline">¶</a></h2>
+<p>VTServer configuration file management.</p>
+<dl class="data">
+<dt id="vt_server_config.CONFIG">
+<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">CONFIG</code><em class="property"> = {'cachefolder': '/var/cache/vt_server', 'cacheformat': 'flac', 'cacheformatoptions': None, 'host': 'localhost', 'logfile': '/var/log/vt_server.log', 'port': 1996}</em><a class="headerlink" href="#vt_server_config.CONFIG" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dictionary holding the current configuration (used in other modules).
+It is instanciated with <a class="reference internal" href="#vt_server_config.read_configuration" title="vt_server_config.read_configuration"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_configuration()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_config.find_configuration">
+<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">find_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_config.find_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to find a configuration file in known places:
+<code class="file docutils literal notranslate"><span class="pre">/usr/local/etc/vt_server</span></code>, <code class="file docutils literal notranslate"><span class="pre">/etc/vt_server</span></code>, <code class="file docutils literal notranslate"><span class="pre">./</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_config.read_configuration">
+<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">read_configuration</code><span class="sig-paren">(</span><em class="sig-param">config_filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_config.read_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a configuration file. If none is provided, will try to find one in default
+places. If that fails or if the config file is invalid will fall back to default
+options.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_logging"></span><div class="section" id="vt-server-logging">
+<h2>vt_server_logging<a class="headerlink" href="#vt-server-logging" title="Permalink to this headline">¶</a></h2>
+<p>VTServer logging facilities.</p>
+<dl class="class">
+<dt id="vt_server_logging.VTServerLogFormatter">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">VTServerLogFormatter</code><a class="headerlink" href="#vt_server_logging.VTServerLogFormatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Formatter</span></code></p>
+<dl class="method">
+<dt id="vt_server_logging.VTServerLogFormatter.format">
+<code class="sig-name descname">format</code><span class="sig-paren">(</span><em class="sig-param">record</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_logging.VTServerLogFormatter.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the specified record as text.</p>
+<p>The record’s attribute dictionary is used as the operand to a
+string formatting operation which yields the returned string.
+Before formatting the dictionary, a couple of preparatory steps
+are carried out. The message attribute of the record is computed
+using LogRecord.getMessage(). If the formatting string uses the
+time (as determined by a call to usesTime(), formatTime() is
+called to format the event time. If there is exception information,
+it is formatted using formatException() and appended to the message.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_logging.get_FileHandler">
+<code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">get_FileHandler</code><span class="sig-paren">(</span><em class="sig-param">logfile</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_logging.get_FileHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<span class="target" id="module-vt_server_cache"></span><div class="section" id="cache-clean-up">
+<h2>Cache clean-up<a class="headerlink" href="#cache-clean-up" title="Permalink to this headline">¶</a></h2>
+<p>The cache can become big and obsolete, so it is a good idea to clean it up regularly.
+In particular, if the original file does not exist anymore, all the processed files
+should be removed.</p>
+<p>For that, we use the job file that is created by the <a class="reference internal" href="#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a>.
+The job file lists all the files that were created (or used) during a specific job.
+If no job file exist for a specific cache file, we erase it. Note, that we may be
+missing cache files from individual modules with this approach.</p>
+<p>The <a class="reference internal" href="#module-vt_server_cache" title="vt_server_cache"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_cache</span></code></a> module has a command line interface so you can easily
+put it in your crontab.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: vt_server_cache.py [-h] [-l LEVEL] [-s] [folder]
+
+positional arguments:
+  folder                The cache folder to cleanse. If none is provided, we
+                        will try to read from the default option file.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LEVEL, --level LEVEL
+                        Level of cleansing [default 0]. 0 will remove all
+                        files created by jobs that are related to files that
+                        do not exist anymore. 1 will also remove files that
+                        were used in the process. 1996 will remove *ALL* files
+                        from the cache.
+  -s, --simulate        Will not do anything, but will show what it would do.
+</pre></div>
+</div>
+<dl class="function">
+<dt id="vt_server_cache.cleanup_cache">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold=None</em>, <em class="sig-param">level=0</em>, <em class="sig-param">simulate=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.cleanup_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function that cleans up the cache. The <strong>level</strong> argument is used to specify
+how spooky clean you want your cache:</p>
+<ul class="simple">
+<li><p>0 is the standard (and default) level, it will scoure the cache folder for
+generated files. If a file does not have an eponym .job file, it will be deleted.
+Otherwise, the job file is opened, and, if the original sound file does not exist
+any more, all files listed as “created” are deleted. The final sound file
+(or symlinks) created are deleted as well as the job file.</p></li>
+<li><p>1 is slightly more aggressive, where all files that are “created” or “used”
+will be deleted.</p></li>
+<li><p>1996 will make your cache spooky clean by eliminating all files (but preserving
+the directory structure).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_cache.delete_file">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_cache.spooky_cleanup_cache">
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">spooky_cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.spooky_cleanup_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="module_howto.html" class="btn btn-neutral float-right" title="How to make a module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="VT Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Etienne Gaudrain
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

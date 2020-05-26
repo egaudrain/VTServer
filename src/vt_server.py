@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``vt_server``
-=============
+vt_server
+=========
 
 This is a Voice Transformation server. It receives command stacks as JSON arrays
 to process sound files that are local on the server, and returns a pointer to the processed file.
@@ -26,48 +26,60 @@ class VTHandler(socketserver.StreamRequestHandler):
     Requests are JSON encoded. It is required that they contain the following field
     `action` which can receive one of two values: `"status"` or `"process"`.
 
-    If ``action`` is  ``"status"``, then no other field is required.
+    If **action** is  `"status"`, then no other field is required.
 
-    If ``action`` is  ``"process"``, then the following fields are required:
+    If **action** is  `"process"`, then the following fields are required:
 
-        * ``file``: the sound file(s) that will be processed. This can be an array
+        file
+          The sound file(s) that will be processed. This can be an array
           of files, in which case they are all processed and then concatenated. This
           can also be a string where the files are separated with a pipe ``" >> "``
           (note that this includes a space before, and a space after).
 
-        * ``stack``: the list of processes that will be run on the file. Each item
+        stack
+          The list of processes that will be run on the file. Each item
           in the stack is an object that is specific to the type of processing.
           Each object must have a `module` attribute that is used to dispatch the
           processing. This can also be a list of stacks that apply to everyone of
-          the files if ``file`` is an array (otherwise, the same stack is applied
+          the files if **file** is an array (otherwise, the same stack is applied
           to all files before concatenation).
 
     The following fields are optional:
 
-        * ``mode``: ``"sync"`` [default], ``"async"`` or ``"hash"``. In ``sync`` mode, the server will only
+        mode
+          `"sync"` [default], `"async"` or `"hash"`. In `sync` mode, the server will only
           send a response when the file is processed. In `async` mode, the server
-          will respond immediately with a `"wait"`` response. The client can probe
-          periodically with the same request until the file is returned. ``"hash"`` only
+          will respond immediately with a `"wait"` response. The client can probe
+          periodically with the same request until the file is returned. `hash` only
           returns the hash of the request that is used as identifier.
 
-        * ``format``: Specifies the output format of the sound files. Can be ``"flac"``, ``"wav"``
-          (or anything else supported by `libsndfile <http://www.mega-nerd.com/libsndfile/>`_, or ``"mp3"``
+        format
+          Specifies the output format of the sound files. Can be `"flac"`, `"wav"`
+          (or anything else supported by `libsndfile <http://www.mega-nerd.com/libsndfile/>`_, or `"mp3"`
           (if `LAME <http://www.mega-nerd.com/libsndfile/>`_ is installed). If none is provided,
-          then the default cache format is used (see vt_server_config_).
+          then the default cache format is used (see :mod:`vt_server_config`).
 
-        * ``format_options``: Specifies options (as a dictionary) for the selected
-          format. At the moment, only ``bitrate`` is specified (as an integer in kbps)
-          for format ``"mp3"`` (see :py:func:`vt_server_brain.encode_to_format` for details).
+        format_options
+          Specifies options (as a dictionary) for the selected
+          format. At the moment, only `bitrate` is specified (as an integer in kbps)
+          for format `"mp3"` (see :py:func:`vt_server_brain.encode_to_format` for details).
 
     The response is also JSON and has the following form:
 
-        * ``out``: ``"ok"`` or ``"error"``
+        out
+          `"ok"` or `"error"`
 
-        * ``details``: In case of success, this contains the outcome of the processing
-          (or ``"wait"`` for the ``"async"`` mode). In case of error, this has some
+        details
+          In case of success, this contains the outcome of the processing
+          (or `"wait"` for the `"async"` mode). In case of error, this has some
           details about the error.
     """
     def handle(self):
+        """
+        The handler function. It basically receives the query in JSON, tries to parse it and then
+        dispatch to :py:func:`vt_server_brain.process` if it worked. Then sends the response back
+        to the client.
+        """
         self.data = self.rfile.readline().strip()
         vsl.LOG.debug("Received from {}: {}.".format(self.client_address[0], self.data))
         msg = dict()

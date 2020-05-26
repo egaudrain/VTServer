@@ -2,16 +2,16 @@
 # coding: utf-8
 
 """
-``vt_server_brain``
-===================
+vt_server_brain
+===============
 
 Dispatches the processing to the right underlings. The brain also manages the
 various processes and the main cache. Each request is dispatched to its own
-process as a *job*.
+process as a **job**.
 
 Jobs have a signature that is based on the task at hand:
 
-    * the ``file`` it applies to,
+    * the **file** it applies to,
 
     * and the process instruction stack list.
 
@@ -20,21 +20,21 @@ signature. The job signature is also used for the name of the cache file.
 
 Everytime a job is submitted, the brain first checks if the file already exists.
 If the file exists, it is returned right away. If the file does not exist, then
-we check if the job is in the `JOBS` list (a managed dictionary). If it is in
-the list, then we just reply ``wait`` to the client. If not, then the brain
+we check if the job is in the :py:data:`JOBS` list (a managed dictionary). If it is in
+the list, then we just reply `'wait'` to the client. If not, then the brain
 creates the job and starts the process.
 
-In ``sync`` mode, the dispatcher waits for the process to be completed.
+In `'sync'` mode, the dispatcher waits for the process to be completed.
 
-In ``async`` mode it returns right away and sends a ``wait`` message. The client can
+In `'async'` mode it returns right away and sends a `'wait'` message. The client can
 send the same request a bit later. If the job is still being processed, the server
-sends the same ``wait`` response. If the job is completed, then the job target file
+sends the same `'wait'` response. If the job is completed, then the job target file
 exists and is returned right away.
 
 Individual tasks listed in the task list can have their own cache system, but
 they need to manage it themselves.
 
-A ``job_janitor`` is scouring the ``JOBS`` list to check on jobs that may be finished,
+A :py:class:`Janitor` is scouring the :py:data:`JOBS` list to check on jobs that may be finished,
 and remove them from the list.
 
 .. Created on 2020-03-20.
@@ -54,6 +54,7 @@ import soundfile as sf
 import numpy as np
 
 manager = Manager()
+#: This is the list of current jobs (actually a managed dict).
 JOBS = manager.dict()
 N_REQUESTS = 0 # This is just for information purposes.
 
@@ -95,10 +96,9 @@ class Janitor():
     @staticmethod
     def janitor_job():
         """
-        The jobs_janitor function checks periodically on the `JOBS` list to see if there are any
+        Checks periodically on the :py:data:`JOBS` list to see if there are any
         process that is finished and needs removing.
         """
-
 
         Ps = dict()
         for p in active_children():
@@ -130,7 +130,10 @@ def _job_signature_multi(files, stack):
 
 def process(req):
     """
-    Creates JOB, checks on cache and dispatches thread.
+    Creates jobs (populating the :py:data:`JOBS` list), checks on cache and dispatches processing threads.
+
+    :param req: The query received by the server.
+    :type req: dict
     """
 
     global N_REQUESTS
@@ -318,11 +321,11 @@ def process_async(req, h, out_filename):
     This is the function that is threaded to run the core of the module. It dispatches
     calls to the appropriate modules, and deals with their cache.
 
-    It also updates the ``JOB`` list when a job is finished, and create a job file
+    It also updates the :py:data:`JOB` list when a job is finished, and create a job file
     with some information about the job (useful for cache cleaning).
 
-    If a module takes a 'file' as argument, the file can be a query. It will be executed in sync mode from the
-    current ``process_async`` process.
+    If a module takes a `'file'` as argument, the file can be a query. It will be executed in sync mode from the
+    current :py:func:`process_async` process.
     """
 
     vsl.LOG.debug("[%s] Processing request %s." % (h, repr(req)))

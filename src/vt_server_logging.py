@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``vt_server_logging``
-=====================
+vt_server_logging
+=================
 
 VTServer logging facilities.
 

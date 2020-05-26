@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``vt_server_module_vocoder``
-============================
+vt_server_module_vocoder
+========================
 
 This module defines the *world* processor based on `vocoder <https://github.com/egaudrain/vocoder>`_,
 a MATLAB vocoder designed to be highly programmable.
@@ -33,135 +33,131 @@ Here is and example of module instructions:
             }
     }
 
-The ``fs`` attribute is optional but can be used to speed up processing. The filter
+The **fs** attribute is optional but can be used to speed up processing. The filter
 definitions that are generated depend on the sampling frequency, so the it has to
 be known to generate the filters. If the argument is not passed, it will be read from
 the file that needs processing. Passing the sampling frequency as an attribute will
 speed things up as we don't need to open the sound file to check its sampling rate.
-However, beware that if the ``fs`` does not match that of the file, you will get an
+However, beware that if the **fs** does not match that of the file, you will get an
 error.
 
 The other attributes are as follows:
 
-``analysis_filters``
---------------------
+analysis_filters
+----------------
 
-``analysis_filters`` is a dictionary defining the filterbank used to analyse the
-input signal. It defines both the cutoff frequencies ``f`` and the filtering ``method``.
+**analysis_filters** is a dictionary defining the filterbank used to analyse the
+input signal. It defines both the cutoff frequencies **f** and the filtering **method**.
 
-``f``: Filterbank frequencies
-'''''''''''''''''''''''''''''
+*f*: Filterbank frequencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These can either be specified as an array of values, using a predefined setting, or
 by using a regular method.
 
-If ``f`` is a numerical array, the values are used as frequencies in Hertz.
+If **f** is a numerical array, the values are used as frequencies in Hertz.
 
-If ``f`` is a string, it refers to a predefined setting. The predefined values are:
-``ci24`` and ``hr90k`` refering to the default map of cochlear implant manufacturers
+If **f** is a string, it refers to a predefined setting. The predefined values are:
+`ci24` and `hr90k` refering to the default map of cochlear implant manufacturers
 Cochlear and Advanced Bionics, respectively.
 
-Otherwise ``f`` is a dictionary with the following items:
+Otherwise **f** is a dictionary with the following items:
 
-    ``fmin``
+    fmin
         The starting frequency of the filterbank.
-
-    ``fmax``
+    fmax
         The end frequency of the filterbank.
-
-    ``n``
+    n
         The number of channels.
-
-    ``scale`` : [optional]
-        The scale on which the frequencies are divided into channels. Default is
-        ``log``. Possible values are ``greenwood``, ``log`` and ``linear``.
-
-    ``shift`` : [optional]
-        A shift in millimiters, towards the base. Note that the shift is applied
-        after all other calculations so the ``fmin`` and ``fmax`` boundaries will
+    scale
+        `[optional]` The scale on which the frequencies are divided into channels. Default is
+        `log`. Possible values are `greenwood`, `log` and `linear`.
+    shift
+        `[optional]` A shift in millimiters, towards the base. Note that the shift is applied
+        after all other calculations so the `fmin` and `fmax` boundaries will
         not be respected anymore.
 
-Filtering ``method``
-''''''''''''''''''''
+Filtering *method*
+^^^^^^^^^^^^^^^^^^
 
 A dictionary with the following elements:
 
-    ``family``
-        The type of filter. At the moment only ``butterworth`` is implemented.
+    family
+        The type of filter. At the moment only `butterworth` is implemented.
 
-        For ``butterworth``, the following parameters have to be provided:
+        For `butterworth`, the following parameters have to be provided:
 
-        ``order``
+        order
             The actual order of the filter. Watch out, that this is the order that
-            is actually achieved. Choosing ``true`` for ``zero-phase`` means only
+            is actually achieved. Choosing `true` for `zero-phase` means only
             even numbers can be provided.
 
-        ``zero-phase``
-            Whether a zero-phase filter is being used. If ``true``, then :func:`filtfilt`
+        zero-phase
+            Whether a zero-phase filter is being used. If `true`, then :func:`filtfilt`
             is used instead of :func:`filt`.
 
         Unlike in the MATLAB version, this is implemented with second-order section
         filters (:func:`sosfiltfilt` and :func:`sosfilt`).
 
 
-``synthesis_filters``
----------------------
+synthesis_filters
+-----------------
 
-It can be string ``"analysis_filters"`` to make them identical to the analysis filters.
+It can be the string `"analysis_filters"` to make them identical to the analysis filters.
 This is also what happens if the element is omitted or ``null``.
 
-Otherwise it can be a dictionary similar to ``analysis_filter``. The number of channels
+Otherwise it can be a dictionary similar to `analysis_filters`_. The number of channels
 has to be the same. If it differs, an error will be returned.
 
 
-``envelope``
-------------
+envelope
+--------
 
 That specifies how the envelope is extracted.
 
-    ``method``
-        Can be ``low-pass`` or ``hilbert``.
+    method
+        Can be `low-pass` or `hilbert`.
 
-        For ``low-pass``, the envelope is extracted with rectification and low-pass
+        For `low-pass`, the envelope is extracted with rectification and low-pass
         filtering. The following parameters are required:
 
-            ``rectify``
-                The wave rectification method: ``half-wave`` or ``full-wave``.
+            rectify
+                The wave rectification method: `half-wave` or `full-wave`.
 
-            ``order``
+            order
                 The order of the filter used for envelope extraction. Again, this
                 is the effective order, so only even numbered are accepted because
                 the envelope is extracted with a zero-phase filter.
 
-            ``fc``
+            fc
                 The cutoff of the envelope extraction in Hertz. Can be a single
                 value or a value per channel.
 
 
-``synthesis``
--------------
+synthesis
+---------
 
-The ``synthesis`` field describes how the resynthesis should be performed.
+The **synthesis** field describes how the resynthesis should be performed.
 
-    ``carrier``
-        Can be ``noise`` or ``sin`` (``low-noise`` and ``pshc`` are not implemented).
+    carrier
+        Can be `noise` or `sin` (`low-noise` and `pshc` are not implemented).
 
-    ``filter_before``
-        If ``true``, the carrier is filtered before multiplication with the envelope (default is ``false``).
+    filter_before
+        If `true`, the carrier is filtered before multiplication with the envelope (default is `false`).
 
-    ``filter_after``
-        If true, the modulated carrier is refiltered in the band to suppress sidebands
-        (default is ``true``). Keep in mind that if you filter broadband carriers both
+    filter_after
+        If `true`, the modulated carrier is refiltered in the band to suppress sidebands
+        (default is `true`). Keep in mind that if you filter broadband carriers both
         before and after modulation you may alter the spectral shape of your signal.
 
-If the ``carrier`` is ``noise``, then a random seed can be provided in ``random_seed``
+If the `carrier` is `noise`, then a random seed can be provided in `random_seed`
 to have frozen noise. If not the random number generator will be initialized with the
 current clock. Note that for multi-channel audio files, the seed is used for each
 channel. If no seed is given, the various chennels will have different noises as
 carriers. To have correlated noise across chennels, pass in a (random) seed.
 
-If the ``carrier`` is ``sin``, the geometric mean of the band's cutoffs are used unless
-attribute ``f`` is provided, in which case it defines the frequencies.
+If the `carrier` is `sin`, the geometric mean of the band's cutoffs are used unless
+attribute `f` is provided, in which case it defines the frequencies.
 
 Content
 -------
@@ -181,6 +177,7 @@ from scipy import signal
 
 import soundfile as sf
 
+#: Presets for manufacturers' filterbanks.
 FB_PRESETS = {
     'ci24':  [188,313,438,563,688,813,938,1063,1188,1313,1563,1813,2063,2313,2688,3063,3563,4063,4688,5313,6063,6938,7938],
     'hr90k': [250,416,494,587,697,828,983,1168,1387,1648,1958,2326,2762,3281,3898,4630,8700]
@@ -253,7 +250,7 @@ def parse_frequency_array(fa):
 def parse_filterbank_method(method, freq, fs):
     """
     Parses the method part of the filterbank definition and creates the filters based on
-    the ``freq`` array and the sampling frequency ``fs``.
+    the `freq` array and the sampling frequency `fs`.
     """
     if not isinstance(method, dict):
         raise ValueError("[vocoder] The filterbank method element is not a dictionary: %s." % repr(method))
@@ -298,7 +295,7 @@ def parse_filterbank_method(method, freq, fs):
 
 def parse_filterbank_definition(fbd, fs):
     """
-    Parses a filterbank definition, used for ``analysis_filters`` and ``synthesis_filters``.
+    Parses a filterbank definition, used for `analysis_filters`_ and `synthesis_filters`_.
     """
 
     if not isinstance(fbd, dict):
@@ -317,6 +314,10 @@ def parse_filterbank_definition(fbd, fs):
     return fbd
 
 def parse_envelope_definition(env_def, fs):
+    """
+    Parses an envelope definition.
+    """
+
     if 'method' not in env_def:
         raise ValueError("[vocoder] Envelope definition needs a 'method' attribute: %s." % repr(env_def))
 
@@ -342,7 +343,7 @@ def parse_envelope_definition(env_def, fs):
 
 def parse_carrier_definition(carrier, synth_fbd):
     """
-    Parses a carrier definition for the ``synthesis`` block.
+    Parses a carrier definition for the `synthesis`_ block.
     """
 
     if 'carrier' not in carrier:
@@ -368,9 +369,9 @@ def parse_carrier_definition(carrier, synth_fbd):
 def parse_arguments(m, in_filename):
     """
     Parses arguments for the vocoder module. Unlike some other modules, it is important to know the
-    sampling frequency we will be operating at. The filename can be read from the ``in_filename`` or
-    it can be provided to speed-up things. Watchout, though, if the passed ``fs`` does not match that
-    of ``in_filename``, you'll get an error.
+    sampling frequency we will be operating at. The filename can be read from the `in_filename` or
+    it can be provided to speed-up things. Watchout, though, if the passed `fs` does not match that
+    of `in_filename`, you'll get an error.
     """
 
     # Analysis filters

@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>How to make a module &mdash; VT Server  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Modules" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> VT Server
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to make a module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">VT Server</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>How to make a module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/module_howto.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="how-to-make-a-module">
+<h1>How to make a module<a class="headerlink" href="#how-to-make-a-module" title="Permalink to this headline">¶</a></h1>
+<p>The VT Server functionality can be extended by creating new modules. This section
+gives some pointers on how to do just that.</p>
+<p>The basic principle is pretty straightforward. If we were writing a module called
+<cite>toto</cite>, we would have to define a function with the following signature:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_toto</span><span class="p">(</span><span class="n">in_filename</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">out_filename</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>in_filename</dt><dd><p>The path to the input filename. It is either an original file,
+or an intermediary file passed on by the previous module in a stack of modules.</p>
+</dd>
+<dt>parameters</dt><dd><p>The module’s parameters definition. This is what a user pass to
+the module in a query.</p>
+</dd>
+<dt>out_filename</dt><dd><p>Provided by the <a class="reference internal" href="modules.html#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a>. The module is responsible
+for writing the file down once the processing is finished.</p>
+</dd>
+</dl>
+<p>When writing a module, you don’t need to worry about caching results of queries.
+This is managed by the <a class="reference internal" href="modules.html#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a>. In other words, the job of the module
+process function is just to read the input file, apply the modifications you need
+to apply to the sound based on the parameters, and then save the result in <strong>out_filename</strong>.</p>
+<p>The function also returns <strong>out_filename</strong>. However, if you need to generate any
+intermediary files you will need to report that back as well. This is the case,
+for instance, for the <cite>world</cite> module where the result of the analysis phase is saved
+in a file so that only synthesis needs to be done for new voice parameters. We need
+to report these files to the brain so that the cache clean-up routines can handle
+these files properly. Similarly, if the generation relies other external files, they
+need to be listed. When this is the case, the return signature is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">soundfile</span> <span class="k">as</span> <span class="nn">sf</span>
+
+<span class="k">def</span> <span class="nf">process_toto</span><span class="p">(</span><span class="n">in_filename</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
+
+    <span class="n">created_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">used_files</span>    <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">in_filename</span><span class="p">)</span>
+
+    <span class="c1"># Do you processing...</span>
+    <span class="c1"># Everytime you generate a file, you need to append it to created_files</span>
+    <span class="c1"># Everytime you load an external file, you need to append it to used_files</span>
+
+    <span class="n">sf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_filename</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_filename</span><span class="p">,</span> <span class="n">created_files</span><span class="p">,</span> <span class="n">used_files</span>
+</pre></div>
+</div>
+<p>Sound files are read with <code class="xref py py-mod docutils literal notranslate"><span class="pre">soundfile</span></code>.</p>
+<p>Once your process function is ready, you need to add it to the <code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code> in
+<a class="reference internal" href="modules.html#module-vt_server_modules" title="vt_server_modules"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_modules</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">vt_module_toto</span> <span class="kn">import</span> <span class="n">process_toto</span>
+<span class="n">PATCH</span><span class="p">[</span><span class="s1">&#39;toto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_toto</span>
+</pre></div>
+</div>
+<p>Note that at the moment there is not automated way of inserting custom modules, so
+you need to edit <code class="file docutils literal notranslate"><span class="pre">vt_server_modules.py</span></code>. Keep that in mind when you update
+the VTServer.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="modules.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Etienne Gaudrain
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

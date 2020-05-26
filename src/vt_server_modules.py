@@ -2,15 +2,17 @@
 # coding: utf-8
 
 """
-``vt_server_modules``
-=====================
+vt_server_modules
+=================
 
 This module contains a number of ``process_...`` functions, imports
-the other process modules and defines the ``PATCH`` that dispatches
+the other process modules and defines the :py:data:`PATCH` that dispatches
 process module names to the right process function.
 
 .. Created on 2020-03-24.
 """
+
+#See :ref:`How to make a module` for details about how to implement your own module.
 
 import vt_server_config as vsc
 import vt_server_logging as vsl
@@ -20,14 +22,14 @@ import soundfile as sf
 import numpy as np
 import scipy, scipy.signal
 
-#: The ``PATCH`` is used to dispatch stack item modules to their corresponding function
+#: The :py:data:`PATCH` is used to dispatch stack item modules to their corresponding function
 PATCH = dict()
 
 #-------------------------------------------------------
 
 def process_time_reverse(in_filename, m, out_filename):
     """
-    ``time-reverse`` flips temporally the input. It doesn't take any argument.
+    `"time-reverse"` flips temporally the input. It doesn't take any argument.
     """
     x, fs = sf.read(in_filename)
     sf.write(out_filename, np.flip(x, axis=0), fs)
@@ -39,16 +41,16 @@ PATCH['time-reverse'] = process_time_reverse
 
 def process_mixin(in_filename, m, out_filename):
     """
-    ``mixin`` adds another sound file (B) to the input file (A). The arguments are:
+    `"mixin"` adds another sound file (B) to the input file (A). The arguments are:
 
-        * 'file': The file that needs to be added to the input file.
+    :param file: The file that needs to be added to the input file.
 
-        * 'levels': A 2-element array containing the gains in dB applied to the A and B.
+    :param levels: A 2-element array containing the gains in dB applied to the A and B.
 
-        * 'pad': A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
-          Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
+    :param pad: A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
+                Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
 
-        * 'align': 'left', 'center', or 'right'. When the two sounds files are not the same length,
+    :param align: 'left', 'center', or 'right'. When the two sounds files are not the same length,
           the shorter one will be padded so as to be aligned as described with the other one. This is
           applied after padding.
 
@@ -125,7 +127,7 @@ PATCH['mixin'] = process_mixin
 
 def process_pad(in_filename, m, out_filename):
     """
-    ``pad`` adds silence before and/or after the sound. It takes `'before'` and/or `'after'`
+    `"pad"` adds silence before and/or after the sound. It takes **before** and/or **after**
     as arguments, specifying the duration of silence in seconds.
     """
 
@@ -148,12 +150,12 @@ PATCH['pad'] = process_pad
 
 def process_ramp(in_filename, m, out_filename):
     """
-    ``ramp`` smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:
+    `"ramp"` smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:
 
-        * 'duration': in seconds. If a single number, it is applied to both onset and offset.
-          If a vector is given, then it specifies `[onset, offset]`. A value of zero means no ramp.
+    :param duration: In seconds. If a single number, it is applied to both onset and offset.
+      If a vector is given, then it specifies `[onset, offset]`. A value of zero means no ramp.
 
-        * 'shape': Either 'linear' (default) or 'cosine'.
+    :param shape: Either 'linear' (default) or 'cosine'.
 
     """
 

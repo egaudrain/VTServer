@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``vt_server_config``
-====================
+vt_server_config
+================
 
 VTServer configuration file management.
 
@@ -17,7 +17,7 @@ import vt_server_logging as vsl
 def find_configuration():
     """
     Attempts to find a configuration file in known places:
-    ``["/usr/local/etc/vt_server", "/etc/vt_server", "./"]``.
+    :file:`/usr/local/etc/vt_server`, :file:`/etc/vt_server`, :file:`./`.
     """
     filename = "vt_server.conf.json"
     possible_locations = ["/usr/local/etc/vt_server", "/etc/vt_server", "./"]

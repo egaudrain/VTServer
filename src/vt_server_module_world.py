@@ -2,8 +2,8 @@
 # coding: utf-8
 
 """
-``vt_server_module_world``
-==========================
+vt_server_module_world
+======================
 
 This module defines the *world* processor based on `pyworld <https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder>`_,
 a module wrapping `Morise's WORLD vocoder <https://github.com/mmorise/World>`_.
@@ -18,9 +18,9 @@ Here are some examples of module instructions:
         "vtl":    "-3.8st"
     }
 
-If a key is missing (here, ``duration``) it is considered as ``None``, which means this part is left unchanged.
+If a key is missing (here, **duration**) it is considered as ``None``, which means this part is left unchanged.
 
-``f0`` can take the following forms:
+**f0** can take the following forms:
 
     * ``*`` followed by a number, in which case it is multiplicating ratio applied to the
       whole f0 contour. For instance ``*2``.
@@ -31,14 +31,14 @@ If a key is missing (here, ``duration``) it is considered as ``None``, which mea
     * ``~`` followed by a number, followed by a unit (only ``Hz``). This will
       set the *average* f0 to the defined value.
 
-``vtl`` is defined similarly:
+**vtl** is defined similarly:
 
     * ``*`` represents a multiplier for the vocal-tract length. Beware, this is not a multiplier
       for the spectral envelope, but its inverse.
 
     * offsets are defined using the unit ``st`` only.
 
-``duration``:
+**duration**:
 
     * the ``*`` multiplier can also be used.
 
@@ -71,18 +71,28 @@ RE['duration'] = re.compile(r"([*+-~]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[e
 
 def check_arguments(mo, purpose):
     """
-    Receives an ``re`` match object from parsing module arguments and do some basic checking.
-    Return a tuple ``(args_ok, args)``. ``args_ok`` is True or False depending on whether
-    the argument is fine or not. ``args`` contains a dictionary with the parsed out argument:
+    Receives an :mod:`re` match object from parsing module arguments and do some basic checking.
 
-    ``v``
-        is the value as a float.
+    :param mo: The argument to parse.
+    :type mo:  re.Match
+    :param purpose: Purpose is `'f0'`, `'vtl'` or `'duration'`.
 
-    ``u``
-        is the unit for offsets, or None for ratios.
+    :return: A tuple of the form ``(args_ok, args)``: ``args_ok`` is True or False depending on whether
+             the argument is fine or not. ``args`` contains a dictionary with the parsed out argument:
 
-    ``~``
-        if ``True``, then it denotes an absolute (average) value instead of an offset.
+                `v`
+                    is the value as a float.
+
+                `u`
+                    is the unit for offsets, or None for ratios.
+
+                `~`
+                    if ``True``, then it denotes an absolute (average) value instead of an offset.
+
+
+
+
+
     """
 
     if mo is None:
@@ -141,18 +151,20 @@ def parse_arguments(m):
 
 def process_world(in_filename, m, out_filename):
     """
-    Processes the file ``in_filename`` according to options ``m``, and store results in ``out_filename``.
+    Processes the file **in_filename** according to parameters **m**, and stores results in **out_filename**.
 
     The first step is to analyse the sound file to extract its f0, spectral envelope and
     aperiodicity map. The results of this operation are cached in a pickle file.
 
-    The options for this module are:
+    The parameters for this module are:
 
-    * ``f0``: either an absolute f0 value in Hertz {### Hz}, a change in semitones {### st} or a ratio {* ###}.
+    :param f0: Either an absolute f0 value in Hertz ``{### Hz}``, a change in semitones ``{### st}`` or a ratio ``{\*###}``.
 
-    * ``vtl``: same for vocal-tract length (only semitones and ratio).
+    :param vtl: Same for vocal-tract length (only semitones and ratio).
 
-    * ``duration``: either an absolute duration in seconds {~###s}, an offset in seconds {+/-###s}, or a ratio {*###}.
+    :param duration: Either an absolute duration in seconds ``{~###s}``, an offset in seconds ``{+/-###s}``, or a ratio ``{\*###}``.
+
+    Just to be clear, these parameters must be keys of the dictionary **m**.
     """
 
     created_files = list()
