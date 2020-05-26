@@ -276,7 +276,7 @@ def parse_filterbank_method(method, freq, fs):
 
         if int(ord)!=ord:
             # The order is not integer anymore
-            raise ValueError("[vocoder] The filter order has to be an integer after taking into account potential double filtering (if zero-phase is true).")
+            raise ValueError("[vocoder] The filter order has to be an integer after taking into account potential double filtering if zero-phase is true ({} given, worked down to {}).".format(method['order'], ord))
 
         # Because we use bandpass, the order is doubled, so we need to divide by two again
         ord = ord / 2
