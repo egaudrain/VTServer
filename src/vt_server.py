@@ -33,7 +33,7 @@ class VTHandler(socketserver.StreamRequestHandler):
         file
           The sound file(s) that will be processed. This can be an array
           of files, in which case they are all processed and then concatenated. This
-          can also be a string where the files are separated with a pipe ``" >> "``
+          can also be a string where the files are separated with ``" >> "``
           (note that this includes a space before, and a space after).
 
         stack

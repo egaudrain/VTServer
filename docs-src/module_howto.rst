@@ -1,5 +1,6 @@
+********************
 How to make a module
-====================
+********************
 
 The VT Server functionality can be extended by creating new modules. This section
 gives some pointers on how to do just that.
@@ -63,7 +64,7 @@ Once your process function is ready, you need to add it to the :data:`PATCH` in
 :mod:`vt_server_modules`:
 
 .. code-block::
-    
+
     from vt_module_toto import process_toto
     PATCH['toto'] = process_toto
 

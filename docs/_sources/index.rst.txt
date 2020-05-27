@@ -9,8 +9,9 @@ This is the Voice Transformation Server's documentation.
 
 .. toctree::
 
-    modules
+    user_manual
     module_howto
+    modules
 
 .. Indices and tables
 .. ==================
