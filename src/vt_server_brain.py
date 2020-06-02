@@ -297,6 +297,7 @@ def multi_process(req):
             if req['format'] == 'mp3':
                 tmp_filename = os.path.join(vsc.CONFIG['cachefolder'], "M"+h+".wav")
                 sf.write(tmp_filename, y, fs)
+                job_info['created_files'].append(tmp_filename)
                 try:
                     encode_to_format(tmp_filename, out_filename, req['format'], req['format_options'])
                 except Exception as err:
@@ -386,9 +387,9 @@ def process_async(req, h, out_filename):
                     o = vsm.PATCH[m['module']](f, m, cache_filename)
                     if type(o) is tuple:
                         f = o[0]
-                        if len(o)>=3:
+                        if len(o)>=3 and o[2] is not None:
                             job_info['used_files'].extend(o[2])
-                        if len(o)>=2:
+                        if len(o)>=2 and o[1] is not None:
                             job_info['created_files'].extend(o[1])
                     else:
                         f = o
@@ -407,7 +408,7 @@ def process_async(req, h, out_filename):
                 pickle.dump(job_info, open(job_filename, "wb"))
                 return
         else:
-            err_msg = "Calling unknown module '%' while processing '%s'." % (m['module'], f)
+            err_msg = "Calling unknown module '%s' while processing '%s'." % (m['module'], f)
             j['out'] = 'error'
             j['details'] = err_msg
             j['finished'] = True

@@ -119,7 +119,7 @@ def process_mixin(in_filename, m, out_filename):
 
     sf.write(out_filename, y, fs)
 
-    return out_filename
+    return out_filename, None, m['file']
 
 PATCH['mixin'] = process_mixin
 

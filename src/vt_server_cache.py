@@ -41,15 +41,16 @@ put it in your crontab.
 import vt_server_config as vsc
 import vt_server_logging as vsl
 
-import os, pickle
+import os, pickle, time
 
-def delete_file(f, simulate):
+def delete_file(f, simulate, silent=False):
     if not simulate:
         try:
             os.remove(f)
             return True
         except Exception as err:
-            print(err)
+            if not silent:
+                print(err)
             return False
 
 def spooky_cleanup_cache(fold, simulate):
@@ -107,7 +108,7 @@ def cleanup_cache(fold=None, level=0, simulate=False):
             found_job_files.append(f.path)
             continue
 
-        if f.name.endswith(".flac") or f.name.endswith(".wav") or f.name.endswith(".aiff"):
+        if f.name.endswith(".flac") or f.name.endswith(".wav") or f.name.endswith(".aiff") or f.name.endswith(".mp3"):
 
             job_file = os.path.splitext(f.path)[0]+".job"
 
@@ -117,10 +118,12 @@ def cleanup_cache(fold=None, level=0, simulate=False):
                 print("Loaded job file "+job_file)
 
             except Exception as err:
-                print("%s: Job file not found or impossible to open. Deleting." % f.name)
-                delete_file(f.path, simulate)
+                st = f.stat()
+                if st.st_mtime < time.time() - 3600:
+                    print("%s: Job file not found or impossible to open and file is older than 1h. Deleting." % f.name)
+                    delete_file(f.path, simulate)
                 print("   Deleting the job file (if it existed) "+job_file)
-                delete_file(job_file, simulate)
+                delete_file(job_file, simulate, True)
 
             else:
                 if type(job['original_file'])==type([]):
