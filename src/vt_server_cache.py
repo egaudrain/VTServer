@@ -35,6 +35,17 @@ put it in your crontab.
                             from the cache.
       -s, --simulate        Will not do anything, but will show what it would do.
 
+The cache cleaning procedure is described below.
+
+.. image:: img/cache.png
+  :alt: Cache cleanup overview
+
+Note that the cache cleaning is not really optimal at the moment and cache may
+blow up. If you use level 0 as default you may have to run level 1 or 1996 once
+in a while to reset everything, although this blunt approach sort of defeats the
+purpose of having a cache.
+
+A better cache procedure will be developed in the future.
 
 """
 

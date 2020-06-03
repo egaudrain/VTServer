@@ -870,6 +870,13 @@ optional arguments:
   -s, --simulate        Will not do anything, but will show what it would do.
 </pre></div>
 </div>
+<p>The cache cleaning procedure is described below.</p>
+<img alt="Cache cleanup overview" src="_images/cache.png" />
+<p>Note that the cache cleaning is not really optimal at the moment and cache may
+blow up. If you use level 0 as default you may have to run level 1 or 1996 once
+in a while to reset everything, although this blunt approach sort of defeats the
+purpose of having a cache.</p>
+<p>A better cache procedure will be developed in the future.</p>
 <dl class="function">
 <dt id="vt_server_cache.cleanup_cache">
 <code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold=None</em>, <em class="sig-param">level=0</em>, <em class="sig-param">simulate=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.cleanup_cache" title="Permalink to this definition">¶</a></dt>
@@ -890,7 +897,7 @@ the directory structure).</p></li>
 
 <dl class="function">
 <dt id="vt_server_cache.delete_file">
-<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em>, <em class="sig-param">silent=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
