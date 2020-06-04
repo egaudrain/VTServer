@@ -430,6 +430,25 @@ If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of
 <dd><p><cite>“time-reverse”</cite> flips temporally the input. It doesn’t take any argument.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="vt_server_modules.ramp">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">ramp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">fs</em>, <em class="sig-param">dur</em>, <em class="sig-param">shape='cosine'</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p>The underlying function to the <cite>“ramp”</cite> processing module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The input sound.</p></li>
+<li><p><strong>fs</strong> – The sampling frequency.</p></li>
+<li><p><strong>dur</strong> – The duration of the ramps (a two-element iterable).</p></li>
+<li><p><strong>shape</strong> – The shape of the ramp (‘cosine’ or ‘linear’). Defaults to ‘cosine’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ramped sound.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <span class="target" id="module-vt_server_module_world"></span><div class="section" id="vt-server-module-world">
 <h2>vt_server_module_world<a class="headerlink" href="#vt-server-module-world" title="Permalink to this headline">¶</a></h2>

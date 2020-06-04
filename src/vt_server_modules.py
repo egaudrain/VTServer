@@ -148,6 +148,41 @@ PATCH['pad'] = process_pad
 
 #-------------------------------------------------------
 
+def ramp(x, fs, dur, shape='cosine'):
+    """
+    The underlying function to the `"ramp"` processing module.
+
+    :param x: The input sound.
+
+    :param fs: The sampling frequency.
+
+    :param dur: The duration of the ramps (a two-element iterable).
+
+    :param shape: The shape of the ramp ('cosine' or 'linear'). Defaults to 'cosine'.
+
+    :return: The ramped sound.
+    """
+
+    if dur[0] != 0:
+        n = int(fs*dur[0])
+        w = np.linspace(0,1,n)
+        if shape=='cosine':
+            w = (1-np.cos(w*np.pi))/2
+        if len(x.shape)>1:
+            w = np.tile(w, (1,x.shape[1]))
+        x[0:n] = x[0:n] * w
+
+    if dur[1] != 0:
+        n = int(fs*dur[1])
+        w = np.linspace(1,0,n)
+        if shape=='cosine':
+            w = (1-np.cos(w*np.pi))/2
+        if len(x.shape)>1:
+            w = np.tile(w, (1,x.shape[1]))
+        x[-n:] = x[-n:] * w
+
+    return x
+
 def process_ramp(in_filename, m, out_filename):
     """
     `"ramp"` smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:
@@ -168,23 +203,7 @@ def process_ramp(in_filename, m, out_filename):
     if m['shape'] not in ['linear', 'cosine']:
         raise ValueError("[ramp] Shape is not recognized (%s given)." % repr(m['shape']))
 
-    if dur[0] != 0:
-        n = int(fs*dur[0])
-        w = np.linspace(0,1,n)
-        if m['shape']=='cosine':
-            w = (1-np.cos(w*np.pi))/2
-        if len(x.shape)>1:
-            w = np.tile(w, (1,x.shape[1]))
-        x[0:n] = x[0:n] * w
-
-    if dur[1] != 0:
-        n = int(fs*dur[1])
-        w = np.linspace(1,0,n)
-        if m['shape']=='cosine':
-            w = (1-np.cos(w*np.pi))/2
-        if len(x.shape)>1:
-            w = np.tile(w, (1,x.shape[1]))
-        x[-n:] = x[-n:] * w
+    x = ramp(x, fs, dur, m['shape'])
 
     sf.write(out_filename, x, fs)
 
