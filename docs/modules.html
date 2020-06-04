@@ -370,6 +370,40 @@ current <a class="reference internal" href="#vt_server_brain.process_async" titl
 </dd></dl>
 
 </div>
+<span class="target" id="module-vt_server_common_tools"></span><dl class="function">
+<dt id="vt_server_common_tools.clipping_prevention">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">clipping_prevention</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.clipping_prevention" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_common_tools.ramp">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">ramp</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">fs</em>, <em class="sig-param">dur</em>, <em class="sig-param">shape='cosine'</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.ramp" title="Permalink to this definition">¶</a></dt>
+<dd><p>The underlying function to the <cite>“ramp”</cite> processing module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The input sound.</p></li>
+<li><p><strong>fs</strong> – The sampling frequency.</p></li>
+<li><p><strong>dur</strong> – The duration of the ramps (a two-element iterable).</p></li>
+<li><p><strong>shape</strong> – The shape of the ramp (‘cosine’ or ‘linear’). Defaults to ‘cosine’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ramped sound.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_common_tools.rms">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">rms</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.rms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_common_tools.signature">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">signature</code><span class="sig-paren">(</span><em class="sig-param">desc</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <span class="target" id="module-vt_server_modules"></span><div class="section" id="vt-server-modules">
 <h2>vt_server_modules<a class="headerlink" href="#vt-server-modules" title="Permalink to this headline">¶</a></h2>
 <p>This module contains a number of <code class="docutils literal notranslate"><span class="pre">process_...</span></code> functions, imports

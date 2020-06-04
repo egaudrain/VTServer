@@ -14,6 +14,11 @@ Source documentation
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: vt_server_common_tools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: vt_server_modules
     :members:
     :undoc-members:
