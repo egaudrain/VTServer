@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+"""
+vt_server_common_tools
+======================
+
+This module contains function that may be useful across other VTServer modules.
+
+"""
+
 import pickle, hashlib
 import numpy as np
 
