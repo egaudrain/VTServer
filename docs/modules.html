@@ -1,39 +1,43 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Source documentation &mdash; VT Server  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="How to make a module" href="module_howto.html" /> 
@@ -73,6 +77,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -111,6 +116,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -145,18 +151,20 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Source documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -307,6 +315,11 @@ and remove them from the list.</p>
 <dd><p>This is the list of current jobs (actually a managed dict).</p>
 </dd></dl>
 
+<dl class="data">
+<dt id="vt_server_brain.JOB_JANITOR">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">JOB_JANITOR</code><em class="property"> = None</em><a class="headerlink" href="#vt_server_brain.JOB_JANITOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="class">
 <dt id="vt_server_brain.Janitor">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">Janitor</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor" title="Permalink to this definition">¶</a></dt>
@@ -331,6 +344,11 @@ process that is finished and needs removing.</p>
 
 </dd></dl>
 
+<dl class="data">
+<dt id="vt_server_brain.N_REQUESTS">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">N_REQUESTS</code><em class="property"> = 0</em><a class="headerlink" href="#vt_server_brain.N_REQUESTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="vt_server_brain.encode_to_format">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">encode_to_format</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">out_filename</em>, <em class="sig-param">fmt</em>, <em class="sig-param">fmt_options</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.encode_to_format" title="Permalink to this definition">¶</a></dt>
@@ -340,6 +358,11 @@ process that is finished and needs removing.</p>
 <dl class="function">
 <dt id="vt_server_brain.job_signature">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">job_signature</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.job_signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
+<dt id="vt_server_brain.manager">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">manager</code><em class="property"> = &lt;multiprocessing.managers.SyncManager object&gt;</em><a class="headerlink" href="#vt_server_brain.manager" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -544,6 +567,11 @@ is useful if you want to use cubic-splines.</p>
 
 </dd></dl>
 
+<dl class="data">
+<dt id="vt_server_module_world.RE">
+<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">RE</code><em class="property"> = {'duration': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(s)?'), 'f0': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(Hz|st)?'), 'vtl': re.compile('([*+-]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(st)?')}</em><a class="headerlink" href="#vt_server_module_world.RE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="vt_server_module_world.check_arguments">
 <code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">check_arguments</code><span class="sig-paren">(</span><em class="sig-param">mo</em>, <em class="sig-param">purpose</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_world.check_arguments" title="Permalink to this definition">¶</a></dt>
@@ -621,7 +649,8 @@ a MATLAB vocoder designed to be highly programmable.</p>
         <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;low-pass&quot;</span><span class="p">,</span>
         <span class="nt">&quot;rectify&quot;</span><span class="p">:</span> <span class="s2">&quot;half-wave&quot;</span><span class="p">,</span>
         <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="nt">&quot;fc&quot;</span><span class="p">:</span> <span class="mi">160</span>
+        <span class="nt">&quot;fc&quot;</span><span class="p">:</span> <span class="mi">160</span><span class="p">,</span>
+        <span class="nt">&quot;modifier&quot;</span><span class="p">:</span> <span class="s2">&quot;spread&quot;</span>
         <span class="p">},</span>
     <span class="nt">&quot;synthesis&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;carrier&quot;</span><span class="p">:</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span>
@@ -719,6 +748,13 @@ the envelope is extracted with a zero-phase filter.</p>
 <dt>fc</dt><dd><p>The cutoff of the envelope extraction in Hertz. Can be a single
 value or a value per channel.</p>
 </dd>
+<dt>modifier</dt><dd><p><cite>[optional]</cite> A (list of) modifier function names that can be
+applied to envelope matrix.
+At the moment, only <cite>“spread”</cite> is implemented. With this modifier,
+the synthesis filters are used to simulate a spread of excitation
+on the envelope levels themselves. This is useful when the carrier
+is a sinewave (see Crew et al., 2012, JASA).</p>
+</dd>
 </dl>
 </div></blockquote>
 </dd>
@@ -751,10 +787,20 @@ attribute <cite>f</cite> is provided, in which case it defines the frequencies.<
 <div class="section" id="content">
 <h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
+<dt id="vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">ENVELOPE_MODIFIER_PATCH</code><em class="property"> = {'spread': &lt;function envelope_modifier_spread&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="data">
 <dt id="vt_server_module_vocoder.FB_PRESETS">
 <code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FB_PRESETS</code><em class="property"> = {'ci24': [188, 313, 438, 563, 688, 813, 938, 1063, 1188, 1313, 1563, 1813, 2063, 2313, 2688, 3063, 3563, 4063, 4688, 5313, 6063, 6938, 7938], 'hr90k': [250, 416, 494, 587, 697, 828, 983, 1168, 1387, 1648, 1958, 2326, 2762, 3281, 3898, 4630, 8700]}</em><a class="headerlink" href="#vt_server_module_vocoder.FB_PRESETS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Presets for manufacturers’ filterbanks.</p>
 </dd></dl>
+
+<dl class="data">
+<dt id="vt_server_module_vocoder.FILTER_FUNCTION_PATCH">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FILTER_FUNCTION_PATCH</code><em class="property"> = {'sosfilt': &lt;function sosfilt&gt;, 'sosfiltfilt': &lt;function sosfiltfilt&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.FILTER_FUNCTION_PATCH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_module_vocoder.env_hilbert">
@@ -764,6 +810,11 @@ attribute <cite>f</cite> is provided, in which case it defines the frequencies.<
 <dl class="function">
 <dt id="vt_server_module_vocoder.env_lowpass">
 <code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">env_lowpass</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">rectif</em>, <em class="sig-param">filter</em>, <em class="sig-param">filter_function</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.env_lowpass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_vocoder.envelope_modifier_spread">
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">envelope_modifier_spread</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">m</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.envelope_modifier_spread" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -855,6 +906,11 @@ options.</p>
 <span class="target" id="module-vt_server_logging"></span><div class="section" id="vt-server-logging">
 <h2>vt_server_logging<a class="headerlink" href="#vt-server-logging" title="Permalink to this headline">¶</a></h2>
 <p>VTServer logging facilities.</p>
+<dl class="data">
+<dt id="vt_server_logging.LOG">
+<code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">LOG</code><em class="property"> = &lt;Logger VTServer (DEBUG)&gt;</em><a class="headerlink" href="#vt_server_logging.LOG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="class">
 <dt id="vt_server_logging.VTServerLogFormatter">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">VTServerLogFormatter</code><a class="headerlink" href="#vt_server_logging.VTServerLogFormatter" title="Permalink to this definition">¶</a></dt>
@@ -952,27 +1008,28 @@ the directory structure).</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2020, Etienne Gaudrain
+        &#169; Copyright 2020, Etienne Gaudrain.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -980,7 +1037,6 @@ the directory structure).</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

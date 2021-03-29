@@ -24,7 +24,8 @@ Here is and example of module instructions:
             "method": "low-pass",
             "rectify": "half-wave",
             "order": 2,
-            "fc": 160
+            "fc": 160,
+            "modifier": "spread"
             },
         "synthesis": {
             "carrier": "sin",
@@ -133,6 +134,14 @@ That specifies how the envelope is extracted.
                 The cutoff of the envelope extraction in Hertz. Can be a single
                 value or a value per channel.
 
+            modifier
+                `[optional]` A (list of) modifier function names that can be
+                applied to envelope matrix.
+                At the moment, only `"spread"` is implemented. With this modifier,
+                the synthesis filters are used to simulate a spread of excitation
+                on the envelope levels themselves. This is useful when the carrier
+                is a sinewave (see Crew et al., 2012, JASA).
+
 
 synthesis
 ---------
@@ -174,8 +183,13 @@ import time, os, re, pickle, collections
 
 import numpy as np
 from scipy import signal
+from scipy import fftpack
 
 import soundfile as sf
+
+#-------------
+# Filterbank
+#-------------
 
 #: Presets for manufacturers' filterbanks.
 FB_PRESETS = {
@@ -209,7 +223,7 @@ def parse_frequency_array(fa):
     if isinstance(fa, (str, bytes)) and fa in FB_PRESETS.keys():
         return np.array(FB_PRESETS[fa])
 
-    elif isinstance(fa, list):
+    elif isinstance(fa, list) or isinstance(fa, np.ndarray):
         if all(isinstance(x, (int, float)) for x in fa):
             return np.array(fa)
         else:
@@ -313,6 +327,42 @@ def parse_filterbank_definition(fbd, fs):
 
     return fbd
 
+FILTER_FUNCTION_PATCH = {'sosfilt': signal.sosfilt, 'sosfiltfilt': signal.sosfiltfilt}
+
+#-------------
+# Envelope
+#-------------
+
+def env_hilbert(x):
+    return abs(signal.hilbert(x, fftpack.next_fast_len(len(x)))[:len(x)])
+    #return abs(signal.hilbert(x))
+
+def env_lowpass(x, rectif, filter, filter_function):
+    return np.fmax( filter_function(filter, rectif(x)), 0)
+
+def envelope_modifier_spread(env, m):
+
+    #env = np.array(env)
+    nt = len(env[0])
+    new_env = np.zeros((len(env), nt))
+
+    if m['synthesis']['carrier']!='sin':
+        raise ValueError("[vocoder] Envelope modifier 'spread' only works with sinewave carriers.")
+
+    f = m['synthesis']['f']
+    nf = len(f)
+
+    for i, e in enumerate(env):
+        _, h = signal.sosfreqz(m['synthesis_filters']['filters'][i], worN=f, whole=False, fs=m['fs'])
+        h = np.abs(h)
+        if m['synthesis_filters']['method']['zero-phase']:
+            h = h**2.
+        new_env += np.tile(h.reshape(-1,1), (1, nt)) * np.tile(e.reshape(1,-1), (nf, 1))
+
+    return new_env
+
+ENVELOPE_MODIFIER_PATCH = { 'spread': envelope_modifier_spread }
+
 def parse_envelope_definition(env_def, fs):
     """
     Parses an envelope definition.
@@ -320,6 +370,20 @@ def parse_envelope_definition(env_def, fs):
 
     if 'method' not in env_def:
         raise ValueError("[vocoder] Envelope definition needs a 'method' attribute: %s." % repr(env_def))
+
+    # Optional arguments
+    if ('modifier' not in env_def) or (env_def['modifier'] is None):
+        env_def['modifier'] = list()
+    elif isinstance(env_def['modifier'], str) or callable(env_def['modifier']):
+        env_def['modifier'] = [env_def['modifier']]
+
+    for i, mo in enumerate(env_def['modifier']):
+        if callable(mo):
+            pass
+        elif mo not in ENVELOPE_MODIFIER_PATCH.keys():
+            raise ValueError("[vocoder] Envelope modifier is not known: %s." % repr(mo))
+        else:
+            env_def['modifier'][i] = ENVELOPE_MODIFIER_PATCH[mo]
 
     if env_def['method'] == 'low-pass':
         for mk in ['order', 'fc', 'rectify']:
@@ -333,13 +397,17 @@ def parse_envelope_definition(env_def, fs):
         env_def['filter'] = signal.butter(ord, env_def['fc'], 'lowpass', analog=False, fs=fs, output='sos')
         env_def['filter_function'] = 'sosfiltfilt'
 
-    elif enve_def['method'] == 'hilbert':
+    elif env_def['method'] == 'hilbert':
         pass
 
     else:
         raise ValueError("[vocoder] The envelope definition method is unknown: %s." % (repr(env_def)))
 
     return env_def
+
+#-------------
+# Carrier
+#-------------
 
 def parse_carrier_definition(carrier, synth_fbd):
     """
@@ -356,15 +424,21 @@ def parse_carrier_definition(carrier, synth_fbd):
         carrier['filter_after'] = True
 
     if carrier['carrier'] == 'noise':
-        carrier['initial_random_state'] = np.random.get_state() # We will return the random generator to its previous state
         if 'random_seed' not in carrier:
             carrier['random_seed'] = None
+            carrier['initial_random_state'] = None
+        else:
+            carrier['initial_random_state'] = np.random.get_state() # We will return the random generator to its previous state
 
     elif carrier['carrier'] == 'sin':
         if 'f' not in carrier:
             carrier['f'] = np.sqrt( synth_fbd['f'][0:-1] * synth_fbd['f'][1:] )
 
     return carrier
+
+#-------------
+# General
+#-------------
 
 def parse_arguments(m, in_filename):
     """
@@ -407,14 +481,6 @@ def parse_arguments(m, in_filename):
 
     return m
 
-FILTER_FUNCTION_PATCH = {'sosfilt': signal.sosfilt, 'sosfiltfilt': signal.sosfiltfilt}
-
-def env_hilbert(x):
-    return abs(signal.hilbert(x))
-
-def env_lowpass(x, rectif, filter, filter_function):
-    return np.fmax( filter_function(filter, rectif(x)), 0)
-
 def process_vocoder(in_filename, m, out_filename):
     """
     The main processing function for the module.
@@ -453,22 +519,32 @@ def process_vocoder(in_filename, m, out_filename):
         # Note: we keep this in the loop. For stereo file, if no seed is given, the two
         # ears will be different. To have correlated noise across ears, pass a (random) seed.
         if m['synthesis']['carrier']=='noise':
-            np.random.seed( m['synthesis']['random_seed'] )
+            if m['synthesis']['random_seed'] is not None:
+                np.random.seed( m['synthesis']['random_seed'] )
             carrier = np.random.uniform(-.98, .98, x.shape[0])
             sin_carrier = False
         elif m['synthesis']['carrier']=='sin':
             t = np.arange(x.shape[0])/fs
             sin_carrier = True
 
+        x_band = [None]*n_bands
+        x_band_rms = [None]*n_bands
+
         for i_band in range(n_bands):
 
             # Bandpass each band
-            x_band = a_filter(m['analysis_filters']['filters'][i_band], x[:, i_channel])
-            x_band_rms = vsct.rms(x_band)
+            x_band[i_band] = a_filter(m['analysis_filters']['filters'][i_band], x[:, i_channel])
+            x_band_rms[i_band] = vsct.rms(x_band[i_band])
 
             # Extracting the envelope
-            x_band = env(x_band)
+            x_band[i_band] = env(x_band[i_band])
 
+        # Here goes envelope modifiers
+        if m['envelope']['modifier'] is not None:
+            for mo in m['envelope']['modifier']:
+                x_band = mo(x_band, m)
+
+        for i_band in range(n_bands):
             # Generating the carrier
             if sin_carrier:
                 carrier = np.sin(2*np.pi*m['synthesis']['f'][i_band]*t)
@@ -478,17 +554,17 @@ def process_vocoder(in_filename, m, out_filename):
             else:
                 carr = carrier
 
-            x_band = x_band * carr
+            x_band[i_band] = x_band[i_band] * carr
 
             if m['synthesis']['filter_after']:
-                x_band = s_filter(m['synthesis_filters']['filters'][i_band], x_band)
+                x_band[i_band] = s_filter(m['synthesis_filters']['filters'][i_band], x_band[i_band])
 
             # Restoring RMS:
-            x_band = x_band / vsct.rms(x_band) * x_band_rms
+            x_band[i_band] = x_band[i_band] / vsct.rms(x_band[i_band]) * x_band_rms[i_band]
 
-            y[:,i_channel] += x_band
+            y[:,i_channel] += x_band[i_band]
 
-    if m['synthesis']['carrier'] == 'noise':
+    if m['synthesis']['carrier'] == 'noise' and m['synthesis']['initial_random_state'] is not None:
         np.random.set_state(m['synthesis']['initial_random_state'])
 
     y, s = vsct.clipping_prevention(y)
@@ -558,32 +634,53 @@ if __name__=="__main__":
         "fs": 44100,
         "analysis_filters": {
             "f": { "fmin": 100, "fmax": 8000, "n": 16, "scale": "greenwood" },
-            "method": { "family": "butterworth", "order": 6, "zero-phase": True }
+            "method": { "family": "butterworth", "order": 24, "zero-phase": True }
             },
-        "synthesis_filters": "analysis_filters",
+        "synthesis_filters": {
+            "f": { "fmin": 100, "fmax": 8000, "n": 16, "scale": "greenwood" },
+            "method": { "family": "butterworth", "order": 4, "zero-phase": True }
+            },
         "envelope": {
             "method": "low-pass",
             "rectify": "half-wave",
             "order": 2,
-            "fc": 160
+            "fc": 50,
+            "modifier": "spread"
             },
         "synthesis": {
-            "carrier": "noise",
+            "carrier": "sin",
             "filter_before": False,
             "filter_after": True
             }
     }
     #in_file  = "test/Beer.wav"
     #out_file = "test/Beer_test_cubic.wav"
-    in_file  = "../test/Man480.wav"
-    out_file = "../test/Man480_vocoded.wav"
+    in_file  = "./test/BKB1a1.wav"
+    out_file = "./test/BKB1a1_vocoded.wav"
     print("Starting to process files...")
-    vsl.LOG.debug("Starting to process files...")
+    vsl.LOG.debug("Starting to process file...")
 
     t0 = time.time()
-
     f = process_vocoder(in_file, m, out_file)
-
     print("Well, it took %.2f ms" % ((time.time()-t0)*1e3))
+    print(f)
 
+    # Creating a test file with tones
+    fs = m['fs']
+    f  = m['analysis_filters']['f']
+    cf = np.exp(np.log(f[:-1])+np.diff(np.log(f))/2)
+    d  = int(fs*.2)
+    t  = np.arange(d)/fs
+    x  = list()
+    for f in cf:
+        x.extend(vsct.ramp(.5*np.sin(2*np.pi*f*t), fs, [50e-3, 50e-3]))
+    sf.write('./test/step_chirps.wav', x, fs)
+
+    in_file  = "./test/step_chirps.wav"
+    out_file = "./test/step_chirps_vocoded.wav"
+    print("Starting to process file...")
+
+    t0 = time.time()
+    f = process_vocoder(in_file, m, out_file)
+    print("Well, it took %.2f ms" % ((time.time()-t0)*1e3))
     print(f)
