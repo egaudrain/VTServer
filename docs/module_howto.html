@@ -1,43 +1,39 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>How to make a module &mdash; VT Server  documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Source documentation" href="modules.html" />
@@ -78,7 +74,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,14 +83,17 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_manual.html">User manual</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How to make a module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to make a module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cache-management">Cache management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#naming-convention">Naming convention</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Source documentation</a></li>
 </ul>
 
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -130,20 +128,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>How to make a module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/module_howto.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -162,7 +158,7 @@
 <p>The VT Server functionality can be extended by creating new modules. This section
 gives some pointers on how to do just that.</p>
 <p>The basic principle is pretty straightforward. If we were writing a module called
-<cite>toto</cite>, we would have to define a function with the following signature:</p>
+“toto”, we would have to define a function with the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_toto</span><span class="p">(</span><span class="n">in_filename</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
     <span class="o">...</span>
     <span class="k">return</span> <span class="n">out_filename</span>
@@ -179,45 +175,50 @@ the module in a query.</p>
 for writing the file down once the processing is finished.</p>
 </dd>
 </dl>
+<p>The first step should be to write some code to parse the module’s parameters. Keep in mind
+that the query results are cached: if the same query is sent again, it will not even be sent to
+your function, but will be picked-up by the <a class="reference internal" href="modules.html#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a> before that. If your processing
+contains random elements that need to be regenerated everytime, you should add a random seed as
+parameter in your queries, and make sure to set the <cite>cache</cite> directive to a short enough value.</p>
+<div class="section" id="cache-management">
+<h2>Cache management<a class="headerlink" href="#cache-management" title="Permalink to this headline">¶</a></h2>
 <p>When writing a module, you don’t need to worry about caching results of queries.
 This is managed by the <a class="reference internal" href="modules.html#module-vt_server_brain" title="vt_server_brain"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_brain</span></code></a>. In other words, the job of the module
 process function is just to read the input file, apply the modifications you need
 to apply to the sound based on the parameters, and then save the result in <strong>out_filename</strong>.</p>
 <p>The function also returns <strong>out_filename</strong>. However, if you need to generate any
-intermediary files you will need to report that back as well. This is the case,
-for instance, for the <cite>world</cite> module where the result of the analysis phase is saved
-in a file so that only synthesis needs to be done for new voice parameters. We need
-to report these files to the brain so that the cache clean-up routines can handle
-these files properly. Similarly, if the generation relies other external files, they
-need to be listed. When this is the case, the return signature is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">soundfile</span> <span class="k">as</span> <span class="nn">sf</span>
-
-<span class="k">def</span> <span class="nf">process_toto</span><span class="p">(</span><span class="n">in_filename</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">out_filename</span><span class="p">):</span>
-
-    <span class="n">created_files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">used_files</span>    <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-
-    <span class="n">x</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">in_filename</span><span class="p">)</span>
-
-    <span class="c1"># Do you processing...</span>
-    <span class="c1"># Everytime you generate a file, you need to append it to created_files</span>
-    <span class="c1"># Everytime you load an external file, you need to append it to used_files</span>
-
-    <span class="n">sf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_filename</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fs</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">out_filename</span><span class="p">,</span> <span class="n">created_files</span><span class="p">,</span> <span class="n">used_files</span>
-</pre></div>
-</div>
+intermediary files you will need handle caching of these files yourself. To that purpose,
+you need to create a job-file for every file that you generate and that is meant
+to remain on the server for some time. Use the <a class="reference internal" href="modules.html#vt_server_common_tools.job_file" title="vt_server_common_tools.job_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_common_tools.job_file()</span></code></a> function, in the
+<a class="reference internal" href="modules.html#module-vt_server_common_tools" title="vt_server_common_tools"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_common_tools</span></code></a> module, for that purpose.</p>
+<p>An example of this can be found in the <cite>world</cite> module where the result of the analysis
+phase is saved in a file so that only synthesis needs to be done for new voice parameters.
+We need to create a job file so that the cache clean-up routines can handle
+these files properly.</p>
 <p>Sound files are read with <code class="xref py py-mod docutils literal notranslate"><span class="pre">soundfile</span></code>.</p>
-<p>Once your process function is ready, you need to add it to the <code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code> in
-<a class="reference internal" href="modules.html#module-vt_server_modules" title="vt_server_modules"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_modules</span></code></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">vt_module_toto</span> <span class="k">import</span> <span class="n">process_toto</span>
-<span class="n">PATCH</span><span class="p">[</span><span class="s1">&#39;toto&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_toto</span>
+</div>
+<div class="section" id="naming-convention">
+<h2>Naming convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h2>
+<p>The process function and you module file must follow a specific naming convention
+to be automatically discovered by the server once placed in the server directory.</p>
+<p>The module must be named <cite>vt_server_module_</cite><em>name</em><cite>.py</cite> and the process function to be called must be named
+<cite>process_</cite><em>name</em>.</p>
+<p>For example, if your module is called “toto”, the module file will be called
+<cite>vt_server_module_toto.py</cite> and the process function will be called <cite>process_toto</cite>.</p>
+<p>With this convention, the module can be called in a query with the name “toto”:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/toto/audio/Beer.wav&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;toto&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;param1&quot;</span><span class="p">:</span> <span class="s2">&quot;blahdiblah&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>Note that at the moment there is not automated way of inserting custom modules, so
-you need to edit <code class="file docutils literal notranslate"><span class="pre">vt_server_modules.py</span></code>. Keep that in mind when you update
-the VTServer.</p>
+</div>
 </div>
 
 
@@ -225,29 +226,29 @@ the VTServer.</p>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="modules.html" class="btn btn-neutral float-right" title="Source documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="user_manual.html" class="btn btn-neutral float-left" title="User manual" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="Source documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="user_manual.html" class="btn btn-neutral float-left" title="User manual" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Etienne Gaudrain.
+        &copy; Copyright 2021, Etienne Gaudrain
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -255,6 +256,7 @@ the VTServer.</p>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

@@ -55,8 +55,8 @@ To get some information about the server, send:
 { "action": "status" }
 ```
 
-Installation
-------------
+Installation as a daemon on Ubuntu Linux
+----------------------------------------
 
 The server is written for Python 3.5+.
 
@@ -75,12 +75,18 @@ Before running the server you will need to install external dependencies:
 $ sudo -H pip3 install numpy scipy pysoundfile pyworld systemd
 ```
 
-I wrote an install script for Linux Debian-based systems like Ubuntu. Just run `install.ubuntu.sh` and it should
+Then, download the repository, e.g.:
+
+```
+$ git clone https://github.com/egaudrain/VTServer.git
+```
+
+In there, there is an install script for Debian-based systems like Ubuntu that rely on systemd. Just run `install.ubuntu.sh` and it should
 do everything that's needed. Note that this is a very rudimentary script. It will install everything necessary in
 `/usr/local/lib/vt_server`. Once installed, the server runs as user ``vt_server``.
 
 The configuration for the server can be found in `/usr/local/etc/vt_server/vt_server.conf.json`. Watchout
-if you modify the cache folder, make sure that the folder exists and that the user `vt_serve` has read/write
+if you modify the cache folder, make sure that the folder exists and that the user `vt_server` has read/write
 access to it.
 
 To use 'mp3' as an output format, you need to install [LAME](https://lame.sourceforge.io/):

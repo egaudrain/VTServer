@@ -119,7 +119,7 @@ def process_mixin(in_filename, m, out_filename):
 
     sf.write(out_filename, y, fs)
 
-    return out_filename, None, m['file']
+    return out_filename
 
 PATCH['mixin'] = process_mixin
 
@@ -177,11 +177,29 @@ def process_ramp(in_filename, m, out_filename):
 PATCH['ramp'] = process_ramp
 
 #-------------------------------------------------------
+# Look for modules in the same folder:
+def discover_modules():
 
-from vt_server_module_world import process_world
-PATCH['world']        = process_world
+    from glob import glob
+    from importlib import import_module
+    import os
 
-#-------------------------------------------------------
+    here = os.path.dirname(os.path.abspath(__file__))
 
-from vt_server_module_vocoder import process_vocoder
-PATCH['vocoder']      = process_vocoder
+    vsl.LOG.info("Looking for modules in %s" % here)
+
+    lst = glob(os.path.join(here, "vt_server_module_*.py"))
+    for m in lst:
+        mod_name, _ = os.path.splitext(os.path.basename(m))
+        mod_label = mod_name.replace("vt_server_module_", "", 1)
+        mod_process_name = "process_"+mod_label
+        try:
+            mo = import_module(mod_name)
+            mod_process = getattr(mo, mod_process_name)
+            PATCH[mod_label] = mod_process
+            vsl.LOG.info("Found module %s providing handler %s for keyword '%s'" % (mod_name, mod_process_name, mod_label))
+        except Exception as e:
+            vsl.LOG.error("Error while attempting importation of module %s:\n%s" % (m, e))
+
+
+    vsl.LOG.info("The available modules are now: "+(", ".join(PATCH.keys())))

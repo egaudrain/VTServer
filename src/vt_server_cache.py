@@ -30,8 +30,7 @@ put it in your crontab.
       -l LEVEL, --level LEVEL
                             Level of cleansing [default 0]. 0 will remove all
                             files created by jobs that are related to files that
-                            do not exist anymore. 1 will also remove files that
-                            were used in the process. 1996 will remove *ALL* files
+                            do not exist anymore. 1996 will remove *ALL* files
                             from the cache.
       -s, --simulate        Will not do anything, but will show what it would do.
 
@@ -40,21 +39,21 @@ The cache cleaning procedure is described below.
 .. image:: img/cache.png
   :alt: Cache cleanup overview
 
-Note that the cache cleaning is not really optimal at the moment and cache may
-blow up. If you use level 0 as default you may have to run level 1 or 1996 once
-in a while to reset everything, although this blunt approach sort of defeats the
-purpose of having a cache.
-
-A better cache procedure will be developed in the future.
-
 """
 
 import vt_server_config as vsc
-import vt_server_logging as vsl
+#import vt_server_logging as vsl
 
-import os, pickle, time
+import os, pickle, time, datetime
 
-def delete_file(f, simulate, silent=False):
+def delete_file(f, simulate, cache_folder=None, silent=False, indent=0):
+
+    if cache_folder is not None:
+        fn = f.replace(cache_folder, '{cache}', 1)
+    else:
+        fn = f
+
+    print("   "+("   "*indent)+"[Deleting] "+fn)
     if not simulate:
         try:
             os.remove(f)
@@ -64,15 +63,19 @@ def delete_file(f, simulate, silent=False):
                 print(err)
             return False
 
-def spooky_cleanup_cache(fold, simulate):
+def spooky_cleanup_cache(fold, simulate, indent=0, cache_folder=None):
+
+    if cache_folder is None:
+        cache_folder = fold
+
     try:
         lst = os.scandir(fold)
+        print(("   "*indent)+fold+"/")
         for f in lst:
             if f.is_dir():
-                spooky_cleanup_cache(f.path, simulate)
+                spooky_cleanup_cache(f.path, simulate, indent+1, cache_folder)
             else:
-                print("Deleting "+f.path)
-                delete_file(f.path, simulate)
+                delete_file(f.path, simulate, cache_folder, False, indent)
         return 0
     except Exception as err:
         print(err)
@@ -91,91 +94,101 @@ def cleanup_cache(fold=None, level=0, simulate=False):
       any more, all files listed as "created" are deleted. The final sound file
       (or symlinks) created are deleted as well as the job file.
 
-    * 1 is slightly more aggressive, where all files that are "created" or "used"
-      will be deleted.
-
     * 1996 will make your cache spooky clean by eliminating all files (but preserving
       the directory structure).
 
     """
 
+    if simulate:
+        print("\n!! We are simulating !!\n")
+
     if fold is None:
         fold = vsc.CONFIG['cachefolder']
 
+    fold = os.path.abspath(fold)
+
+    print("Scanning cache folder [%s]...\n" % fold)
+
     if level>=1996:
+        print("We are running in SPOOKY CLEAN mode!\n")
         return spooky_cleanup_cache(fold, simulate)
 
-
-    lst = os.scandir(fold)
+    # lst = os.scandir(fold)
 
     found_job_files = list()
     scanned_job_files = list()
 
-    for f in lst:
-        if f.is_dir():
-            continue
+    for root, dirs, files in os.walk(fold):
 
-        if f.name.endswith(".job"):
-            found_job_files.append(f.path)
-            continue
+        for fn in files:
 
-        if f.name.endswith(".flac") or f.name.endswith(".wav") or f.name.endswith(".aiff") or f.name.endswith(".mp3"):
+            f = os.path.join(root, fn)
+            fe, ext = os.path.splitext(f)
 
-            job_file = os.path.splitext(f.path)[0]+".job"
-
-            try:
-                scanned_job_files.append(job_file)
-                job = pickle.load(open(job_file, "rb"))
-                print("Loaded job file "+job_file)
-
-            except Exception as err:
-                st = f.stat()
-                if st.st_mtime < time.time() - 3600:
-                    print("%s: Job file not found or impossible to open and file is older than 1h. Deleting." % f.name)
-                    delete_file(f.path, simulate)
-                print("   Deleting the job file (if it existed) "+job_file)
-                delete_file(job_file, simulate, True)
-
+            if ext == ".job":
+                found_job_files.append(f)
+                continue
             else:
-                if type(job['original_file'])==type([]):
-                    all_there = True
-                    for f in job['original_file']:
-                        all_there &= os.path.exists(f)
-                    if all_there:
-                        print("   Original files for job %s still exist. Skipping." % job['original_file'])
-                        continue
 
-                elif os.path.exists(job['original_file']):
-                    # The original file still exists, we do nothing
-                    print("   Original file for job %s still exist. Skipping." % job['original_file'])
-                    continue
+                print("%s:" % f.replace(fold, '{cache}', 1))
 
-                # Some files are missing
+                job_file = fe+".job"
+
                 try:
-                    for cf in job['created_files']:
-                        print("   Deleting created file " + cf)
-                        delete_file(cf, simulate)
-
-                    if level>=1:
-                        for uf in job['used_files']:
-                            print("   Deleting used file " + uf)
-                            delete_file(uf, simulate)
+                    scanned_job_files.append(job_file)
+                    job = pickle.load(open(job_file, "rb"))
+                    print("   [Job] Loaded job file "+(job_file.replace(fold, '{cache}', 1)))
 
                 except Exception as err:
-                    print(err)
 
-                finally:
-                    print("   Deleting the job file "+job_file)
+                    st = os.stat(f)
+                    if st.st_mtime < time.time() - 120:
+                        print("   [No-job] Cannot open job file, and target older than 2 min. The error was:\n       %s" % str(err))
+                        delete_file(f, simulate, fold)
+                    else:
+                        print("   [No-job] Cannot open job file, but target is younger than 2 min. The error was:\n      %s" % str(err))
+                        print("   [Keeping] File is too young to be killed.")
+
+                    if os.path.isfile(job_file):
+                        delete_file(job_file, simulate, fold, True)
+
+                else:
+                    if'cache_expiration' not in job or job['cache_expiration'] is None or datetime.datetime.now() <= job['cache_expiration'][0]:
+
+                        if job['cache_expiration'] is None:
+                            cache_date = 'never expires'
+                        else:
+                            cache_date = str(job['cache_expiration'][0])
+
+                        print("   Cache is not expired ("+cache_date+").")
+
+                        all_there = True
+                        source_file_list = ""
+
+                        for fs in job['source_files']:
+                            e = os.path.exists(fs)
+                            source_file_list += "\n      "
+                            if e:
+                                source_file_list += "[X] "
+                            else:
+                                source_file_list += "[ ] "
+                            source_file_list += fs.replace(fold, "{cache}", 1)
+                            all_there &= e
+
+                        if all_there:
+                            print("   All source files still exist:" + source_file_list)
+                            print("   [Keeping]")
+                            continue
+                        else:
+                            print("   Some source files are missing:" + source_file_list)
+
+                    else:
+                        print("   Cache expired on %s." % job['cache_expiration'][0])
+
+                    # Some files are missing
+                    delete_file(f, simulate)
                     delete_file(job_file, simulate)
 
-                    # If something went wrong, we try to delete the output file again
-                    if os.path.exists(f.path):
-                        print("   Deleting output file " + f.name)
-                        delete_file(f.path, simulate)
-
-        else:
-            # The file doesn't really anything to do here
-            pass
 
     for f in found_job_files:
         if f in scanned_job_files:
@@ -190,7 +203,7 @@ def cleanup_cache(fold=None, level=0, simulate=False):
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--level", help="Level of cleansing [default 0]. 0 will remove all files created by jobs that are related to files that do not exist anymore. 1 will also remove files that were used in the process. 1996 will remove *ALL* files from the cache.", type=int, default=0)
+    parser.add_argument("-l", "--level", help="Level of cleansing [default 0]. 0 will remove all files created by jobs that are related to files that do not exist anymore. 1996 will remove *ALL* files from the cache.", type=int, default=0)
     parser.add_argument("-s", "--simulate", help="Will not do anything, but will show what it would do.", action="store_true")
     parser.add_argument("folder", help="The cache folder to cleanse. If none is provided, we will try to read from the default option file.", default=None, nargs='?')
 

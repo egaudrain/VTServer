@@ -9,11 +9,57 @@ This module contains function that may be useful across other VTServer modules.
 
 """
 
-import pickle, hashlib
+import pickle, hashlib, os, datetime
 import numpy as np
 
 def signature(desc):
     return hashlib.md5(pickle.dumps(desc, 2)).hexdigest()
+
+def job_file(target_file, source_files, cache_expiration=None, stack=None, error=None):
+    """
+    Creates a job file for the `target_file` specified.
+
+    :param target_file: The output file that this job file concerns.
+
+    :param source_files: The list of source files that were used to produce the target file. During cache clean-up, if one of the source files is removed, the target will be removed.
+
+    :param cache_expiration: The cache expiration datetime or `None` (default if omitted).
+
+    :param stack: Optionnally a stack can be provided. `None` otherwise.
+
+    """
+
+    job_info = dict()
+    job_info['target_file'] = os.path.abspath(target_file)
+    job_info['source_files'] = list(set([os.path.abspath(p) for p in source_files]))
+    job_info['cache_expiration'] = cache_expiration
+    job_info['stack'] = stack
+
+    job_filename = os.path.splitext(target_file)[0]+".job"
+
+    with open(job_filename, "wb") as f:
+        pickle.dump(job_info, f)
+
+def update_job_file(target_file):
+    """
+    Updates the `target_file` cache expiration date if necessary. Note that `target_file`
+    is not the job file itself, but the file targeted by the job-file.
+    """
+
+    job_filename = os.path.splitext(target_file)[0]+".job"
+    job_info = pickle.load(open(job_filename, 'rb'))
+
+    if job_info['cache_expiration'] is not None:
+        job_info['cache_expiration'] = (datetime.datetime.now() + datetime.timedelta(hours=job_info['cache_expiration'][1]), job_info['cache_expiration'][1])
+        pickle.dump(job_info, open(job_filename, 'wb'))
+
+
+
+
+
+#-----------------------------------------------------
+# Audio tools
+#-----------------------------------------------------
 
 def rms(x):
     return np.sqrt(np.mean(x**2))

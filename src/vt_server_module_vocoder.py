@@ -488,8 +488,8 @@ def process_vocoder(in_filename, m, out_filename):
 
     m = parse_arguments(m, in_filename)
 
-    created_files = list()
-    used_files    = list()
+    #created_files = list()
+    #used_files    = list()
 
     # When opening the sound file, check that m['fs'] matches that of in_filename
     x, fs = sf.read(in_filename, always_2d=True)
@@ -573,9 +573,9 @@ def process_vocoder(in_filename, m, out_filename):
 
     sf.write(out_filename, y, fs)
 
-    created_files.append(out_filename)
+    #created_files.append(out_filename)
 
-    return out_filename, created_files, used_files
+    return out_filename #, created_files, used_files
 
 #-----------------------------------------
 if __name__=="__main__":

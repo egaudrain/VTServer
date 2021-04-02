@@ -154,6 +154,15 @@ def process(req):
     if 'format_options' not in req:
         req['format_options'] = vsc.CONFIG['cacheformatoptions']
 
+    if 'cache' not in req:
+        req['cache'] = None
+    elif req['cache'] is False:
+        req['cache'] = (datetime.datetime.now() + datetime.timedelta(hours=24), 24)
+    elif isinstance(req['cache'], (int, float)) and req['cache']>=0:
+        req['cache'] = (datetime.datetime.now() + datetime.timedelta(hours=req['cache']), req['cache'])
+    else:
+        return {'out': 'error', 'details':  "The 'cache' field could not be interpreted."}
+
     if type(req['file'])==type([]) or (' >> ' in req['file']):
         # Send to multi-process if there are multiple input files
         return multi_process(req)
@@ -177,6 +186,8 @@ def process(req):
 
     h = job_signature(req)
 
+    vsl.LOG.info("[%s] Processing request: %s" % (h, req))
+
     if req['mode'] == 'hash':
         return {'out': 'ok', 'details': h}
 
@@ -184,6 +195,11 @@ def process(req):
 
     if os.access(out_filename, os.R_OK):
         # The file already exists and is accessible, we return it
+        vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
+        try:
+            vsct.update_job_file(out_filename)
+        except:
+            vsl.LOG.warning("[h] Something went wrong while updating the job-file associated with %s" % (h,out_filename))
         return {"out": "ok", "details": out_filename}
     else:
         if h in JOBS:
@@ -238,6 +254,8 @@ def multi_process(req):
 
     h = _job_signature_multi(files, req['stack'])
 
+    vsl.LOG.info("[%s] Multi-file processing request: %s" % (h, req))
+
     if req['mode'] == 'hash':
         return {'out': 'ok', 'details': h}
 
@@ -245,17 +263,24 @@ def multi_process(req):
 
     if os.access(out_filename, os.R_OK):
         # The file already exists and is accessible, we return it
+        vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
+
+        try:
+            vsct.update_job_file(out_filename)
+        except:
+            vsl.LOG.warning("Something went wrong while updating the job-file associated with %s" % out_filename)
+
         return {"out": "ok", "details": out_filename}
 
     else:
         #vsl.LOG.debug("Adding multi job %s to the job list." % h)
 
-        job_info = dict()
-        job_info['original_file'] = files
-        job_info['created_files'] = list()
-        job_info['used_files'] = list()
-        job_info['stack'] = req['stack']
-        job_filename = os.path.splitext(out_filename)[0]+".job"
+        # job_info = dict()
+        # job_info['original_files'] = files
+        # job_info['support_files'] = list()
+        # job_info['stack'] = req['stack']
+        # job_info['cache_expiration'] = req['cache']
+        # job_filename = os.path.splitext(out_filename)[0]+".job"
 
         resp = dict()
         o = list()
@@ -284,7 +309,7 @@ def multi_process(req):
             y    = None
             fs_y = None
             for j in o:
-                job_info['used_files'].append(j['details'])
+                #job_info['used_files'].append(j['details'])
                 x, fs = sf.read(j['details'])
                 if y is None:
                     y = x
@@ -297,18 +322,20 @@ def multi_process(req):
             if req['format'] == 'mp3':
                 tmp_filename = os.path.join(vsc.CONFIG['cachefolder'], "M"+h+".wav")
                 sf.write(tmp_filename, y, fs)
-                job_info['created_files'].append(tmp_filename)
+                #job_info['created_files'].append(tmp_filename)
                 try:
                     encode_to_format(tmp_filename, out_filename, req['format'], req['format_options'])
+                    vsct.job_file(out_filename, files, req['cache'], req['stack'])
                 except Exception as err:
                     err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (tmp_filename, req['format'], err, err.output.decode('utf-8'))
                     vsl.LOG.critical(err_msg)
                     return {'out': 'error', 'details': err_msg}
             else:
                 sf.write(out_filename, x, fs)
+                vsct.job_file(out_filename, [x['details'] for x in o], req['cache'], req['stack'])
 
-            job_info['created_files'].append(out_filename)
-            pickle.dump(job_info, open(job_filename, "wb"))
+            # job_info['created_files'].append(out_filename)
+            # pickle.dump(job_info, open(job_filename, "wb"))
 
             return {'out': 'ok', 'details': out_filename}
 
@@ -327,6 +354,28 @@ def process_async(req, h, out_filename):
 
     If a module takes a `'file'` as argument, the file can be a query. It will be executed in sync mode from the
     current :py:func:`process_async` process.
+
+    Job files are pickled `dict` objects that contain the following fields:
+
+        original_file `[string]`
+            The original sound file that the job was based on.
+
+        created_files `[list]`
+            The list of files that were created in the process. This includes the final
+            sound file, but also intermediate files that may have been necessary to the
+            process.
+
+        used_files `[list]`
+            If an intermediate file was used, but not created by the current job, it is listed here.
+
+        stack `[dict]`
+            The stack that defines the job.
+
+        cache_expiration `[tuple(datetime, float)]` `optional`
+            If `None` or missing, the cache does not expire by itself. Otherwise, the field contains
+            a date after which the `created_files` can be removed, and a time-delta in hours. Everytime the
+            file is accessed, the cache expiration is updated with the time-delta.
+
     """
 
     vsl.LOG.debug("[%s] Processing request %s." % (h, repr(req)))
@@ -336,12 +385,12 @@ def process_async(req, h, out_filename):
 
     j = JOBS[h]
 
-    job_info = dict()
-    job_info['original_file'] = f
-    job_info['created_files'] = list()
-    job_info['used_files'] = list()
-    job_info['stack'] = req['stack']
-    job_filename = os.path.splitext(out_filename)[0]+".job"
+    # job_info = dict()
+    # job_info['source_files'] = [f] # If source file does not exist anymore, the job is deleted
+    # job_info['support_files'] = list() # Additional files that need deleting if source file is missing, but not if there is simple cache expiration
+    # job_info['stack'] = req['stack']
+    # job_info['cache_expiration'] = req['cache']
+    # job_filename = os.path.splitext(out_filename)[0]+".job"
 
     for i, m in enumerate(req['stack']):
 
@@ -361,6 +410,7 @@ def process_async(req, h, out_filename):
                 hm = vsct.signature((os.path.abspath(f), m))
                 module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
                 if req['format']=='mp3':
+                    # We save in wav first, and will convert to mp3 at the end
                     cache_filename = os.path.join(module_cache_path, hm+".wav")
                 else:
                     cache_filename = os.path.join(module_cache_path, hm+"."+vsc.CONFIG['cacheformat'])
@@ -369,8 +419,12 @@ def process_async(req, h, out_filename):
                     os.makedirs(module_cache_path)
 
                 if os.access(cache_filename, os.R_OK):
+                    try:
+                        vsct.update_job_file(cache_filename)
+                    except:
+                        vsk.LOG.warning("Something went wrong while updating the job-file associated with %s" % cache_filename)
+
                     f = cache_filename
-                    job_info['used_files'].append(f)
                 else:
                     if 'file' in m and type(m['file'])==type(dict()):
                         # This is a module that takes a file as argument, and the file is a query
@@ -385,16 +439,14 @@ def process_async(req, h, out_filename):
 
                     # Calling the right module
                     o = vsm.PATCH[m['module']](f, m, cache_filename)
-                    if type(o) is tuple:
-                        f = o[0]
-                        if len(o)>=3 and o[2] is not None:
-                            job_info['used_files'].extend(o[2])
-                        if len(o)>=2 and o[1] is not None:
-                            job_info['created_files'].extend(o[1])
-                    else:
-                        f = o
+                    source_files = [f]
+                    if 'file' in m:
+                        source_files.append(m['file'])
+                    vsct.job_file(o, source_files, req['cache'], m)
+
+                    f = o
+
                     vsl.LOG.debug("[%s] Done with module '%s'" % (h, m['module']))
-                    job_info['created_files'].append(f)
 
             except Exception as err:
                 #err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))
@@ -404,8 +456,6 @@ def process_async(req, h, out_filename):
                 j['finished'] = True
                 JOBS[h] = j
                 vsl.LOG.critical(err_msg)
-                job_info['error'] = err_msg
-                pickle.dump(job_info, open(job_filename, "wb"))
                 return
         else:
             err_msg = "Calling unknown module '%s' while processing '%s'." % (m['module'], f)
@@ -414,16 +464,16 @@ def process_async(req, h, out_filename):
             j['finished'] = True
             JOBS[h] = j
             vsl.LOG.critical(err_msg)
-            job_info['error'] = err_msg
-            pickle.dump(job_info, open(job_filename, "wb"))
             return
 
     if os.path.splitext(f)[1] == os.path.splitext(out_filename)[1]:
         os.symlink(f, out_filename)
+        vsct.job_file(out_filename, [f], req['cache'], req['stack'])
     else:
         if req['format'] == 'mp3':
             try:
                 encode_to_format(f, out_filename, req['format'], req['format_options'])
+                vsct.job_file(out_filename, [f], req['cache'], req['stack'])
             except Exception as err:
                 err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (f, req['format'], err, err.output.decode('utf-8'))
                 j['out'] = 'error'
@@ -431,14 +481,17 @@ def process_async(req, h, out_filename):
                 j['finished'] = True
                 JOBS[h] = j
                 vsl.LOG.critical(err_msg)
-                job_info['error'] = err_msg
                 return
         else:
             x, fs = sf.read(f)
             sf.write(out_filename, x, fs)
+            vsct.job_file(out_filename, [f], req['cache'], req['stack'])
 
-    job_info['created_files'].append(out_filename)
-    pickle.dump(job_info, open(job_filename, "wb"))
+    # job_info['created_files'].append(out_filename)
+    #
+    # job_info['created_files'] = [os.path.abspath(f) for f in job_info['created_files']]
+    # job_info['support_files'] = [os.path.abspath(f) for f in job_info['used_files']]
+    # pickle.dump(job_info, open(job_filename, "wb"))
 
     j['out'] = 'ok'
     j['details'] = out_filename

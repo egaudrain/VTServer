@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'VT Server'
-copyright = '2020, Etienne Gaudrain'
+copyright = '2021, Etienne Gaudrain'
 author = 'Etienne Gaudrain'
 
 

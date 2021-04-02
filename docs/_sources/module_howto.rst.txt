@@ -6,7 +6,7 @@ The VT Server functionality can be extended by creating new modules. This sectio
 gives some pointers on how to do just that.
 
 The basic principle is pretty straightforward. If we were writing a module called
-`toto`, we would have to define a function with the following signature:
+"toto", we would have to define a function with the following signature:
 
 .. code-block::
 
@@ -26,48 +26,56 @@ out_filename
     Provided by the :mod:`vt_server_brain`. The module is responsible
     for writing the file down once the processing is finished.
 
+The first step should be to write some code to parse the module's parameters. Keep in mind
+that the query results are cached: if the same query is sent again, it will not even be sent to
+your function, but will be picked-up by the :mod:`vt_server_brain` before that. If your processing
+contains random elements that need to be regenerated everytime, you should add a random seed as
+parameter in your queries, and make sure to set the `cache` directive to a short enough value.
+
+Cache management
+================
+
 When writing a module, you don't need to worry about caching results of queries.
 This is managed by the :mod:`vt_server_brain`. In other words, the job of the module
 process function is just to read the input file, apply the modifications you need
 to apply to the sound based on the parameters, and then save the result in **out_filename**.
 
 The function also returns **out_filename**. However, if you need to generate any
-intermediary files you will need to report that back as well. This is the case,
-for instance, for the `world` module where the result of the analysis phase is saved
-in a file so that only synthesis needs to be done for new voice parameters. We need
-to report these files to the brain so that the cache clean-up routines can handle
-these files properly. Similarly, if the generation relies other external files, they
-need to be listed. When this is the case, the return signature is:
+intermediary files you will need handle caching of these files yourself. To that purpose,
+you need to create a job-file for every file that you generate and that is meant
+to remain on the server for some time. Use the :func:`vt_server_common_tools.job_file` function, in the
+:py:mod:`vt_server_common_tools` module, for that purpose.
 
-.. code-block::
-
-    import soundfile as sf
-
-    def process_toto(in_filename, parameters, out_filename):
-
-        created_files = list()
-        used_files    = list()
-
-        x, fs = sf.read(in_filename)
-
-        # Do you processing...
-        # Everytime you generate a file, you need to append it to created_files
-        # Everytime you load an external file, you need to append it to used_files
-
-        sf.write(out_filename, y, fs)
-
-        return out_filename, created_files, used_files
+An example of this can be found in the `world` module where the result of the analysis
+phase is saved in a file so that only synthesis needs to be done for new voice parameters.
+We need to create a job file so that the cache clean-up routines can handle
+these files properly.
 
 Sound files are read with :mod:`soundfile`.
 
-Once your process function is ready, you need to add it to the :data:`PATCH` in
-:mod:`vt_server_modules`:
+Naming convention
+=================
 
-.. code-block::
+The process function and you module file must follow a specific naming convention
+to be automatically discovered by the server once placed in the server directory.
 
-    from vt_module_toto import process_toto
-    PATCH['toto'] = process_toto
+The module must be named `vt_server_module_`\ *name*\ `.py` and the process function to be called must be named
+`process_`\ *name*.
 
-Note that at the moment there is not automated way of inserting custom modules, so
-you need to edit :file:`vt_server_modules.py`. Keep that in mind when you update
-the VTServer.
+For example, if your module is called "toto", the module file will be called
+`vt_server_module_toto.py` and the process function will be called `process_toto`.
+
+With this convention, the module can be called in a query with the name "toto":
+
+.. code-block:: json
+
+    {
+        "action": "process",
+        "file": "/home/toto/audio/Beer.wav",
+        "stack": [
+            {
+                "module": "toto",
+                "param1": "blahdiblah"
+            }
+        ]
+    }

@@ -1,43 +1,39 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Source documentation &mdash; VT Server  documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="How to make a module" href="module_howto.html" /> 
@@ -77,7 +73,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -116,7 +111,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -151,20 +145,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Source documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -228,6 +220,12 @@ then the default cache format is used (see <a class="reference internal" href="#
 <dt>format_options</dt><dd><p>Specifies options (as a dictionary) for the selected
 format. At the moment, only <cite>bitrate</cite> is specified (as an integer in kbps)
 for format <cite>“mp3”</cite> (see <a class="reference internal" href="#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).</p>
+</dd>
+<dt>cache</dt><dd><p>If not provided or <cite>True</cite>, no expiration is set for the cache file. If <cite>False</cite>,
+the cache is set to expire after 24h. Otherwise a duration before expiration can
+be provided in hours. Keep in mind that the generated sound file has to exist long
+enough for it to be downloaded by the client. Note that sub-queries do not inherit
+cache status from their parents.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -315,11 +313,6 @@ and remove them from the list.</p>
 <dd><p>This is the list of current jobs (actually a managed dict).</p>
 </dd></dl>
 
-<dl class="data">
-<dt id="vt_server_brain.JOB_JANITOR">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">JOB_JANITOR</code><em class="property"> = None</em><a class="headerlink" href="#vt_server_brain.JOB_JANITOR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="class">
 <dt id="vt_server_brain.Janitor">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">Janitor</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor" title="Permalink to this definition">¶</a></dt>
@@ -344,11 +337,6 @@ process that is finished and needs removing.</p>
 
 </dd></dl>
 
-<dl class="data">
-<dt id="vt_server_brain.N_REQUESTS">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">N_REQUESTS</code><em class="property"> = 0</em><a class="headerlink" href="#vt_server_brain.N_REQUESTS" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="function">
 <dt id="vt_server_brain.encode_to_format">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">encode_to_format</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">out_filename</em>, <em class="sig-param">fmt</em>, <em class="sig-param">fmt_options</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.encode_to_format" title="Permalink to this definition">¶</a></dt>
@@ -358,11 +346,6 @@ process that is finished and needs removing.</p>
 <dl class="function">
 <dt id="vt_server_brain.job_signature">
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">job_signature</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.job_signature" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="data">
-<dt id="vt_server_brain.manager">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">manager</code><em class="property"> = &lt;multiprocessing.managers.SyncManager object&gt;</em><a class="headerlink" href="#vt_server_brain.manager" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -391,6 +374,25 @@ calls to the appropriate modules, and deals with their cache.</p>
 with some information about the job (useful for cache cleaning).</p>
 <p>If a module takes a <cite>‘file’</cite> as argument, the file can be a query. It will be executed in sync mode from the
 current <a class="reference internal" href="#vt_server_brain.process_async" title="vt_server_brain.process_async"><code class="xref py py-func docutils literal notranslate"><span class="pre">process_async()</span></code></a> process.</p>
+<p>Job files are pickled <cite>dict</cite> objects that contain the following fields:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>original_file <cite>[string]</cite></dt><dd><p>The original sound file that the job was based on.</p>
+</dd>
+<dt>created_files <cite>[list]</cite></dt><dd><p>The list of files that were created in the process. This includes the final
+sound file, but also intermediate files that may have been necessary to the
+process.</p>
+</dd>
+<dt>used_files <cite>[list]</cite></dt><dd><p>If an intermediate file was used, but not created by the current job, it is listed here.</p>
+</dd>
+<dt>stack <cite>[dict]</cite></dt><dd><p>The stack that defines the job.</p>
+</dd>
+<dt>cache_expiration <cite>[tuple(datetime, float)]</cite> <cite>optional</cite></dt><dd><p>If <cite>None</cite> or missing, the cache does not expire by itself. Otherwise, the field contains
+a date after which the <cite>created_files</cite> can be removed, and a time-delta in hours. Everytime the
+file is accessed, the cache expiration is updated with the time-delta.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -401,6 +403,22 @@ current <a class="reference internal" href="#vt_server_brain.process_async" titl
 <dt id="vt_server_common_tools.clipping_prevention">
 <code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">clipping_prevention</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.clipping_prevention" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_common_tools.job_file">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">job_file</code><span class="sig-paren">(</span><em class="sig-param">target_file</em>, <em class="sig-param">source_files</em>, <em class="sig-param">cache_expiration=None</em>, <em class="sig-param">stack=None</em>, <em class="sig-param">error=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.job_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a job file for the <cite>target_file</cite> specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_file</strong> – The output file that this job file concerns.</p></li>
+<li><p><strong>source_files</strong> – The list of source files that were used to produce the target file. During cache clean-up, if one of the source files is removed, the target will be removed.</p></li>
+<li><p><strong>cache_expiration</strong> – The cache expiration datetime or <cite>None</cite> (default if omitted).</p></li>
+<li><p><strong>stack</strong> – Optionnally a stack can be provided. <cite>None</cite> otherwise.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="vt_server_common_tools.ramp">
@@ -431,6 +449,13 @@ current <a class="reference internal" href="#vt_server_brain.process_async" titl
 <code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">signature</code><span class="sig-paren">(</span><em class="sig-param">desc</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.signature" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="function">
+<dt id="vt_server_common_tools.update_job_file">
+<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">update_job_file</code><span class="sig-paren">(</span><em class="sig-param">target_file</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.update_job_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the <cite>target_file</cite> cache expiration date if necessary. Note that <cite>target_file</cite>
+is not the job file itself, but the file targeted by the job-file.</p>
+</dd></dl>
+
 </div>
 <span class="target" id="module-vt_server_modules"></span><div class="section" id="vt-server-modules">
 <h2>vt_server_modules<a class="headerlink" href="#vt-server-modules" title="Permalink to this headline">¶</a></h2>
@@ -439,9 +464,14 @@ the other process modules and defines the <a class="reference internal" href="#v
 process module names to the right process function.</p>
 <dl class="data">
 <dt id="vt_server_modules.PATCH">
-<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'mixin': &lt;function process_mixin&gt;, 'pad': &lt;function process_pad&gt;, 'ramp': &lt;function process_ramp&gt;, 'time-reverse': &lt;function process_time_reverse&gt;, 'vocoder': &lt;function process_vocoder&gt;, 'world': &lt;function process_world&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'mixin': &lt;function process_mixin&gt;, 'pad': &lt;function process_pad&gt;, 'ramp': &lt;function process_ramp&gt;, 'time-reverse': &lt;function process_time_reverse&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <a class="reference internal" href="#vt_server_modules.PATCH" title="vt_server_modules.PATCH"><code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code></a> is used to dispatch stack item modules to their corresponding function</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.discover_modules">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">discover_modules</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.discover_modules" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_modules.process_mixin">
@@ -566,11 +596,6 @@ is useful if you want to use cubic-splines.</p>
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="data">
-<dt id="vt_server_module_world.RE">
-<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">RE</code><em class="property"> = {'duration': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(s)?'), 'f0': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(Hz|st)?'), 'vtl': re.compile('([*+-]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(st)?')}</em><a class="headerlink" href="#vt_server_module_world.RE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_module_world.check_arguments">
@@ -787,20 +812,10 @@ attribute <cite>f</cite> is provided, in which case it defines the frequencies.<
 <div class="section" id="content">
 <h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
 <dl class="data">
-<dt id="vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH">
-<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">ENVELOPE_MODIFIER_PATCH</code><em class="property"> = {'spread': &lt;function envelope_modifier_spread&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="data">
 <dt id="vt_server_module_vocoder.FB_PRESETS">
 <code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FB_PRESETS</code><em class="property"> = {'ci24': [188, 313, 438, 563, 688, 813, 938, 1063, 1188, 1313, 1563, 1813, 2063, 2313, 2688, 3063, 3563, 4063, 4688, 5313, 6063, 6938, 7938], 'hr90k': [250, 416, 494, 587, 697, 828, 983, 1168, 1387, 1648, 1958, 2326, 2762, 3281, 3898, 4630, 8700]}</em><a class="headerlink" href="#vt_server_module_vocoder.FB_PRESETS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Presets for manufacturers’ filterbanks.</p>
 </dd></dl>
-
-<dl class="data">
-<dt id="vt_server_module_vocoder.FILTER_FUNCTION_PATCH">
-<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FILTER_FUNCTION_PATCH</code><em class="property"> = {'sosfilt': &lt;function sosfilt&gt;, 'sosfiltfilt': &lt;function sosfiltfilt&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.FILTER_FUNCTION_PATCH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_module_vocoder.env_hilbert">
@@ -882,7 +897,7 @@ the <cite>freq</cite> array and the sampling frequency <cite>fs</cite>.</p>
 <p>VTServer configuration file management.</p>
 <dl class="data">
 <dt id="vt_server_config.CONFIG">
-<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">CONFIG</code><em class="property"> = {'cachefolder': '/var/cache/vt_server', 'cacheformat': 'flac', 'cacheformatoptions': None, 'host': 'localhost', 'logfile': '/var/log/vt_server.log', 'port': 1996}</em><a class="headerlink" href="#vt_server_config.CONFIG" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_config.</code><code class="sig-name descname">CONFIG</code><em class="property"> = {'cachefolder': '/var/cache/vt_server', 'cacheformat': 'flac', 'cacheformatoptions': None, 'host': 'localhost', 'logfile': '/var/log/vt_server.log', 'loglevel': 'INFO', 'port': 1996}</em><a class="headerlink" href="#vt_server_config.CONFIG" title="Permalink to this definition">¶</a></dt>
 <dd><p>The dictionary holding the current configuration (used in other modules).
 It is instanciated with <a class="reference internal" href="#vt_server_config.read_configuration" title="vt_server_config.read_configuration"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_configuration()</span></code></a>.</p>
 </dd></dl>
@@ -906,11 +921,6 @@ options.</p>
 <span class="target" id="module-vt_server_logging"></span><div class="section" id="vt-server-logging">
 <h2>vt_server_logging<a class="headerlink" href="#vt-server-logging" title="Permalink to this headline">¶</a></h2>
 <p>VTServer logging facilities.</p>
-<dl class="data">
-<dt id="vt_server_logging.LOG">
-<code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">LOG</code><em class="property"> = &lt;Logger VTServer (DEBUG)&gt;</em><a class="headerlink" href="#vt_server_logging.LOG" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="class">
 <dt id="vt_server_logging.VTServerLogFormatter">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">VTServerLogFormatter</code><a class="headerlink" href="#vt_server_logging.VTServerLogFormatter" title="Permalink to this definition">¶</a></dt>
@@ -959,19 +969,13 @@ optional arguments:
   -l LEVEL, --level LEVEL
                         Level of cleansing [default 0]. 0 will remove all
                         files created by jobs that are related to files that
-                        do not exist anymore. 1 will also remove files that
-                        were used in the process. 1996 will remove *ALL* files
+                        do not exist anymore. 1996 will remove *ALL* files
                         from the cache.
   -s, --simulate        Will not do anything, but will show what it would do.
 </pre></div>
 </div>
 <p>The cache cleaning procedure is described below.</p>
 <img alt="Cache cleanup overview" src="_images/cache.png" />
-<p>Note that the cache cleaning is not really optimal at the moment and cache may
-blow up. If you use level 0 as default you may have to run level 1 or 1996 once
-in a while to reset everything, although this blunt approach sort of defeats the
-purpose of having a cache.</p>
-<p>A better cache procedure will be developed in the future.</p>
 <dl class="function">
 <dt id="vt_server_cache.cleanup_cache">
 <code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold=None</em>, <em class="sig-param">level=0</em>, <em class="sig-param">simulate=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.cleanup_cache" title="Permalink to this definition">¶</a></dt>
@@ -983,8 +987,6 @@ generated files. If a file does not have an eponym .job file, it will be deleted
 Otherwise, the job file is opened, and, if the original sound file does not exist
 any more, all files listed as “created” are deleted. The final sound file
 (or symlinks) created are deleted as well as the job file.</p></li>
-<li><p>1 is slightly more aggressive, where all files that are “created” or “used”
-will be deleted.</p></li>
 <li><p>1996 will make your cache spooky clean by eliminating all files (but preserving
 the directory structure).</p></li>
 </ul>
@@ -992,12 +994,12 @@ the directory structure).</p></li>
 
 <dl class="function">
 <dt id="vt_server_cache.delete_file">
-<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em>, <em class="sig-param">silent=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">delete_file</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">simulate</em>, <em class="sig-param">cache_folder=None</em>, <em class="sig-param">silent=False</em>, <em class="sig-param">indent=0</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.delete_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_cache.spooky_cleanup_cache">
-<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">spooky_cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold</em>, <em class="sig-param">simulate</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.spooky_cleanup_cache" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_cache.</code><code class="sig-name descname">spooky_cleanup_cache</code><span class="sig-paren">(</span><em class="sig-param">fold</em>, <em class="sig-param">simulate</em>, <em class="sig-param">indent=0</em>, <em class="sig-param">cache_folder=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_cache.spooky_cleanup_cache" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -1008,28 +1010,27 @@ the directory structure).</p></li>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+      
+        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Etienne Gaudrain.
+        &copy; Copyright 2021, Etienne Gaudrain
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -1037,6 +1038,7 @@ the directory structure).</p></li>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

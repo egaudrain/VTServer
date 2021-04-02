@@ -60,6 +60,13 @@ def read_configuration(config_filename=None):
         config['logfile'] = "/var/log/vt_server.log"
         vsl.LOG.warning("Hey watchout, the 'logfile' wasn't defined! Setting to default '%s'." % config['logfile'])
 
+    if 'loglevel' not in config:
+        config['loglevel'] = "INFO"
+        vsl.LOG.warning("Hey watchout, the 'loglevel' wasn't defined! Setting to default '%s'." % config['loglevel'])
+    elif config['loglevel'] not in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']:
+        vsl.LOG.warning("The provided 'loglevel' ('%s') is not valid! Setting to default '%s'." % (config['loglevel'], 'INFO'))
+        config['loglevel'] = "INFO"
+
     if 'cachefolder' not in config:
         config['cachefolder'] = "/var/cache/vt_server"
         vsl.LOG.warning("Hey watchout, the 'cachefolder' wasn't defined! Setting to default '%s'." % config['cachefolder'])

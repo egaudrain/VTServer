@@ -167,8 +167,8 @@ def process_world(in_filename, m, out_filename):
     Just to be clear, these parameters must be keys of the dictionary **m**.
     """
 
-    created_files = list()
-    used_files    = list()
+    # created_files = list()
+    # used_files    = list()
 
     # Analysis
     dat_folder   = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
@@ -185,6 +185,10 @@ def process_world(in_filename, m, out_filename):
         tp1 = time.process_time()
 
         dat = pickle.load(open(dat_filename, "rb"))
+
+        # No need to update because cache is set to None
+        #vsct.update_job_file(dat_filename)
+
         # We could check some things here like the file and the World version, but it should
         # be builtin the file signature.
         #f0, sp, ap, fs, rms_x, sp_interp, ap_interp = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms'], dat['sp_interp'], dat['ap_interp']
@@ -197,7 +201,7 @@ def process_world(in_filename, m, out_filename):
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Loaded f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, dat_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
-        used_files.append(dat_filename)
+        # used_files.append(dat_filename)
 
     except:
         t1 = time.time()
@@ -210,12 +214,14 @@ def process_world(in_filename, m, out_filename):
         # makes it way too big and the processing gain is relatively small
 
         pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__, 'frame_period': pyworld.default_frame_period}, open(dat_filename, 'wb'))
+        vsct.job_file(dat_filename, [in_filename], None)
 
         t2 = time.time()
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Extracted f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, in_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
-        created_files.append(dat_filename)
+        # created_files.append(dat_filename)
+
 
     # Modification of decomposition
     m = parse_arguments(m)
@@ -309,7 +315,7 @@ def process_world(in_filename, m, out_filename):
 
     sf.write(out_filename, y, fs)
 
-    return out_filename, created_files, used_files
+    return out_filename
 
 
 def regularize_arrays(*args):

@@ -16,6 +16,7 @@ import json
 import os, traceback
 import vt_server_logging as vsl
 import vt_server_brain
+from vt_server_modules import discover_modules
 # optional
 import threading
 
@@ -63,6 +64,13 @@ class VTHandler(socketserver.StreamRequestHandler):
           Specifies options (as a dictionary) for the selected
           format. At the moment, only `bitrate` is specified (as an integer in kbps)
           for format `"mp3"` (see :py:func:`vt_server_brain.encode_to_format` for details).
+
+        cache
+          If not provided or `True`, no expiration is set for the cache file. If `False`,
+          the cache is set to expire after 24h. Otherwise a duration before expiration can
+          be provided in hours. Keep in mind that the generated sound file has to exist long
+          enough for it to be downloaded by the client. Note that sub-queries do not inherit
+          cache status from their parents.
 
     The response is also JSON and has the following form:
 
@@ -139,6 +147,14 @@ def main():
         vsl.LOG.addHandler(vsl.get_FileHandler(config['logfile']))
     else:
         vsl.LOG.error("The logfile '%s' couldn't be accessed. Check that there is proper permission to write there." % config['logfile'])
+
+    try:
+        vsl.LOG.info("Setting logging level to '%s'." % config['loglevel'])
+        vsl.LOG.setLevel(config['loglevel'])
+    except:
+        vsl.LOG.warning("Could not set log-level to '%s'" % config['loglevel'])
+
+    discover_modules()
 
     server = VTServer((config['host'], config['port']), VTHandler)
 
