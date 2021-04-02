@@ -38,7 +38,7 @@ install -C -m 644 -v src/vt_server.service /etc/systemd/system/
 
 touch /var/log/vt_server.log
 chown vt_server:adm /var/log/vt_server.log
-chmod 777 /var/log/vt_server.log
+chmod 664 /var/log/vt_server.log
 
 systemctl stop vt_server
 systemctl daemon-reload
