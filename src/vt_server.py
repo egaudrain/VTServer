@@ -66,11 +66,14 @@ class VTHandler(socketserver.StreamRequestHandler):
           for format `"mp3"` (see :py:func:`vt_server_brain.encode_to_format` for details).
 
         cache
-          If not provided or `True`, no expiration is set for the cache file. If `False`,
-          the cache is set to expire after 24h. Otherwise a duration before expiration can
+          This defines when the cache will expire. Cache files are deleted either when one of
+          the source files is missing, or when the cache expires. The cache expiration date is
+          updated everytime the file is requested. If `True` or `None` (`null` in JSON), no expiration is set for the cache file.
+          If `False`, the cache is set to expire after 1h. Otherwise a duration before expiration can
           be provided in hours. Keep in mind that the generated sound file has to exist long
           enough for it to be downloaded by the client. Note that sub-queries do not inherit
-          cache status from their parents.
+          cache status from their parents. If not provided, the cache value is 730, which
+          corresponds roughly to 1 month.
 
     The response is also JSON and has the following form:
 

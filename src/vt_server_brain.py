@@ -155,9 +155,10 @@ def process(req):
         req['format_options'] = vsc.CONFIG['cacheformatoptions']
 
     if 'cache' not in req:
-        req['cache'] = None
-    elif req['cache'] is False:
-        req['cache'] = (datetime.datetime.now() + datetime.timedelta(hours=24), 24)
+        req['cache'] = 730
+
+    if req['cache'] is False:
+        req['cache'] = (datetime.datetime.now() + datetime.timedelta(hours=1), 1)
     elif isinstance(req['cache'], (int, float)) and req['cache']>=0:
         req['cache'] = (datetime.datetime.now() + datetime.timedelta(hours=req['cache']), req['cache'])
     else:

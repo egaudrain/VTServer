@@ -221,11 +221,14 @@ then the default cache format is used (see <a class="reference internal" href="#
 format. At the moment, only <cite>bitrate</cite> is specified (as an integer in kbps)
 for format <cite>“mp3”</cite> (see <a class="reference internal" href="#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).</p>
 </dd>
-<dt>cache</dt><dd><p>If not provided or <cite>True</cite>, no expiration is set for the cache file. If <cite>False</cite>,
-the cache is set to expire after 24h. Otherwise a duration before expiration can
+<dt>cache</dt><dd><p>This defines when the cache will expire. Cache files are deleted either when one of
+the source files is missing, or when the cache expires. The cache expiration date is
+updated everytime the file is requested. If <cite>True</cite> or <cite>None</cite> (<cite>null</cite> in JSON), no expiration is set for the cache file.
+If <cite>False</cite>, the cache is set to expire after 1h. Otherwise a duration before expiration can
 be provided in hours. Keep in mind that the generated sound file has to exist long
 enough for it to be downloaded by the client. Note that sub-queries do not inherit
-cache status from their parents.</p>
+cache status from their parents. If not provided, the cache value is 730, which
+corresponds roughly to 1 month.</p>
 </dd>
 </dl>
 </div></blockquote>
