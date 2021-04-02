@@ -118,7 +118,7 @@ class VTHandler(socketserver.StreamRequestHandler):
         #vsl.LOG.debug("Sent.")
 
 class VTServer(socketserver.ThreadingTCPServer):
-    __version__ = '1.0'
+    __version__ = '2.0'
 
     def server_activate(self):
         super().server_activate()

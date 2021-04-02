@@ -10,6 +10,7 @@ fi
 
 # Creating the vt_server user
 useradd -r -s /bin/false vt_server
+adduser vt_server syslog
 
 DEST=/usr/local/lib/vt_server
 
