@@ -200,7 +200,7 @@ def process(req):
         try:
             vsct.update_job_file(out_filename)
         except:
-            vsl.LOG.warning("[h] Something went wrong while updating the job-file associated with %s" % (h,out_filename))
+            vsl.LOG.warning("[%s] Something went wrong while updating the job-file associated with %s" % (h,out_filename))
         return {"out": "ok", "details": out_filename}
     else:
         if h in JOBS:
