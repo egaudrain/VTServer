@@ -20,6 +20,11 @@ from vt_server_modules import discover_modules
 # optional
 import threading
 
+
+__version__ = "2.1"
+__author__  = "Etienne Gaudrain"
+
+
 class VTHandler(socketserver.StreamRequestHandler):
     """
     The handler for the server requests.
@@ -118,7 +123,6 @@ class VTHandler(socketserver.StreamRequestHandler):
         #vsl.LOG.debug("Sent.")
 
 class VTServer(socketserver.ThreadingTCPServer):
-    __version__ = '2.0'
 
     def server_activate(self):
         super().server_activate()
@@ -126,7 +130,7 @@ class VTServer(socketserver.ThreadingTCPServer):
         # Instanciating the janitor for periodic 400s check
         vt_server_brain.JOB_JANITOR = vt_server_brain.Janitor(400)
 
-        vsl.LOG.info("Running VTServer version {} on {}:{}.".format(self.__version__, self.server_address[0], self.server_address[1]))
+        vsl.LOG.info("Running VTServer version {} on {}:{}.".format(__version__, self.server_address[0], self.server_address[1]))
 
     def server_close(self):
         print('\nTerminating.')

@@ -25,7 +25,7 @@ Here is and example of module instructions:
             "rectify": "half-wave",
             "order": 2,
             "fc": 160,
-            "modifier": "spread"
+            "modifiers": "spread"
             },
         "synthesis": {
             "carrier": "sin",
@@ -132,9 +132,10 @@ That specifies how the envelope is extracted.
 
             fc
                 The cutoff of the envelope extraction in Hertz. Can be a single
-                value or a value per channel.
+                value or a value per band. If fewer values than bands are provided,
+                the array is recycled as necessary.
 
-            modifier
+            modifiers
                 `[optional]` A (list of) modifier function names that can be
                 applied to envelope matrix.
                 At the moment, only `"spread"` is implemented. With this modifier,
@@ -162,11 +163,13 @@ The **synthesis** field describes how the resynthesis should be performed.
 If the `carrier` is `noise`, then a random seed can be provided in `random_seed`
 to have frozen noise. If not the random number generator will be initialized with the
 current clock. Note that for multi-channel audio files, the seed is used for each
-channel. If no seed is given, the various chennels will have different noises as
-carriers. To have correlated noise across chennels, pass in a (random) seed.
+channel. If no seed is given, the various bands will have different noises as
+carriers. To have correlated noise across bands, pass in a (random) seed. Also note
+that the cache system also means that once an output file is generated, it will be served
+as is rather than re-generated. To generate truely random files, provide a random seed.
 
-If the `carrier` is `sin`, the geometric mean of the band's cutoffs are used unless
-attribute `f` is provided, in which case it defines the frequencies.
+If the `carrier` is `sin`, the center frequency of each band will be determined based on the scale
+that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.
 
 Content
 -------
@@ -225,7 +228,9 @@ def parse_frequency_array(fa):
 
     elif isinstance(fa, list) or isinstance(fa, np.ndarray):
         if all(isinstance(x, (int, float)) for x in fa):
-            return np.array(fa)
+            frq = np.array(fa)
+            frq_center = [np.sqrt(frq[i]*frq[i+1]) for i in range(len(frq)-1)]
+            return frq, frq_center
         else:
             raise ValueError("[vocoder] A frequency array definition is a list but not all elements are numeric: %s." % repr(fa))
 
@@ -241,22 +246,25 @@ def parse_frequency_array(fa):
             fa['scale'] = 'log'
 
         if fa['scale']=='log':
-            frq = np.exp(np.linspace(np.log(fa['fmin']), np.log(fa['fmax']), fa['n']+1))
+            frq = np.exp(np.linspace(np.log(fa['fmin']), np.log(fa['fmax']), 2*fa['n']+1))
             if 'shift' in fa:
                 frq = mm2freq( freq2mm(frq) + fa['shift'] )
         elif fa['scale']=='greenwood':
-            mm = np.linspace(freq2mm(fa['fmin']), freq2mm(fa['fmax']), fa['n']+1)
+            mm = np.linspace(freq2mm(fa['fmin']), freq2mm(fa['fmax']), 2*fa['n']+1)
             if 'shift' in fa:
                 mm = mm + fa['shift']
             frq = mm2freq(mm)
         elif fa['scale']=='linear':
-            frq = np.linspace(fa['fmin'], fa['fmax'], fa['n']+1)
+            frq = np.linspace(fa['fmin'], fa['fmax'], 2*fa['n']+1)
             if 'shift' in fa:
                 frq = mm2freq( freq2mm(frq) + fa['shift'] )
         else:
             raise ValueError("[vocoder] The type of scale '%s' is not known for the frequency array definition." % fa['scale'])
 
-        return frq
+        frq_center = frq[1::2]
+        frq = frq[0::2]
+
+        return frq, frq_center
 
     else:
         raise ValueError("[vocoder] Could not parse frequency array definition: %s" % repr(fa))
@@ -304,6 +312,9 @@ def parse_filterbank_method(method, freq, fs):
 
             filters.append(sos)
 
+    else:
+        raise ValueError("[vocoder] The filterbank family '%s' is not implemented." % (method['family']))
+
     return filters, filter_function
 
 
@@ -318,7 +329,7 @@ def parse_filterbank_definition(fbd, fs):
     if 'f' not in fbd:
         raise ValueError("[vocoder] The filterbank definition has no frequency array 'f' attribute: %s." % repr(fbd))
     else:
-        fbd['f'] = parse_frequency_array(fbd['f'])
+        fbd['f'], fbd['fc'] = parse_frequency_array(fbd['f'])
 
     if 'method' not in fbd:
         raise ValueError("[vocoder] The filterbank definition has no 'method' attribute: %s." % repr(fbd))
@@ -363,7 +374,7 @@ def envelope_modifier_spread(env, m):
 
 ENVELOPE_MODIFIER_PATCH = { 'spread': envelope_modifier_spread }
 
-def parse_envelope_definition(env_def, fs):
+def parse_envelope_definition(env_def, fs, n_bands):
     """
     Parses an envelope definition.
     """
@@ -372,18 +383,18 @@ def parse_envelope_definition(env_def, fs):
         raise ValueError("[vocoder] Envelope definition needs a 'method' attribute: %s." % repr(env_def))
 
     # Optional arguments
-    if ('modifier' not in env_def) or (env_def['modifier'] is None):
-        env_def['modifier'] = list()
-    elif isinstance(env_def['modifier'], str) or callable(env_def['modifier']):
-        env_def['modifier'] = [env_def['modifier']]
+    if ('modifiers' not in env_def) or (env_def['modifiers'] is None):
+        env_def['modifiers'] = list()
+    elif isinstance(env_def['modifiers'], str) or callable(env_def['modifiers']):
+        env_def['modifiers'] = [env_def['modifiers']]
 
-    for i, mo in enumerate(env_def['modifier']):
+    for i, mo in enumerate(env_def['modifiers']):
         if callable(mo):
             pass
         elif mo not in ENVELOPE_MODIFIER_PATCH.keys():
             raise ValueError("[vocoder] Envelope modifier is not known: %s." % repr(mo))
         else:
-            env_def['modifier'][i] = ENVELOPE_MODIFIER_PATCH[mo]
+            env_def['modifiers'][i] = ENVELOPE_MODIFIER_PATCH[mo]
 
     if env_def['method'] == 'low-pass':
         for mk in ['order', 'fc', 'rectify']:
@@ -394,7 +405,26 @@ def parse_envelope_definition(env_def, fs):
         if int(ord)!=ord:
             raise ValueError("[vocoder] The envelope definition order must be even: %s." % (repr(env_def)))
 
-        env_def['filter'] = signal.butter(ord, env_def['fc'], 'lowpass', analog=False, fs=fs, output='sos')
+        if not isinstance(env_def['fc'], (list, np.ndarray, tuple)):
+            env_def['fc'] = [env_def['fc']]
+        else:
+            env_def['fc'] = list(env_def['fc'])
+
+        for i_fc, fc in enumerate(env_def['fc']):
+            try:
+                env_def['fc'][i_fc] = float(fc)
+            except Exception as err:
+                raise ValueError("[vocoder] The cutoff 'fc' must be numeric: found %s (%s). (%s)" % (repr(fc), type(fc), err))
+
+        if len(env_def['fc'])<n_bands:
+            env_def['fc'] = np.resize(env_def['fc'], n_bands)
+
+        unique_fc, unique_indices = np.unique(env_def['fc'], return_inverse=True)
+        env_def['filter_table'] = list()
+        for fc in unique_fc:
+            env_def['filter_table'].append( signal.butter(ord, fc, 'lowpass', analog=False, fs=fs, output='sos') )
+        env_def['filters'] = [env_def['filter_table'][k] for k in unique_indices]
+
         env_def['filter_function'] = 'sosfiltfilt'
 
     elif env_def['method'] == 'hilbert':
@@ -432,7 +462,7 @@ def parse_carrier_definition(carrier, synth_fbd):
 
     elif carrier['carrier'] == 'sin':
         if 'f' not in carrier:
-            carrier['f'] = np.sqrt( synth_fbd['f'][0:-1] * synth_fbd['f'][1:] )
+            carrier['f'] = synth_fbd['fc']
 
     return carrier
 
@@ -471,7 +501,7 @@ def parse_arguments(m, in_filename):
     if 'envelope' not in m or not isinstance(m['envelope'], dict):
         raise ValueError("[vocoder] For module 'vocoder', the 'envelope' key must be provided.")
 
-    m['envelope'] = parse_envelope_definition(m['envelope'], m['fs'])
+    m['envelope'] = parse_envelope_definition(m['envelope'], m['fs'], len(m['analysis_filters']['fc']))
 
     # Carrier
     if 'synthesis' not in m or not isinstance(m['synthesis'], dict):
@@ -504,14 +534,14 @@ def process_vocoder(in_filename, m, out_filename):
     s_filter = FILTER_FUNCTION_PATCH[m['synthesis_filters']['filter_function']]
 
     if m['envelope']['method'] == 'hilbert':
-        env = env_hilbert
+        env = lambda x, i_band: env_hilbert(x)
     elif m['envelope']['method'] == 'low-pass':
         env_filter = FILTER_FUNCTION_PATCH[m['envelope']['filter_function']]
         if m['envelope']['rectify'] == 'half-wave':
             rectif = lambda x: np.fmax(x, 0)
         elif m['envelope']['rectify'] == 'full-wave':
             rectif = abs
-        env = lambda x: env_lowpass(x, rectif, m['envelope']['filter'], env_filter)
+        env = lambda x, i_band: env_lowpass(x, rectif, m['envelope']['filters'][i_band], env_filter)
 
     # If the audio is multichannel, we apply the vocoder to each channel
     for i_channel in range(x.shape[1]):
@@ -537,11 +567,11 @@ def process_vocoder(in_filename, m, out_filename):
             x_band_rms[i_band] = vsct.rms(x_band[i_band])
 
             # Extracting the envelope
-            x_band[i_band] = env(x_band[i_band])
+            x_band[i_band] = env(x_band[i_band], i_band)
 
         # Here goes envelope modifiers
-        if m['envelope']['modifier'] is not None:
-            for mo in m['envelope']['modifier']:
+        if m['envelope']['modifiers'] is not None:
+            for mo in m['envelope']['modifiers']:
                 x_band = mo(x_band, m)
 
         for i_band in range(n_bands):
@@ -621,8 +651,8 @@ if __name__=="__main__":
     #
     # fig.savefig("vocoder_test_filter_order.png", dpi=300)
 
-    vsc.CONFIG['cachefolder'] = 'test/cache'
-    vsc.CONFIG['logfile'] = 'test/vt_server.log'
+    vsc.CONFIG['cachefolder'] = '../test/cache'
+    vsc.CONFIG['logfile'] = '../test/vt_server.log'
 
     if not os.path.exists(vsc.CONFIG['cachefolder']):
         os.makedirs(vsc.CONFIG['cachefolder'])
@@ -644,8 +674,8 @@ if __name__=="__main__":
             "method": "low-pass",
             "rectify": "half-wave",
             "order": 2,
-            "fc": 50,
-            "modifier": "spread"
+            "fc": np.array([50, 5]),
+            "modifiers": "spread"
             },
         "synthesis": {
             "carrier": "sin",
@@ -655,8 +685,8 @@ if __name__=="__main__":
     }
     #in_file  = "test/Beer.wav"
     #out_file = "test/Beer_test_cubic.wav"
-    in_file  = "./test/BKB1a1.wav"
-    out_file = "./test/BKB1a1_vocoded.wav"
+    in_file  = "../test/Beer.wav"
+    out_file = "../test/Beer_vocoded.wav"
     print("Starting to process files...")
     vsl.LOG.debug("Starting to process file...")
 
@@ -674,13 +704,15 @@ if __name__=="__main__":
     x  = list()
     for f in cf:
         x.extend(vsct.ramp(.5*np.sin(2*np.pi*f*t), fs, [50e-3, 50e-3]))
-    sf.write('./test/step_chirps.wav', x, fs)
+    sf.write('../test/step_chirps.wav', x, fs)
 
-    in_file  = "./test/step_chirps.wav"
-    out_file = "./test/step_chirps_vocoded.wav"
+    in_file  = "../test/step_chirps.wav"
+    out_file = "../test/step_chirps_vocoded.wav"
     print("Starting to process file...")
 
     t0 = time.time()
     f = process_vocoder(in_file, m, out_file)
     print("Well, it took %.2f ms" % ((time.time()-t0)*1e3))
     print(f)
+
+    print(m['envelope']['fc'])
