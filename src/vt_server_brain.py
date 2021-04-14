@@ -119,14 +119,14 @@ class Janitor():
 JOB_JANITOR = None # now instantiated manually
 
 def job_signature(req):
-    if "|" in req['file']:
-        files = req['file'].split("|")
+    if " >> " in req['file']:
+        files = req['file'].split(" >> ")
         return _job_signature_multi(files, req['stack'])
     else:
         return vsct.signature((os.path.abspath(req['file']), req['stack']))
 
 def _job_signature_multi(files, stack):
-    return vsct.signature(("|".join([os.path.abspath(x) for x in files]), stack))
+    return vsct.signature((" >> ".join([os.path.abspath(x) for x in files]), stack))
 
 def process(req):
     """
@@ -164,12 +164,15 @@ def process(req):
     else:
         return {'out': 'error', 'details':  "The 'cache' field could not be interpreted."}
 
-    if type(req['file'])==type([]) or (' >> ' in req['file']):
+    if isinstance(req['file'], list) or (' >> ' in req['file']):
         # Send to multi-process if there are multiple input files
         return multi_process(req)
 
     # TODO: Handle generators for file
-    req['file'] = os.path.abspath(req['file'])
+    if req['file'].endswith(os.path.sep):
+        req['file'] = os.path.abspath(req['file']) + os.path.sep
+    else:
+        req['file'] = os.path.abspath(req['file'])
 
     if not os.access(req['file'], os.R_OK):
         vsl.LOG.debug("File '%s' was requested but cannot be accessed." % req['file'])
@@ -234,7 +237,7 @@ def multi_process(req):
     This is called from :py:func:`process` if multiple files have been provided as input.
     """
 
-    if type(req['file'])==type([]):
+    if isinstance(req['file'], list):
         files = req['file']
     else:
         files = req['file'].split(' >> ')
@@ -344,6 +347,72 @@ def multi_process(req):
             return {'out': 'error', 'details': "Huuuu... we multiple times shouldn't find ourselves here... %s" % repr(req)}
 
 
+def process_module(f, m, format, cache=None):
+    """
+    Applying a single module and managing the job-file.
+
+    :param f: The source file (string) or sub-query (dict).
+
+    :param m: The module parameters.
+
+    :param format: The file format the sound needs to be generated into.
+
+    :param cache: The cache expiration policy (either None, by default, or a tuple with a
+        date and a number of hours).
+
+    """
+    # Do we have this already in cache?
+    hm = vsct.signature((os.path.abspath(f), m))
+    module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
+    if format=='mp3':
+        # We save in wav first, and will convert to mp3 at the end
+        cache_filename = os.path.join(module_cache_path, hm+".wav")
+    else:
+        cache_filename = os.path.join(module_cache_path, hm+"."+vsc.CONFIG['cacheformat'])
+
+    if not os.path.exists(module_cache_path):
+        os.makedirs(module_cache_path)
+
+    if os.access(cache_filename, os.R_OK):
+        try:
+            vsct.update_job_file(cache_filename)
+        except Exception as err:
+            vsl.LOG.warning("Something went wrong while updating the job-file associated with %s: %s" % (cache_filename, err))
+
+        f = cache_filename
+    else:
+        if 'file' in m and type(m['file'])==type(dict()):
+            # This is a module that takes a file as argument, and the file is a query
+            # We run the query first and substitute the file with the result
+            q = copy.deepcopy(m['file'])
+            q['mode'] = 'sync'
+            res = process(q)
+            if res['out']=='ok':
+                m['file'] = res['details']
+            else:
+                raise Exception(res['details'])
+
+        # Calling the right module
+        source_files = list()
+
+        if vsm.MODULES[m['module']].type == 'modifier':
+            o = vsm.MODULES[m['module']](f, m, cache_filename)
+            source_files = [f]
+
+        elif vsm.MODULES[m['module']].type == 'generator':
+            o, sources_files = vsm.MODULES[m['module']](f, m, cache_filename)
+            if sources_files is None:
+                sources_files = []
+
+        if 'file' in m:
+            source_files.append(m['file'])
+
+        vsct.job_file(o, source_files, cache, m)
+
+        f = o
+
+    return f
+
 
 def process_async(req, h, out_filename):
     """
@@ -405,49 +474,10 @@ def process_async(req, h, out_filename):
             return
 
         vsl.LOG.debug("[%s] Doing module '%s'" % (h, m['module']))
-        if m['module'] in vsm.PATCH:
+        if m['module'] in vsm.MODULES:
             try:
-                # Do we have this already in cache?
-                hm = vsct.signature((os.path.abspath(f), m))
-                module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
-                if req['format']=='mp3':
-                    # We save in wav first, and will convert to mp3 at the end
-                    cache_filename = os.path.join(module_cache_path, hm+".wav")
-                else:
-                    cache_filename = os.path.join(module_cache_path, hm+"."+vsc.CONFIG['cacheformat'])
-
-                if not os.path.exists(module_cache_path):
-                    os.makedirs(module_cache_path)
-
-                if os.access(cache_filename, os.R_OK):
-                    try:
-                        vsct.update_job_file(cache_filename)
-                    except:
-                        vsk.LOG.warning("Something went wrong while updating the job-file associated with %s" % cache_filename)
-
-                    f = cache_filename
-                else:
-                    if 'file' in m and type(m['file'])==type(dict()):
-                        # This is a module that takes a file as argument, and the file is a query
-                        # We run the query first and substitute the file with the result
-                        q = copy.deepcopy(m['file'])
-                        q['mode'] = 'sync'
-                        res = process(q)
-                        if res['out']=='ok':
-                            m['file'] = res['details']
-                        else:
-                            raise Exception(res['details'])
-
-                    # Calling the right module
-                    o = vsm.PATCH[m['module']](f, m, cache_filename)
-                    source_files = [f]
-                    if 'file' in m:
-                        source_files.append(m['file'])
-                    vsct.job_file(o, source_files, req['cache'], m)
-
-                    f = o
-
-                    vsl.LOG.debug("[%s] Done with module '%s'" % (h, m['module']))
+                f = process_module(f, m, req['format'], req['cache'])
+                vsl.LOG.debug("[%s] Done with module '%s'" % (h, m['module']))
 
             except Exception as err:
                 #err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))

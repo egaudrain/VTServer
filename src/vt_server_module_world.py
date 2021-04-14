@@ -140,11 +140,17 @@ def parse_arguments(m):
         if k not in m:
             m[k] = None
         else:
-            args_ok, args = check_arguments(RE[k].match(m[k]), k)
-            if not args_ok:
-                raise ValueError("[world] Error while parsing argument %s (%s): %s" % (k, m[k], args))
+            if isinstance(m[k], dict):
+                if 'u' in m[k] and 'v' in m[k] and '~' in m[k]:
+                    continue
+            elif m[k] is None:
+                continue
             else:
-                m[k] = args
+                args_ok, args = check_arguments(RE[k].match(m[k]), k)
+                if not args_ok:
+                    raise ValueError("[world] Error while parsing argument %s (%s): %s" % (k, m[k], args))
+                else:
+                    m[k] = args
 
     return m
 

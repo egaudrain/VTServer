@@ -6,8 +6,22 @@ vt_server_modules
 =================
 
 This module contains a number of ``process_...`` functions, imports
-the other process modules and defines the :py:data:`PATCH` that dispatches
+the other process modules and defines the :py:data:`MODULES` patch that dispatches
 process module names to the right process function.
+
+There are two types of modules:
+
+    'modifier'
+        The modules take a source sound file as input and generate a new sound file from
+        it. The cache management for these modules is such that, before the cache
+        expiration date, if a source sound file is missing, the generated file will
+        also be removed. Source files are listed in the job-files. After the expiration
+        date, the generated file is removed.
+
+    'generator'
+        These modules do not take a source sound file as input, but generate sounds
+        via other means. Sometimes they do need source files and therefore need to
+        declare themselves which files they have used.
 
 .. Created on 2020-03-24.
 """
@@ -22,8 +36,32 @@ import soundfile as sf
 import numpy as np
 import scipy, scipy.signal
 
-#: The :py:data:`PATCH` is used to dispatch stack item modules to their corresponding function
-PATCH = dict()
+class vt_module:
+    """
+    This class is a simple wrapper for the module functions.
+
+    :param process_function: The main process function of the module.
+    :param name: The name of the module, which is also the keyword used in queries. If ``None``, the name is derived from the process_function name.
+    :param type: The type of module ('modifier' or 'generator').
+
+    To access the name of the module, use the attribute :py:attr:__name__.
+
+    To call the process function, you can use the class instance as a callable.
+    """
+
+    def __init__(self, process_function, name=None, type='modifier'):
+        if name is None:
+            name = process_function.__name__.replace('process_', '', 1)
+        self.__name__ = name
+        self.process_function = process_function
+        self.type = type
+
+    def __call__(self, *args):
+        return self.process_function(*args)
+
+
+#: The :py:data:`MODULE` is used to dispatch stack item modules to their corresponding function
+MODULES = dict()
 
 #-------------------------------------------------------
 
@@ -35,7 +73,7 @@ def process_time_reverse(in_filename, m, out_filename):
     sf.write(out_filename, np.flip(x, axis=0), fs)
     return out_filename
 
-PATCH['time-reverse'] = process_time_reverse
+MODULES['time-reverse'] = vt_module(process_time_reverse, 'time-reverse')
 
 #-------------------------------------------------------
 
@@ -121,7 +159,7 @@ def process_mixin(in_filename, m, out_filename):
 
     return out_filename
 
-PATCH['mixin'] = process_mixin
+MODULES['mixin'] = vt_module(process_mixin)
 
 #-------------------------------------------------------
 
@@ -144,7 +182,7 @@ def process_pad(in_filename, m, out_filename):
 
     return out_filename
 
-PATCH['pad'] = process_pad
+MODULES['pad'] = vt_module(process_pad)
 
 #-------------------------------------------------------
 
@@ -174,7 +212,7 @@ def process_ramp(in_filename, m, out_filename):
 
     return out_filename
 
-PATCH['ramp'] = process_ramp
+MODULES['ramp'] = vt_module(process_ramp)
 
 #-------------------------------------------------------
 # Look for modules in the same folder:
@@ -196,10 +234,22 @@ def discover_modules():
         try:
             mo = import_module(mod_name)
             mod_process = getattr(mo, mod_process_name)
-            PATCH[mod_label] = mod_process
+            if hasattr(mo, 'MODULE_TYPE'):
+                mod_type = getattr(mo, 'MODULE_TYPE')
+            else:
+                mod_type = 'modifier'
+            MODULES[mod_label] = vt_module(mod_process, mod_label, mod_type)
             vsl.LOG.info("Found module %s providing handler %s for keyword '%s'" % (mod_name, mod_process_name, mod_label))
         except Exception as e:
             vsl.LOG.error("Error while attempting importation of module %s:\n%s" % (m, e))
 
 
-    vsl.LOG.info("The available modules are now: "+(", ".join(PATCH.keys())))
+    vsl.LOG.info("The available modules are now: "+(", ".join(MODULES.keys())))
+
+#===============================================================================
+if __name__=='__main__':
+    discover_modules()
+    for k in MODULES:
+        print(k+":")
+        print("\t"+MODULES[k].__name__)
+        print("\t"+MODULES[k].type)

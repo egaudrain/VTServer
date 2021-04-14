@@ -398,6 +398,23 @@ file is accessed, the cache expiration is updated with the time-delta.</p>
 </div></blockquote>
 </dd></dl>
 
+<dl class="function">
+<dt id="vt_server_brain.process_module">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process_module</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">m</em>, <em class="sig-param">format</em>, <em class="sig-param">cache=None</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applying a single module and managing the job-file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> – The source file (string) or sub-query (dict).</p></li>
+<li><p><strong>m</strong> – The module parameters.</p></li>
+<li><p><strong>format</strong> – The file format the sound needs to be generated into.</p></li>
+<li><p><strong>cache</strong> – The cache expiration policy (either None, by default, or a tuple with a
+date and a number of hours).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <span class="target" id="module-vt_server_common_tools"></span><div class="section" id="vt-server-common-tools">
 <h2>vt_server_common_tools<a class="headerlink" href="#vt-server-common-tools" title="Permalink to this headline">¶</a></h2>
@@ -416,7 +433,7 @@ file is accessed, the cache expiration is updated with the time-delta.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target_file</strong> – The output file that this job file concerns.</p></li>
 <li><p><strong>source_files</strong> – The list of source files that were used to produce the target file. During cache clean-up, if one of the source files is removed, the target will be removed.</p></li>
-<li><p><strong>cache_expiration</strong> – The cache expiration datetime or <cite>None</cite> (default if omitted).</p></li>
+<li><p><strong>cache_expiration</strong> – A tuple with the cache expiration datetime and the duration of validity in hours, or <cite>None</cite> (default if omitted).</p></li>
 <li><p><strong>stack</strong> – Optionnally a stack can be provided. <cite>None</cite> otherwise.</p></li>
 </ul>
 </dd>
@@ -463,12 +480,27 @@ is not the job file itself, but the file targeted by the job-file.</p>
 <span class="target" id="module-vt_server_modules"></span><div class="section" id="vt-server-modules">
 <h2>vt_server_modules<a class="headerlink" href="#vt-server-modules" title="Permalink to this headline">¶</a></h2>
 <p>This module contains a number of <code class="docutils literal notranslate"><span class="pre">process_...</span></code> functions, imports
-the other process modules and defines the <a class="reference internal" href="#vt_server_modules.PATCH" title="vt_server_modules.PATCH"><code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code></a> that dispatches
+the other process modules and defines the <a class="reference internal" href="#vt_server_modules.MODULES" title="vt_server_modules.MODULES"><code class="xref py py-data docutils literal notranslate"><span class="pre">MODULES</span></code></a> patch that dispatches
 process module names to the right process function.</p>
+<p>There are two types of modules:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘modifier’</dt><dd><p>The modules take a source sound file as input and generate a new sound file from
+it. The cache management for these modules is such that, before the cache
+expiration date, if a source sound file is missing, the generated file will
+also be removed. Source files are listed in the job-files. After the expiration
+date, the generated file is removed.</p>
+</dd>
+<dt>‘generator’</dt><dd><p>These modules do not take a source sound file as input, but generate sounds
+via other means. Sometimes they do need source files and therefore need to
+declare themselves which files they have used.</p>
+</dd>
+</dl>
+</div></blockquote>
 <dl class="data">
-<dt id="vt_server_modules.PATCH">
-<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">PATCH</code><em class="property"> = {'mixin': &lt;function process_mixin&gt;, 'pad': &lt;function process_pad&gt;, 'ramp': &lt;function process_ramp&gt;, 'time-reverse': &lt;function process_time_reverse&gt;}</em><a class="headerlink" href="#vt_server_modules.PATCH" title="Permalink to this definition">¶</a></dt>
-<dd><p>The <a class="reference internal" href="#vt_server_modules.PATCH" title="vt_server_modules.PATCH"><code class="xref py py-data docutils literal notranslate"><span class="pre">PATCH</span></code></a> is used to dispatch stack item modules to their corresponding function</p>
+<dt id="vt_server_modules.MODULES">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">MODULES</code><em class="property"> = {'mixin': &lt;vt_server_modules.vt_module object&gt;, 'pad': &lt;vt_server_modules.vt_module object&gt;, 'ramp': &lt;vt_server_modules.vt_module object&gt;, 'time-reverse': &lt;vt_server_modules.vt_module object&gt;}</em><a class="headerlink" href="#vt_server_modules.MODULES" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="xref py py-data docutils literal notranslate"><span class="pre">MODULE</span></code> is used to dispatch stack item modules to their corresponding function</p>
 </dd></dl>
 
 <dl class="function">
@@ -523,6 +555,24 @@ If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of
 <dt id="vt_server_modules.process_time_reverse">
 <code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_time_reverse</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_time_reverse" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>“time-reverse”</cite> flips temporally the input. It doesn’t take any argument.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="vt_server_modules.vt_module">
+<em class="property">class </em><code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">vt_module</code><span class="sig-paren">(</span><em class="sig-param">process_function</em>, <em class="sig-param">name=None</em>, <em class="sig-param">type='modifier'</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.vt_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class is a simple wrapper for the module functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>process_function</strong> – The main process function of the module.</p></li>
+<li><p><strong>name</strong> – The name of the module, which is also the keyword used in queries. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the name is derived from the process_function name.</p></li>
+<li><p><strong>type</strong> – The type of module (‘modifier’ or ‘generator’).</p></li>
+</ul>
+</dd>
+</dl>
+<p>To access the name of the module, use the attribute :py:attr:__name__.</p>
+<p>To call the process function, you can use the class instance as a callable.</p>
 </dd></dl>
 
 </div>
@@ -678,7 +728,7 @@ a MATLAB vocoder designed to be highly programmable.</p>
         <span class="nt">&quot;rectify&quot;</span><span class="p">:</span> <span class="s2">&quot;half-wave&quot;</span><span class="p">,</span>
         <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
         <span class="nt">&quot;fc&quot;</span><span class="p">:</span> <span class="mi">160</span><span class="p">,</span>
-        <span class="nt">&quot;modifier&quot;</span><span class="p">:</span> <span class="s2">&quot;spread&quot;</span>
+        <span class="nt">&quot;modifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;spread&quot;</span>
         <span class="p">},</span>
     <span class="nt">&quot;synthesis&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;carrier&quot;</span><span class="p">:</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span>
@@ -774,9 +824,10 @@ is the effective order, so only even numbered are accepted because
 the envelope is extracted with a zero-phase filter.</p>
 </dd>
 <dt>fc</dt><dd><p>The cutoff of the envelope extraction in Hertz. Can be a single
-value or a value per channel.</p>
+value or a value per band. If fewer values than bands are provided,
+the array is recycled as necessary.</p>
 </dd>
-<dt>modifier</dt><dd><p><cite>[optional]</cite> A (list of) modifier function names that can be
+<dt>modifiers</dt><dd><p><cite>[optional]</cite> A (list of) modifier function names that can be
 applied to envelope matrix.
 At the moment, only <cite>“spread”</cite> is implemented. With this modifier,
 the synthesis filters are used to simulate a spread of excitation
@@ -807,10 +858,12 @@ before and after modulation you may alter the spectral shape of your signal.</p>
 <p>If the <cite>carrier</cite> is <cite>noise</cite>, then a random seed can be provided in <cite>random_seed</cite>
 to have frozen noise. If not the random number generator will be initialized with the
 current clock. Note that for multi-channel audio files, the seed is used for each
-channel. If no seed is given, the various chennels will have different noises as
-carriers. To have correlated noise across chennels, pass in a (random) seed.</p>
-<p>If the <cite>carrier</cite> is <cite>sin</cite>, the geometric mean of the band’s cutoffs are used unless
-attribute <cite>f</cite> is provided, in which case it defines the frequencies.</p>
+channel. If no seed is given, the various bands will have different noises as
+carriers. To have correlated noise across bands, pass in a (random) seed. Also note
+that the cache system also means that once an output file is generated, it will be served
+as is rather than re-generated. To generate truely random files, provide a random seed.</p>
+<p>If the <cite>carrier</cite> is <cite>sin</cite>, the center frequency of each band will be determined based on the scale
+that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.</p>
 </div>
 <div class="section" id="content">
 <h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
@@ -864,7 +917,7 @@ of <cite>in_filename</cite>, you’ll get an error.</p>
 
 <dl class="function">
 <dt id="vt_server_module_vocoder.parse_envelope_definition">
-<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_envelope_definition</code><span class="sig-paren">(</span><em class="sig-param">env_def</em>, <em class="sig-param">fs</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_envelope_definition" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">parse_envelope_definition</code><span class="sig-paren">(</span><em class="sig-param">env_def</em>, <em class="sig-param">fs</em>, <em class="sig-param">n_bands</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_vocoder.parse_envelope_definition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses an envelope definition.</p>
 </dd></dl>
 

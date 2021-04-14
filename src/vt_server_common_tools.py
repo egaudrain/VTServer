@@ -23,7 +23,7 @@ def job_file(target_file, source_files, cache_expiration=None, stack=None, error
 
     :param source_files: The list of source files that were used to produce the target file. During cache clean-up, if one of the source files is removed, the target will be removed.
 
-    :param cache_expiration: The cache expiration datetime or `None` (default if omitted).
+    :param cache_expiration: A tuple with the cache expiration datetime and the duration of validity in hours, or `None` (default if omitted).
 
     :param stack: Optionnally a stack can be provided. `None` otherwise.
 
@@ -93,8 +93,11 @@ def ramp(x, fs, dur, shape='cosine'):
         if shape=='cosine':
             w = (1-np.cos(w*np.pi))/2
         if len(x.shape)>1:
-            w = np.tile(w, (1,x.shape[1]))
-        x[0:n] = x[0:n] * w
+            w.shape = (w.shape[0],1)
+            w = np.tile(w, (1, x.shape[1]))
+            x[0:n,:] = x[0:n,:] * w
+        else:
+            x[0:n] = x[0:n] * w
 
     if dur[1] != 0:
         n = int(fs*dur[1])
@@ -102,6 +105,7 @@ def ramp(x, fs, dur, shape='cosine'):
         if shape=='cosine':
             w = (1-np.cos(w*np.pi))/2
         if len(x.shape)>1:
+            w.shape = (w.shape[0],1)
             w = np.tile(w, (1,x.shape[1]))
         x[-n:] = x[-n:] * w
 

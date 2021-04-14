@@ -15,8 +15,8 @@ import socketserver
 import json
 import os, traceback
 import vt_server_logging as vsl
-import vt_server_brain
 from vt_server_modules import discover_modules
+import vt_server_brain
 # optional
 import threading
 
