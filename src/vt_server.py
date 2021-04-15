@@ -150,10 +150,11 @@ def main():
 
     config = vsc.CONFIG
 
-    if os.access(config['logfile'], os.W_OK):
+    #if os.access(config['logfile'], os.W_OK):
+    try:
         vsl.LOG.addHandler(vsl.get_FileHandler(config['logfile']))
-    else:
-        vsl.LOG.error("The logfile '%s' couldn't be accessed. Check that there is proper permission to write there." % config['logfile'])
+    except Exception as err:
+        vsl.LOG.error("The logfile '%s' couldn't be accessed. Check that there is proper permission to write there: %s" % (os.path.abspath(config['logfile'], err)))
 
     try:
         vsl.LOG.info("Setting logging level to '%s'." % config['loglevel'])
