@@ -61,6 +61,38 @@ def update_job_file(target_file):
 # Audio tools
 #-----------------------------------------------------
 
+import scipy.signal as sg
+try:
+    import samplerate
+    DEFAULT_RESAMPLING_METHOD = 'samplerate'
+except ImportError:
+    DEFAULT_RESAMPLING_METHOD = 'scipy'
+
+def resample(x, ratio, method=None):
+    """
+    The common resampling function.
+
+    Each module can use their own resampling function, but this one will default to the best
+    available option. If `samplerate <https://github.com/tuxu/python-samplerate>`_ is installed,
+    it will be used. Otherwise, the :py:func:`scipy.signal.resample` function is used.
+
+    :param x: The input sound as a numpy array.
+    :param ratio: The ratio of new frequency / old frequency.
+    :param method: 'scipy', 'samplerate', 'samplerate-fast'. Defaults to 'samplerate' if
+        the module is available, and 'scipy' otherwise.
+    """
+
+    if method is None:
+        method = DEFAULT_RESAMPLING_METHOD
+
+    if method=='samplerate':
+        return samplerate.resample(x, ratio, 'sinc_best')
+    elif method=='samplerate-fast':
+        return samplerate.resample(x, ratio, 'sinc_fastest')
+    elif method=='scipy':
+        return sg.resample(x, int(y.shape[0]*ratio))
+
+
 def rms(x):
     return np.sqrt(np.mean(x**2))
 

@@ -31,6 +31,12 @@ VTServer uses **pysoundfile** to read sound files. On Linux you will need to ins
 
     $ sudo apt install libsndfile1
 
+It is also recommended to install **samplerate** for precise and efficient resampling. On Linux, that means you need to install `libsamplerate <http://www.mega-nerd.com/libsamplerate/>`_:
+
+.. code-block:: text
+
+    $ sudo apt install libsamplerate0
+
 The Numpy and Scipy packages of the current Ubuntu 18.04 LTS are not new enough, so just get the latest with pip.
 On macOS, it is also recommended to use pip to install these dependencies.
 
@@ -38,7 +44,7 @@ This can be done as follows:
 
 .. code-block:: text
 
-    $ sudo -H pip3 install numpy scipy pysoundfile pyworld
+    $ sudo -H pip3 install numpy scipy pysoundfile pyworld samplerate
 
 To use 'mp3' as an output format, you need to install `LAME <https://lame.sourceforge.io/>`__.
 

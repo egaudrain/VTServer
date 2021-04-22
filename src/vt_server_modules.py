@@ -111,9 +111,9 @@ def process_mixin(in_filename, m, out_filename):
     # Normalizing the sampling frequency
     fs = max(fs_A, fs_B)
     if fs_A != fs:
-        A = scipy.signal.resample(A, int(A.shape[0]*fs/fs_A))
+        A = vsct.resample(A, fs/fs_A)
     if fs_B != fs:
-        B = scipy.signal.resample(B, int(B.shape[0]*fs/fs_B))
+        B = vsct.resample(B, fs/fs_B)
 
     # Normalizing the shape
     n  = max(len(A.shape), len(B.shape))
@@ -245,6 +245,8 @@ def discover_modules():
 
 
     vsl.LOG.info("The available modules are now: "+(", ".join(MODULES.keys())))
+
+    vsl.LOG.info("Default resampling method is: %s" % vsct.DEFAULT_RESAMPLING_METHOD)
 
 #===============================================================================
 if __name__=='__main__':
