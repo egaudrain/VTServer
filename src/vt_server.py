@@ -21,7 +21,7 @@ import vt_server_brain
 import threading
 
 
-__version__ = "2.1"
+__version__ = "2.2"
 __author__  = "Etienne Gaudrain"
 
 
