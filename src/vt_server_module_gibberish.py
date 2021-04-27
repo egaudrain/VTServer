@@ -13,7 +13,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.
     {
         "module": "gibberish",
         "seed":   8,
-        "files": ["sp1F/cat_8_red.wav", "sp1F/cat_9_black.wav", ...],
+        "files": ["sp1F/cat_8_red.wav", "sp1F/cat_9_black.wav", "..."],
         "chunk_dur_min": 0.2,
         "chunk_dur_max": 0.7,
         "total_dur": 1.2,
@@ -66,7 +66,7 @@ Instead of ``files``, we can have ``shell_pattern`` which defines a shell-like p
             "include": "sp1F/cat*.wav",
             "exclude": ["sp1F/cat_8_*.wav", "sp1F/cat_*_red.wav"]
         },
-        ...
+        "...": "..."
     }
 
 If a list of patterns is provided, the outcome is cumulative.

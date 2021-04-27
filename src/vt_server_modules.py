@@ -81,16 +81,20 @@ def process_mixin(in_filename, m, out_filename):
     """
     `"mixin"` adds another sound file (B) to the input file (A). The arguments are:
 
-    :param file: The file that needs to be added to the input file.
+    file
+        The file that needs to be added to the input file.
 
-    :param levels: A 2-element array containing the gains in dB applied to the A and B.
+    levels
+        A 2-element array containing the gains in dB applied to the A and B.
 
-    :param pad: A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
-                Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
+    pad
+        A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
+        Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
 
-    :param align: 'left', 'center', or 'right'. When the two sounds files are not the same length,
-          the shorter one will be padded so as to be aligned as described with the other one. This is
-          applied after padding.
+    align
+        'left', 'center', or 'right'. When the two sounds files are not the same length,
+        the shorter one will be padded so as to be aligned as described with the other one. This is
+        applied after padding.
 
     If the two sound files are not of the same sampling frequency, they are resampled to the max of the two.
 
@@ -169,11 +173,16 @@ def process_pad(in_filename, m, out_filename):
     as arguments, specifying the duration of silence in seconds.
     """
 
+    for k in ['before', 'after']:
+        if k not in m:
+            m[k] = 0
+        try:
+            m[k] = float(m[k])
+        except:
+            raise ValueError("'%s' has to be convertible to a float (%s given)" % (k,repr(m[k])))
+
     x, fs = sf.read(in_filename)
-    if 'before' not in m:
-        m['before'] = 0
-    if 'after' not in m:
-        m['after'] = 0
+
     if len(x.shape)>1:
         x = np.concatenate((np.zeros((int(m['before']*fs), x.shape[1])), x, np.zeros((int(m['after']*fs), x.shape[1]))), axis=0)
     else:
@@ -186,14 +195,63 @@ MODULES['pad'] = vt_module(process_pad)
 
 #-------------------------------------------------------
 
+def process_slice(in_filename, m, out_filename):
+    """
+    `"slice"` selects a portion of a sound. It takes the following arguments:
+
+    start
+        The onset point, in seconds. [0 if omitted.]
+
+    end
+        The offset point, in seconds. Negative number are counted
+        from the end. Values exceding the length of the file will lead to zero padding.
+        [The end of the sound if omitted.]
+
+    If the start time is larger than the end time, an error is raised.
+    """
+
+    for k in ['start', 'end']:
+        if k not in m:
+            m[k] = 0
+        try:
+            m[k] = float(m[k])
+        except:
+            raise ValueError("'%s' has to be convertible to a float (%s given)" % (k,repr(m[k])))
+
+    x, fs = sf.read(in_filename, always_2d=True)
+
+    i1 = round(fs*m['start'])
+    if m['end']==0:
+        i2 = x.shape[0]
+    else:
+        i2 = round(fs*m['end'])+1
+
+    if (i2>0 and i1>=i2) or (i2<0 and i1>=x.shape[0]-i2):
+            raise ValueError("'start' (%f s, i=%d) cannot be larger than 'end' (%f s, i=%d)" % (m['start'], i1, m['end'], i2))
+
+    if i2>=x.shape[0]:
+        x = np.pad(x, ((0, i2-x.shape[0]), (0,0)))
+
+    x = x[i1:i2,]
+
+    sf.write(out_filename, x, fs)
+
+    return out_filename
+
+MODULES['slice'] = vt_module(process_slice)
+
+#-------------------------------------------------------
+
 def process_ramp(in_filename, m, out_filename):
     """
     `"ramp"` smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:
 
-    :param duration: In seconds. If a single number, it is applied to both onset and offset.
-      If a vector is given, then it specifies `[onset, offset]`. A value of zero means no ramp.
+    duration
+        In seconds. If a single number, it is applied to both onset and offset.
+        If a vector is given, then it specifies `[onset, offset]`. A value of zero means no ramp.
 
-    :param shape: Either 'linear' (default) or 'cosine'.
+    shape
+        Either 'linear' (default) or 'cosine'.
 
     """
 

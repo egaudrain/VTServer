@@ -241,12 +241,13 @@ module is also cached, even when the module doesn't do much (like adding silence
 We could make (intermediate) caching optional for future versions, but this is not
 implemented at the moment.
 
-Each module has its own parameters. See :mod:`vt_server_modules` for more details.
+Each module has its own parameters. See :ref:`available-modules` for more details.
 
 Sub-queries
 ^^^^^^^^^^^
 
-If a module has a **file** parameter (for instance the :func:`mixin<vt_server_modules.process_mixin>` module),
+In the main query, or if a module has a **file** parameter
+(for instance the :func:`mixin<vt_server_modules.process_mixin>` module),
 another query can be used in place of a file name. **mixin** adds two sound files
 on top of each other. If you want to process them both before mixing, you can use a
 sub-query.

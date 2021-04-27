@@ -34,6 +34,11 @@ Source documentation
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: vt_server_module_gibberish
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: vt_server_config
     :members:
     :undoc-members:

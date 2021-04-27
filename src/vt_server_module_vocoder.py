@@ -50,7 +50,7 @@ analysis_filters
 **analysis_filters** is a dictionary defining the filterbank used to analyse the
 input signal. It defines both the cutoff frequencies **f** and the filtering **method**.
 
-*f*: Filterbank frequencies
+*f* Filterbank frequencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These can either be specified as an array of values, using a predefined setting, or
@@ -107,7 +107,7 @@ synthesis_filters
 It can be the string `"analysis_filters"` to make them identical to the analysis filters.
 This is also what happens if the element is omitted or ``null``.
 
-Otherwise it can be a dictionary similar to `analysis_filters`_. The number of channels
+Otherwise it can be a dictionary similar to `analysis_filters`. The number of channels
 has to be the same. If it differs, an error will be returned.
 
 
@@ -170,9 +170,6 @@ as is rather than re-generated. To generate truely random files, provide a rando
 
 If the `carrier` is `sin`, the center frequency of each band will be determined based on the scale
 that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.
-
-Content
--------
 
 .. Created on 2020-03-27.
 

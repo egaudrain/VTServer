@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Available modules &mdash; VT Server  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to make a module" href="module_howto.html" />
+    <link rel="prev" title="User manual" href="user_manual.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> VT Server
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_manual.html">User manual</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Available modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gibberish"><code class="docutils literal notranslate"><span class="pre">gibberish</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#files">Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#segment-properties">Segment properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stack">Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#seed">Seed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mixin"><code class="docutils literal notranslate"><span class="pre">mixin</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pad"><code class="docutils literal notranslate"><span class="pre">pad</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ramp"><code class="docutils literal notranslate"><span class="pre">ramp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#slice"><code class="docutils literal notranslate"><span class="pre">slice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-reverse"><code class="docutils literal notranslate"><span class="pre">time-reverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vocoder"><code class="docutils literal notranslate"><span class="pre">vocoder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-filters">analysis_filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#f-filterbank-frequencies"><em>f</em> Filterbank frequencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filtering-method">Filtering <em>method</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesis-filters">synthesis_filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#envelope">envelope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesis">synthesis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Source documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">VT Server</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Available modules</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/vt_modules.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="available-modules">
+<span id="id1"></span><h1>Available modules<a class="headerlink" href="#available-modules" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<hr class="docutils" />
+<div class="section" id="gibberish">
+<h2><code class="docutils literal notranslate"><span class="pre">gibberish</span></code><a class="headerlink" href="#gibberish" title="Permalink to this headline">¶</a></h2>
+<p>This module contains a function to create a gibberish masker,
+created out of random sentence chunks, that can be used in the CRM experiment.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;gibberish&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;seed&quot;</span><span class="p">:</span>   <span class="mi">8</span><span class="p">,</span>
+    <span class="nt">&quot;files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sp1F/cat_8_red.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;sp1F/cat_9_black.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;chunk_dur_min&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="nt">&quot;chunk_dur_max&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="nt">&quot;total_dur&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+    <span class="nt">&quot;ramp&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="nt">&quot;force_nb_channels&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;force_fs&quot;</span><span class="p">:</span> <span class="mi">44100</span><span class="p">,</span>
+    <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;f0&quot;</span><span class="p">:</span>     <span class="s2">&quot;*2&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;vtl&quot;</span><span class="p">:</span>    <span class="s2">&quot;-3.8st&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The base folder will be read from the <code class="docutils literal notranslate"><span class="pre">in_filename</span></code> of the process function. If the
+gibberrish module is used at the top of the stack, this will be the content of the <code class="docutils literal notranslate"><span class="pre">file</span></code>
+attribute of the main query. If is used lower in the stack, there may be unexpected results
+as the folder will be the cache folder of the previous module.</p>
+<p>If the source files have different sampling frequencies, the sampling frequency of the first chunk
+will be used as reference, and all the following segments will be resampled to that sampling frequency.
+Alternatively, it is possible to specify <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> to impose a sampling frequency. If <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> is
+0 or <code class="docutils literal notranslate"><span class="pre">None</span></code>, the default method is used.</p>
+<p>A similar mechanism is used for stereo vs. mono files. The number of channels can be imposed with <code class="docutils literal notranslate"><span class="pre">force_nb_channels</span></code>.
+Again, if <code class="docutils literal notranslate"><span class="pre">force_nb_channels</span></code> is 0 or <code class="docutils literal notranslate"><span class="pre">None</span></code>, the default method based on the first chunk is used. If the number
+of channels of a segment is greater than the number of channels in the output, all channels are averaged and
+duplicated to the appropriate number of channels. This is fine for stereo/mono conversion, but keep that in mind
+if you ever use files with more channels. If a segment has fewer channels than needed, the extra channels are created
+by recycling the existing values. Again, for stero/mono conversion, this is fine, but might not be what you want
+for multi-channel audio.</p>
+<div class="section" id="files">
+<h3>Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h3>
+<p>The module will look through the provided <code class="docutils literal notranslate"><span class="pre">files</span></code> to generate the output. As much as possible, it will try to
+not reuse a file, but will loop through the list if necessary.</p>
+<p>The list will be shuffled randomly based on the <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter.</p>
+<p>Instead of <code class="docutils literal notranslate"><span class="pre">files</span></code>, we can have <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code> which defines a shell-like patterns as an object:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;gibberish&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;seed&quot;</span><span class="p">:</span>   <span class="mi">8</span><span class="p">,</span>
+    <span class="nt">&quot;shell_pattern&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;include&quot;</span><span class="p">:</span> <span class="s2">&quot;sp1F/cat*.wav&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;exclude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sp1F/cat_8_*.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;sp1F/cat_*_red.wav&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If a list of patterns is provided, the outcome is cumulative.</p>
+<p>Alternatively, a regular expression can be used as <code class="docutils literal notranslate"><span class="pre">re_pattern</span></code>.</p>
+<p>If all <code class="docutils literal notranslate"><span class="pre">files</span></code>, and <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code> and/or <code class="docutils literal notranslate"><span class="pre">re_pattern</span></code> are provided, only one is used by prioritising in the order they are presented here.</p>
+</div>
+<div class="section" id="segment-properties">
+<h3>Segment properties<a class="headerlink" href="#segment-properties" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">chunk_dur_min</span></code> and <code class="docutils literal notranslate"><span class="pre">chunk_dur_max</span></code> define the minimum and maximum segment duration. <code class="docutils literal notranslate"><span class="pre">total_dur</span></code> is the total duration we are aiming to generate. <code class="docutils literal notranslate"><span class="pre">ramp</span></code> defines the duration of the ramps applied to each segment.</p>
+</div>
+<div class="section" id="stack">
+<h3>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">stack</span></code> is an optional processing stack that will be applied to all the selected files before concatenation.</p>
+</div>
+<div class="section" id="seed">
+<h3>Seed<a class="headerlink" href="#seed" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter is mandatory to make sure cache is managed properly.</p>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="mixin">
+<h2><code class="docutils literal notranslate"><span class="pre">mixin</span></code><a class="headerlink" href="#mixin" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“mixin”</cite> adds another sound file (B) to the input file (A). The arguments are:</p>
+<dl class="simple">
+<dt>file</dt><dd><p>The file that needs to be added to the input file.</p>
+</dd>
+<dt>levels</dt><dd><p>A 2-element array containing the gains in dB applied to the A and B.</p>
+</dd>
+<dt>pad</dt><dd><p>A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
+Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.</p>
+</dd>
+<dt>align</dt><dd><p>‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
+the shorter one will be padded so as to be aligned as described with the other one. This is
+applied after padding.</p>
+</dd>
+</dl>
+<p>If the two sound files are not of the same sampling frequency, they are resampled to the max of the two.</p>
+<p>If the two sound files are not the same shape (number of channels), the one with fewer channels is duplicated to have the same number of channels as the one with the most.</p>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="pad">
+<h2><code class="docutils literal notranslate"><span class="pre">pad</span></code><a class="headerlink" href="#pad" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“pad”</cite> adds silence before and/or after the sound. It takes <strong>before</strong> and/or <strong>after</strong>
+as arguments, specifying the duration of silence in seconds.</p>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="ramp">
+<h2><code class="docutils literal notranslate"><span class="pre">ramp</span></code><a class="headerlink" href="#ramp" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“ramp”</cite> smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:</p>
+<dl class="simple">
+<dt>duration</dt><dd><p>In seconds. If a single number, it is applied to both onset and offset.
+If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of zero means no ramp.</p>
+</dd>
+<dt>shape</dt><dd><p>Either ‘linear’ (default) or ‘cosine’.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="slice">
+<h2><code class="docutils literal notranslate"><span class="pre">slice</span></code><a class="headerlink" href="#slice" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“slice”</cite> selects a portion of a sound. It takes the following arguments:</p>
+<dl class="simple">
+<dt>start</dt><dd><p>The onset point, in seconds. [0 is omitted.]</p>
+</dd>
+<dt>end</dt><dd><p>The offset point, in seconds. Negative number are counted
+from the end. Values exceding the length of the file will lead to zero padding.
+[The end of the sound if omitted.]</p>
+</dd>
+</dl>
+<p>If the start time is larger than the end time, an error is raised.</p>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="time-reverse">
+<h2><code class="docutils literal notranslate"><span class="pre">time-reverse</span></code><a class="headerlink" href="#time-reverse" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“time-reverse”</cite> flips temporally the input. It doesn’t take any argument.</p>
+</div></blockquote>
+</div>
+<hr class="docutils" />
+<div class="section" id="vocoder">
+<h2><code class="docutils literal notranslate"><span class="pre">vocoder</span></code><a class="headerlink" href="#vocoder" title="Permalink to this headline">¶</a></h2>
+<p>This module defines the <em>world</em> processor based on <a class="reference external" href="https://github.com/egaudrain/vocoder">vocoder</a>,
+a MATLAB vocoder designed to be highly programmable.</p>
+<p>Here is and example of module instructions:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;vocoder&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;fs&quot;</span><span class="p">:</span> <span class="mi">44100</span><span class="p">,</span>
+    <span class="nt">&quot;analysis_filters&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;f&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;fmin&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="nt">&quot;fmax&quot;</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span> <span class="nt">&quot;n&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="nt">&quot;scale&quot;</span><span class="p">:</span> <span class="s2">&quot;greenwood&quot;</span> <span class="p">},</span>
+        <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;family&quot;</span><span class="p">:</span> <span class="s2">&quot;butterworth&quot;</span><span class="p">,</span> <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="nt">&quot;zero-phase&quot;</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span>
+        <span class="p">},</span>
+    <span class="nt">&quot;synthesis_filters&quot;</span><span class="p">:</span> <span class="s2">&quot;analysis_filters&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;envelope&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;low-pass&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;rectify&quot;</span><span class="p">:</span> <span class="s2">&quot;half-wave&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nt">&quot;fc&quot;</span><span class="p">:</span> <span class="mi">160</span><span class="p">,</span>
+        <span class="nt">&quot;modifiers&quot;</span><span class="p">:</span> <span class="s2">&quot;spread&quot;</span>
+        <span class="p">},</span>
+    <span class="nt">&quot;synthesis&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;carrier&quot;</span><span class="p">:</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;filter_before&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nt">&quot;filter_after&quot;</span><span class="p">:</span> <span class="kc">true</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <strong>fs</strong> attribute is optional but can be used to speed up processing. The filter
+definitions that are generated depend on the sampling frequency, so the it has to
+be known to generate the filters. If the argument is not passed, it will be read from
+the file that needs processing. Passing the sampling frequency as an attribute will
+speed things up as we don’t need to open the sound file to check its sampling rate.
+However, beware that if the <strong>fs</strong> does not match that of the file, you will get an
+error.</p>
+<p>The other attributes are as follows:</p>
+<div class="section" id="analysis-filters">
+<h3>analysis_filters<a class="headerlink" href="#analysis-filters" title="Permalink to this headline">¶</a></h3>
+<p><strong>analysis_filters</strong> is a dictionary defining the filterbank used to analyse the
+input signal. It defines both the cutoff frequencies <strong>f</strong> and the filtering <strong>method</strong>.</p>
+<div class="section" id="f-filterbank-frequencies">
+<h4><em>f</em> Filterbank frequencies<a class="headerlink" href="#f-filterbank-frequencies" title="Permalink to this headline">¶</a></h4>
+<p>These can either be specified as an array of values, using a predefined setting, or
+by using a regular method.</p>
+<p>If <strong>f</strong> is a numerical array, the values are used as frequencies in Hertz.</p>
+<p>If <strong>f</strong> is a string, it refers to a predefined setting. The predefined values are:
+<cite>ci24</cite> and <cite>hr90k</cite> refering to the default map of cochlear implant manufacturers
+Cochlear and Advanced Bionics, respectively.</p>
+<p>Otherwise <strong>f</strong> is a dictionary with the following items:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>fmin</dt><dd><p>The starting frequency of the filterbank.</p>
+</dd>
+<dt>fmax</dt><dd><p>The end frequency of the filterbank.</p>
+</dd>
+<dt>n</dt><dd><p>The number of channels.</p>
+</dd>
+<dt>scale</dt><dd><p><cite>[optional]</cite> The scale on which the frequencies are divided into channels. Default is
+<cite>log</cite>. Possible values are <cite>greenwood</cite>, <cite>log</cite> and <cite>linear</cite>.</p>
+</dd>
+<dt>shift</dt><dd><p><cite>[optional]</cite> A shift in millimiters, towards the base. Note that the shift is applied
+after all other calculations so the <cite>fmin</cite> and <cite>fmax</cite> boundaries will
+not be respected anymore.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="filtering-method">
+<h4>Filtering <em>method</em><a class="headerlink" href="#filtering-method" title="Permalink to this headline">¶</a></h4>
+<p>A dictionary with the following elements:</p>
+<blockquote>
+<div><dl>
+<dt>family</dt><dd><p>The type of filter. At the moment only <cite>butterworth</cite> is implemented.</p>
+<p>For <cite>butterworth</cite>, the following parameters have to be provided:</p>
+<dl class="simple">
+<dt>order</dt><dd><p>The actual order of the filter. Watch out, that this is the order that
+is actually achieved. Choosing <cite>true</cite> for <cite>zero-phase</cite> means only
+even numbers can be provided.</p>
+</dd>
+<dt>zero-phase</dt><dd><p>Whether a zero-phase filter is being used. If <cite>true</cite>, then <code class="xref py py-func docutils literal notranslate"><span class="pre">filtfilt()</span></code>
+is used instead of <code class="xref py py-func docutils literal notranslate"><span class="pre">filt()</span></code>.</p>
+</dd>
+</dl>
+<p>Unlike in the MATLAB version, this is implemented with second-order section
+filters (<code class="xref py py-func docutils literal notranslate"><span class="pre">sosfiltfilt()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">sosfilt()</span></code>).</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="synthesis-filters">
+<h3>synthesis_filters<a class="headerlink" href="#synthesis-filters" title="Permalink to this headline">¶</a></h3>
+<p>It can be the string <cite>“analysis_filters”</cite> to make them identical to the analysis filters.
+This is also what happens if the element is omitted or <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p>
+<p>Otherwise it can be a dictionary similar to <cite>analysis_filters</cite>. The number of channels
+has to be the same. If it differs, an error will be returned.</p>
+</div>
+<div class="section" id="envelope">
+<h3>envelope<a class="headerlink" href="#envelope" title="Permalink to this headline">¶</a></h3>
+<p>That specifies how the envelope is extracted.</p>
+<blockquote>
+<div><dl>
+<dt>method</dt><dd><p>Can be <cite>low-pass</cite> or <cite>hilbert</cite>.</p>
+<p>For <cite>low-pass</cite>, the envelope is extracted with rectification and low-pass
+filtering. The following parameters are required:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>rectify</dt><dd><p>The wave rectification method: <cite>half-wave</cite> or <cite>full-wave</cite>.</p>
+</dd>
+<dt>order</dt><dd><p>The order of the filter used for envelope extraction. Again, this
+is the effective order, so only even numbered are accepted because
+the envelope is extracted with a zero-phase filter.</p>
+</dd>
+<dt>fc</dt><dd><p>The cutoff of the envelope extraction in Hertz. Can be a single
+value or a value per band. If fewer values than bands are provided,
+the array is recycled as necessary.</p>
+</dd>
+<dt>modifiers</dt><dd><p><cite>[optional]</cite> A (list of) modifier function names that can be
+applied to envelope matrix.
+At the moment, only <cite>“spread”</cite> is implemented. With this modifier,
+the synthesis filters are used to simulate a spread of excitation
+on the envelope levels themselves. This is useful when the carrier
+is a sinewave (see Crew et al., 2012, JASA).</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="synthesis">
+<h3>synthesis<a class="headerlink" href="#synthesis" title="Permalink to this headline">¶</a></h3>
+<p>The <strong>synthesis</strong> field describes how the resynthesis should be performed.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>carrier</dt><dd><p>Can be <cite>noise</cite> or <cite>sin</cite> (<cite>low-noise</cite> and <cite>pshc</cite> are not implemented).</p>
+</dd>
+<dt>filter_before</dt><dd><p>If <cite>true</cite>, the carrier is filtered before multiplication with the envelope (default is <cite>false</cite>).</p>
+</dd>
+<dt>filter_after</dt><dd><p>If <cite>true</cite>, the modulated carrier is refiltered in the band to suppress sidebands
+(default is <cite>true</cite>). Keep in mind that if you filter broadband carriers both
+before and after modulation you may alter the spectral shape of your signal.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>If the <cite>carrier</cite> is <cite>noise</cite>, then a random seed can be provided in <cite>random_seed</cite>
+to have frozen noise. If not the random number generator will be initialized with the
+current clock. Note that for multi-channel audio files, the seed is used for each
+channel. If no seed is given, the various bands will have different noises as
+carriers. To have correlated noise across bands, pass in a (random) seed. Also note
+that the cache system also means that once an output file is generated, it will be served
+as is rather than re-generated. To generate truely random files, provide a random seed.</p>
+<p>If the <cite>carrier</cite> is <cite>sin</cite>, the center frequency of each band will be determined based on the scale
+that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="module_howto.html" class="btn btn-neutral float-right" title="How to make a module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="user_manual.html" class="btn btn-neutral float-left" title="User manual" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Etienne Gaudrain
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

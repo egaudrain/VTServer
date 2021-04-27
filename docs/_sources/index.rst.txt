@@ -1,7 +1,7 @@
 
-#########
+=========
 VT Server
-#########
+=========
 
 This is the Voice Transformation Server's documentation.
 
@@ -10,6 +10,7 @@ This is the Voice Transformation Server's documentation.
 .. toctree::
 
     user_manual
+    vt_modules
     module_howto
     modules
 

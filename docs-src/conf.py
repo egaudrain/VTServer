@@ -13,13 +13,16 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.dirname(__file__))
 
+import vt_server as vt
 
 # -- Project information -----------------------------------------------------
 
 project = 'VT Server'
 copyright = '2021, Etienne Gaudrain'
 author = 'Etienne Gaudrain'
+version = vt.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -74,3 +77,5 @@ html_static_path = ['_static']
 html_css_files = [
     'css/custom.css',
 ]
+
+import extract_vt_module_doc

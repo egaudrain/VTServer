@@ -1,46 +1,42 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Source documentation &mdash; VT Server  documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="How to make a module" href="module_howto.html" /> 
+    <link rel="prev" title="Available modules" href="vt_modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -63,6 +59,10 @@
           
             
             
+              <div class="version">
+                2.2
+              </div>
+            
           
 
           
@@ -77,7 +77,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,6 +87,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_manual.html">User manual</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vt_modules.html">Available modules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Source documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server">vt_server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server-brain">vt_server_brain</a></li>
@@ -96,14 +96,20 @@
 <li class="toctree-l2"><a class="reference internal" href="#vt-server-module-world">vt_server_module_world</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server-module-vocoder">vt_server_module_vocoder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#analysis-filters">analysis_filters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#f-filterbank-frequencies"><em>f</em>: Filterbank frequencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#f-filterbank-frequencies"><em>f</em> Filterbank frequencies</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#filtering-method">Filtering <em>method</em></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#synthesis-filters">synthesis_filters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#envelope">envelope</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#synthesis">synthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#content">Content</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#vt-server-module-gibberish">vt_server_module_gibberish</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#files">Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#segment-properties">Segment properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stack">Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#seed">Seed</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server-config">vt_server_config</a></li>
@@ -116,7 +122,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -151,20 +156,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>Source documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -324,11 +327,6 @@ and remove them from the list.</p>
 <dd><p>This is the list of current jobs (actually a managed dict).</p>
 </dd></dl>
 
-<dl class="data">
-<dt id="vt_server_brain.JOB_JANITOR">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">JOB_JANITOR</code><em class="property"> = None</em><a class="headerlink" href="#vt_server_brain.JOB_JANITOR" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="class">
 <dt id="vt_server_brain.Janitor">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">Janitor</code><span class="sig-paren">(</span><em class="sig-param">interval</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.Janitor" title="Permalink to this definition">¶</a></dt>
@@ -353,9 +351,9 @@ process that is finished and needs removing.</p>
 
 </dd></dl>
 
-<dl class="data">
-<dt id="vt_server_brain.N_REQUESTS">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">N_REQUESTS</code><em class="property"> = 0</em><a class="headerlink" href="#vt_server_brain.N_REQUESTS" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="vt_server_brain.cast_outfile">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">cast_outfile</code><span class="sig-paren">(</span><em class="sig-param">f</em>, <em class="sig-param">out_filename</em>, <em class="sig-param">req</em>, <em class="sig-param">h</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.cast_outfile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -369,20 +367,20 @@ process that is finished and needs removing.</p>
 <code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">job_signature</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.job_signature" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="data">
-<dt id="vt_server_brain.manager">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">manager</code><em class="property"> = &lt;multiprocessing.managers.SyncManager object&gt;</em><a class="headerlink" href="#vt_server_brain.manager" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="function">
 <dt id="vt_server_brain.multi_process">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">multi_process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.multi_process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">multi_process</code><span class="sig-paren">(</span><em class="sig-param">req</em>, <em class="sig-param">force_sync=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.multi_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is called from <a class="reference internal" href="#vt_server_brain.process" title="vt_server_brain.process"><code class="xref py py-func docutils literal notranslate"><span class="pre">process()</span></code></a> if multiple files have been provided as input.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="vt_server_brain.multi_process_async">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">multi_process_async</code><span class="sig-paren">(</span><em class="sig-param">files</em>, <em class="sig-param">req</em>, <em class="sig-param">h</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.multi_process_async" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="vt_server_brain.process">
-<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param">req</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param">req</em>, <em class="sig-param">force_sync=False</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates jobs (populating the <a class="reference internal" href="#vt_server_brain.JOBS" title="vt_server_brain.JOBS"><code class="xref py py-data docutils literal notranslate"><span class="pre">JOBS</span></code></a> list), checks on cache and dispatches processing threads.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -438,15 +436,15 @@ date and a number of hours).</p></li>
 </dl>
 </dd></dl>
 
+<dl class="function">
+<dt id="vt_server_brain.subquery_process_async">
+<code class="sig-prename descclassname">vt_server_brain.</code><code class="sig-name descname">subquery_process_async</code><span class="sig-paren">(</span><em class="sig-param">req</em>, <em class="sig-param">h</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_brain.subquery_process_async" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <span class="target" id="module-vt_server_common_tools"></span><div class="section" id="vt-server-common-tools">
 <h2>vt_server_common_tools<a class="headerlink" href="#vt-server-common-tools" title="Permalink to this headline">¶</a></h2>
 <p>This module contains function that may be useful across other VTServer modules.</p>
-<dl class="data">
-<dt id="vt_server_common_tools.DEFAULT_RESAMPLING_METHOD">
-<code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">DEFAULT_RESAMPLING_METHOD</code><em class="property"> = 'samplerate'</em><a class="headerlink" href="#vt_server_common_tools.DEFAULT_RESAMPLING_METHOD" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="function">
 <dt id="vt_server_common_tools.clipping_prevention">
 <code class="sig-prename descclassname">vt_server_common_tools.</code><code class="sig-name descname">clipping_prevention</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_common_tools.clipping_prevention" title="Permalink to this definition">¶</a></dt>
@@ -546,7 +544,7 @@ declare themselves which files they have used.</p>
 </div></blockquote>
 <dl class="data">
 <dt id="vt_server_modules.MODULES">
-<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">MODULES</code><em class="property"> = {'mixin': &lt;vt_server_modules.vt_module object&gt;, 'pad': &lt;vt_server_modules.vt_module object&gt;, 'ramp': &lt;vt_server_modules.vt_module object&gt;, 'time-reverse': &lt;vt_server_modules.vt_module object&gt;}</em><a class="headerlink" href="#vt_server_modules.MODULES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">MODULES</code><em class="property"> = {'gibberish': &lt;vt_server_modules.vt_module object&gt;, 'mixin': &lt;vt_server_modules.vt_module object&gt;, 'pad': &lt;vt_server_modules.vt_module object&gt;, 'ramp': &lt;vt_server_modules.vt_module object&gt;, 'slice': &lt;vt_server_modules.vt_module object&gt;, 'time-reverse': &lt;vt_server_modules.vt_module object&gt;, 'vocoder': &lt;vt_server_modules.vt_module object&gt;, 'world': &lt;vt_server_modules.vt_module object&gt;}</em><a class="headerlink" href="#vt_server_modules.MODULES" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <code class="xref py py-data docutils literal notranslate"><span class="pre">MODULE</span></code> is used to dispatch stack item modules to their corresponding function</p>
 </dd></dl>
 
@@ -559,17 +557,17 @@ declare themselves which files they have used.</p>
 <dt id="vt_server_modules.process_mixin">
 <code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_mixin</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_mixin" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>“mixin”</cite> adds another sound file (B) to the input file (A). The arguments are:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> – The file that needs to be added to the input file.</p></li>
-<li><p><strong>levels</strong> – A 2-element array containing the gains in dB applied to the A and B.</p></li>
-<li><p><strong>pad</strong> – A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
-Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.</p></li>
-<li><p><strong>align</strong> – ‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
+<dl class="simple">
+<dt>file</dt><dd><p>The file that needs to be added to the input file.</p>
+</dd>
+<dt>levels</dt><dd><p>A 2-element array containing the gains in dB applied to the A and B.</p>
+</dd>
+<dt>pad</dt><dd><p>A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
+Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.</p>
+</dd>
+<dt>align</dt><dd><p>‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
 the shorter one will be padded so as to be aligned as described with the other one. This is
-applied after padding.</p></li>
-</ul>
+applied after padding.</p>
 </dd>
 </dl>
 <p>If the two sound files are not of the same sampling frequency, they are resampled to the max of the two.</p>
@@ -587,15 +585,28 @@ as arguments, specifying the duration of silence in seconds.</p>
 <dt id="vt_server_modules.process_ramp">
 <code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_ramp</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_ramp" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>“ramp”</cite> smoothes the onset and/or offset of a signal by applying a ramp. The parameters are:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>duration</strong> – In seconds. If a single number, it is applied to both onset and offset.
-If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of zero means no ramp.</p></li>
-<li><p><strong>shape</strong> – Either ‘linear’ (default) or ‘cosine’.</p></li>
-</ul>
+<dl class="simple">
+<dt>duration</dt><dd><p>In seconds. If a single number, it is applied to both onset and offset.
+If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of zero means no ramp.</p>
+</dd>
+<dt>shape</dt><dd><p>Either ‘linear’ (default) or ‘cosine’.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="vt_server_modules.process_slice">
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_slice</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>“slice”</cite> selects a portion of a sound. It takes the following arguments:</p>
+<dl class="simple">
+<dt>start</dt><dd><p>The onset point, in seconds. [0 is omitted.]</p>
+</dd>
+<dt>end</dt><dd><p>The offset point, in seconds. Negative number are counted
+from the end. Values exceding the length of the file will lead to zero padding.
+[The end of the sound if omitted.]</p>
+</dd>
+</dl>
+<p>If the start time is larger than the end time, an error is raised.</p>
 </dd></dl>
 
 <dl class="function">
@@ -696,11 +707,6 @@ is useful if you want to use cubic-splines.</p>
 <dd></dd></dl>
 
 </dd></dl>
-
-<dl class="data">
-<dt id="vt_server_module_world.RE">
-<code class="sig-prename descclassname">vt_server_module_world.</code><code class="sig-name descname">RE</code><em class="property"> = {'duration': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(s)?'), 'f0': re.compile('([*+-~]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(Hz|st)?'), 'vtl': re.compile('([*+-]?)\\s*((?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\\s*(st)?')}</em><a class="headerlink" href="#vt_server_module_world.RE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_module_world.check_arguments">
@@ -803,7 +809,7 @@ error.</p>
 <p><strong>analysis_filters</strong> is a dictionary defining the filterbank used to analyse the
 input signal. It defines both the cutoff frequencies <strong>f</strong> and the filtering <strong>method</strong>.</p>
 <div class="section" id="f-filterbank-frequencies">
-<h4><em>f</em>: Filterbank frequencies<a class="headerlink" href="#f-filterbank-frequencies" title="Permalink to this headline">¶</a></h4>
+<h4><em>f</em> Filterbank frequencies<a class="headerlink" href="#f-filterbank-frequencies" title="Permalink to this headline">¶</a></h4>
 <p>These can either be specified as an array of values, using a predefined setting, or
 by using a regular method.</p>
 <p>If <strong>f</strong> is a numerical array, the values are used as frequencies in Hertz.</p>
@@ -856,7 +862,7 @@ filters (<code class="xref py py-func docutils literal notranslate"><span class=
 <h3>synthesis_filters<a class="headerlink" href="#synthesis-filters" title="Permalink to this headline">¶</a></h3>
 <p>It can be the string <cite>“analysis_filters”</cite> to make them identical to the analysis filters.
 This is also what happens if the element is omitted or <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p>
-<p>Otherwise it can be a dictionary similar to <a class="reference internal" href="#analysis-filters">analysis_filters</a>. The number of channels
+<p>Otherwise it can be a dictionary similar to <cite>analysis_filters</cite>. The number of channels
 has to be the same. If it differs, an error will be returned.</p>
 </div>
 <div class="section" id="envelope">
@@ -916,24 +922,11 @@ that the cache system also means that once an output file is generated, it will 
 as is rather than re-generated. To generate truely random files, provide a random seed.</p>
 <p>If the <cite>carrier</cite> is <cite>sin</cite>, the center frequency of each band will be determined based on the scale
 that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.</p>
-</div>
-<div class="section" id="content">
-<h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
-<dl class="data">
-<dt id="vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH">
-<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">ENVELOPE_MODIFIER_PATCH</code><em class="property"> = {'spread': &lt;function envelope_modifier_spread&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.ENVELOPE_MODIFIER_PATCH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="data">
 <dt id="vt_server_module_vocoder.FB_PRESETS">
 <code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FB_PRESETS</code><em class="property"> = {'ci24': [188, 313, 438, 563, 688, 813, 938, 1063, 1188, 1313, 1563, 1813, 2063, 2313, 2688, 3063, 3563, 4063, 4688, 5313, 6063, 6938, 7938], 'hr90k': [250, 416, 494, 587, 697, 828, 983, 1168, 1387, 1648, 1958, 2326, 2762, 3281, 3898, 4630, 8700]}</em><a class="headerlink" href="#vt_server_module_vocoder.FB_PRESETS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Presets for manufacturers’ filterbanks.</p>
 </dd></dl>
-
-<dl class="data">
-<dt id="vt_server_module_vocoder.FILTER_FUNCTION_PATCH">
-<code class="sig-prename descclassname">vt_server_module_vocoder.</code><code class="sig-name descname">FILTER_FUNCTION_PATCH</code><em class="property"> = {'sosfilt': &lt;function sosfilt&gt;, 'sosfiltfilt': &lt;function sosfiltfilt&gt;}</em><a class="headerlink" href="#vt_server_module_vocoder.FILTER_FUNCTION_PATCH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="vt_server_module_vocoder.env_hilbert">
@@ -1010,6 +1003,99 @@ the <cite>freq</cite> array and the sampling frequency <cite>fs</cite>.</p>
 
 </div>
 </div>
+<span class="target" id="module-vt_server_module_gibberish"></span><div class="section" id="vt-server-module-gibberish">
+<h2>vt_server_module_gibberish<a class="headerlink" href="#vt-server-module-gibberish" title="Permalink to this headline">¶</a></h2>
+<p>This module contains a function to create a gibberish masker,
+created out of random sentence chunks, that can be used in the CRM experiment.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;gibberish&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;seed&quot;</span><span class="p">:</span>   <span class="mi">8</span><span class="p">,</span>
+    <span class="nt">&quot;files&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sp1F/cat_8_red.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;sp1F/cat_9_black.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;chunk_dur_min&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="nt">&quot;chunk_dur_max&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="nt">&quot;total_dur&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+    <span class="nt">&quot;ramp&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="nt">&quot;force_nb_channels&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">&quot;force_fs&quot;</span><span class="p">:</span> <span class="mi">44100</span><span class="p">,</span>
+    <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;f0&quot;</span><span class="p">:</span>     <span class="s2">&quot;*2&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;vtl&quot;</span><span class="p">:</span>    <span class="s2">&quot;-3.8st&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The base folder will be read from the <code class="docutils literal notranslate"><span class="pre">in_filename</span></code> of the process function. If the
+gibberrish module is used at the top of the stack, this will be the content of the <code class="docutils literal notranslate"><span class="pre">file</span></code>
+attribute of the main query. If is used lower in the stack, there may be unexpected results
+as the folder will be the cache folder of the previous module.</p>
+<p>If the source files have different sampling frequencies, the sampling frequency of the first chunk
+will be used as reference, and all the following segments will be resampled to that sampling frequency.
+Alternatively, it is possible to specify <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> to impose a sampling frequency. If <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> is
+0 or <code class="docutils literal notranslate"><span class="pre">None</span></code>, the default method is used.</p>
+<p>A similar mechanism is used for stereo vs. mono files. The number of channels can be imposed with <code class="docutils literal notranslate"><span class="pre">force_nb_channels</span></code>.
+Again, if <code class="docutils literal notranslate"><span class="pre">force_nb_channels</span></code> is 0 or <code class="docutils literal notranslate"><span class="pre">None</span></code>, the default method based on the first chunk is used. If the number
+of channels of a segment is greater than the number of channels in the output, all channels are averaged and
+duplicated to the appropriate number of channels. This is fine for stereo/mono conversion, but keep that in mind
+if you ever use files with more channels. If a segment has fewer channels than needed, the extra channels are created
+by recycling the existing values. Again, for stero/mono conversion, this is fine, but might not be what you want
+for multi-channel audio.</p>
+<div class="section" id="files">
+<h3>Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h3>
+<p>The module will look through the provided <code class="docutils literal notranslate"><span class="pre">files</span></code> to generate the output. As much as possible, it will try to
+not reuse a file, but will loop through the list if necessary.</p>
+<p>The list will be shuffled randomly based on the <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter.</p>
+<p>Instead of <code class="docutils literal notranslate"><span class="pre">files</span></code>, we can have <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code> which defines a shell-like patterns as an object:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;gibberish&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;seed&quot;</span><span class="p">:</span>   <span class="mi">8</span><span class="p">,</span>
+    <span class="nt">&quot;shell_pattern&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;include&quot;</span><span class="p">:</span> <span class="s2">&quot;sp1F/cat*.wav&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;exclude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sp1F/cat_8_*.wav&quot;</span><span class="p">,</span> <span class="s2">&quot;sp1F/cat_*_red.wav&quot;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;...&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If a list of patterns is provided, the outcome is cumulative.</p>
+<p>Alternatively, a regular expression can be used as <code class="docutils literal notranslate"><span class="pre">re_pattern</span></code>.</p>
+<p>If all <code class="docutils literal notranslate"><span class="pre">files</span></code>, and <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code> and/or <code class="docutils literal notranslate"><span class="pre">re_pattern</span></code> are provided, only one is used by prioritising in the order they are presented here.</p>
+</div>
+<div class="section" id="segment-properties">
+<h3>Segment properties<a class="headerlink" href="#segment-properties" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">chunk_dur_min</span></code> and <code class="docutils literal notranslate"><span class="pre">chunk_dur_max</span></code> define the minimum and maximum segment duration. <code class="docutils literal notranslate"><span class="pre">total_dur</span></code> is the total duration we are aiming to generate. <code class="docutils literal notranslate"><span class="pre">ramp</span></code> defines the duration of the ramps applied to each segment.</p>
+</div>
+<div class="section" id="stack">
+<h3>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">stack</span></code> is an optional processing stack that will be applied to all the selected files before concatenation.</p>
+</div>
+<div class="section" id="seed">
+<h3>Seed<a class="headerlink" href="#seed" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter is mandatory to make sure cache is managed properly.</p>
+<dl class="function">
+<dt id="vt_server_module_gibberish.get_file_list_from_array">
+<code class="sig-prename descclassname">vt_server_module_gibberish.</code><code class="sig-name descname">get_file_list_from_array</code><span class="sig-paren">(</span><em class="sig-param">file_array</em>, <em class="sig-param">folder</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_gibberish.get_file_list_from_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_gibberish.get_file_list_from_re_pattern">
+<code class="sig-prename descclassname">vt_server_module_gibberish.</code><code class="sig-name descname">get_file_list_from_re_pattern</code><span class="sig-paren">(</span><em class="sig-param">pattern</em>, <em class="sig-param">folder</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_gibberish.get_file_list_from_re_pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_gibberish.get_file_list_from_shell_pattern">
+<code class="sig-prename descclassname">vt_server_module_gibberish.</code><code class="sig-name descname">get_file_list_from_shell_pattern</code><span class="sig-paren">(</span><em class="sig-param">patterns</em>, <em class="sig-param">folder</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_gibberish.get_file_list_from_shell_pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="vt_server_module_gibberish.process_gibberish">
+<code class="sig-prename descclassname">vt_server_module_gibberish.</code><code class="sig-name descname">process_gibberish</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_module_gibberish.process_gibberish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
 <span class="target" id="module-vt_server_config"></span><div class="section" id="vt-server-config">
 <h2>vt_server_config<a class="headerlink" href="#vt-server-config" title="Permalink to this headline">¶</a></h2>
 <p>VTServer configuration file management.</p>
@@ -1039,11 +1125,6 @@ options.</p>
 <span class="target" id="module-vt_server_logging"></span><div class="section" id="vt-server-logging">
 <h2>vt_server_logging<a class="headerlink" href="#vt-server-logging" title="Permalink to this headline">¶</a></h2>
 <p>VTServer logging facilities.</p>
-<dl class="data">
-<dt id="vt_server_logging.LOG">
-<code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">LOG</code><em class="property"> = &lt;Logger VTServer (DEBUG)&gt;</em><a class="headerlink" href="#vt_server_logging.LOG" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="class">
 <dt id="vt_server_logging.VTServerLogFormatter">
 <em class="property">class </em><code class="sig-prename descclassname">vt_server_logging.</code><code class="sig-name descname">VTServerLogFormatter</code><a class="headerlink" href="#vt_server_logging.VTServerLogFormatter" title="Permalink to this definition">¶</a></dt>
@@ -1133,28 +1214,27 @@ the directory structure).</p></li>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+      
+        <a href="vt_modules.html" class="btn btn-neutral float-left" title="Available modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Etienne Gaudrain.
+        &copy; Copyright 2021, Etienne Gaudrain
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -1162,6 +1242,7 @@ the directory structure).</p></li>
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {
