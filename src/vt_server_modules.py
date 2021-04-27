@@ -68,6 +68,7 @@ MODULES = dict()
 def process_time_reverse(in_filename, m, out_filename):
     """
     `"time-reverse"` flips temporally the input. It doesn't take any argument.
+    
     """
     x, fs = sf.read(in_filename)
     sf.write(out_filename, np.flip(x, axis=0), fs)
@@ -84,14 +85,14 @@ def process_mixin(in_filename, m, out_filename):
     file
         The file that needs to be added to the input file.
 
-    levels
+    levels *=[0,0]*
         A 2-element array containing the gains in dB applied to the A and B.
 
-    pad
+    pad *=[0,0,0,0]*
         A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
         Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
 
-    align
+    align *='left'*
         'left', 'center', or 'right'. When the two sounds files are not the same length,
         the shorter one will be padded so as to be aligned as described with the other one. This is
         applied after padding.

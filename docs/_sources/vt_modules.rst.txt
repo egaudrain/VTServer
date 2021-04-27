@@ -45,10 +45,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.
         ]
     }
 
-The base folder will be read from the ``in_filename`` of the process function. If the
-gibberrish module is used at the top of the stack, this will be the content of the ``file``
-attribute of the main query. If is used lower in the stack, there may be unexpected results
-as the folder will be the cache folder of the previous module.
+**This module is intended to be used at the top of the stack**
 
 If the source files have different sampling frequencies, the sampling frequency of the first chunk
 will be used as reference, and all the following segments will be resampled to that sampling frequency.
@@ -67,7 +64,12 @@ Files
 ^^^^^
 
 The module will look through the provided ``files`` to generate the output. As much as possible, it will try to
-not reuse a file, but will loop through the list if necessary.
+not reuse a file, but will recycle the list if necessary.
+
+If the module is first in the stack, the filenames provided in ``files`` (or ``shell_pattern``, or ``re_pattern``)
+are relative to the folder specified in the ``file`` field of the query. Make sure that the folder name ends with a `/`.
+
+However, note that if the module is not used at the top of the stack, but lower, there may be unexpected results as the folder will be the cache folder of the previous module.
 
 The list will be shuffled randomly based on the ``seed`` parameter.
 
@@ -124,14 +126,14 @@ ________________________________________
     file
         The file that needs to be added to the input file.
 
-    levels
+    levels *=[0,0]*
         A 2-element array containing the gains in dB applied to the A and B.
 
-    pad
+    pad *=[0,0,0,0]*
         A 4-element array that specifies the before and after padding of A and B (in seconds): ``[A.before, A.after, B.before, B.after]``.
         Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.
 
-    align
+    align *='left'*
         'left', 'center', or 'right'. When the two sounds files are not the same length,
         the shorter one will be padded so as to be aligned as described with the other one. This is
         applied after padding.
@@ -207,6 +209,7 @@ ________________________________________
 
 
     `"time-reverse"` flips temporally the input. It doesn't take any argument.
+    
     
 
 

@@ -29,10 +29,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.
         ]
     }
 
-The base folder will be read from the ``in_filename`` of the process function. If the
-gibberrish module is used at the top of the stack, this will be the content of the ``file``
-attribute of the main query. If is used lower in the stack, there may be unexpected results
-as the folder will be the cache folder of the previous module.
+**This module is intended to be used at the top of the stack**
 
 If the source files have different sampling frequencies, the sampling frequency of the first chunk
 will be used as reference, and all the following segments will be resampled to that sampling frequency.
@@ -51,7 +48,12 @@ Files
 -----
 
 The module will look through the provided ``files`` to generate the output. As much as possible, it will try to
-not reuse a file, but will loop through the list if necessary.
+not reuse a file, but will recycle the list if necessary.
+
+If the module is first in the stack, the filenames provided in ``files`` (or ``shell_pattern``, or ``re_pattern``)
+are relative to the folder specified in the ``file`` field of the query. Make sure that the folder name ends with a `/`.
+
+However, note that if the module is not used at the top of the stack, but lower, there may be unexpected results as the folder will be the cache folder of the previous module.
 
 The list will be shuffled randomly based on the ``seed`` parameter.
 

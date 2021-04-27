@@ -544,7 +544,7 @@ declare themselves which files they have used.</p>
 </div></blockquote>
 <dl class="data">
 <dt id="vt_server_modules.MODULES">
-<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">MODULES</code><em class="property"> = {'gibberish': &lt;vt_server_modules.vt_module object&gt;, 'mixin': &lt;vt_server_modules.vt_module object&gt;, 'pad': &lt;vt_server_modules.vt_module object&gt;, 'ramp': &lt;vt_server_modules.vt_module object&gt;, 'slice': &lt;vt_server_modules.vt_module object&gt;, 'time-reverse': &lt;vt_server_modules.vt_module object&gt;, 'vocoder': &lt;vt_server_modules.vt_module object&gt;, 'world': &lt;vt_server_modules.vt_module object&gt;}</em><a class="headerlink" href="#vt_server_modules.MODULES" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">MODULES</code><em class="property"> = {'mixin': &lt;vt_server_modules.vt_module object&gt;, 'pad': &lt;vt_server_modules.vt_module object&gt;, 'ramp': &lt;vt_server_modules.vt_module object&gt;, 'slice': &lt;vt_server_modules.vt_module object&gt;, 'time-reverse': &lt;vt_server_modules.vt_module object&gt;}</em><a class="headerlink" href="#vt_server_modules.MODULES" title="Permalink to this definition">¶</a></dt>
 <dd><p>The <code class="xref py py-data docutils literal notranslate"><span class="pre">MODULE</span></code> is used to dispatch stack item modules to their corresponding function</p>
 </dd></dl>
 
@@ -560,12 +560,12 @@ declare themselves which files they have used.</p>
 <dl class="simple">
 <dt>file</dt><dd><p>The file that needs to be added to the input file.</p>
 </dd>
-<dt>levels</dt><dd><p>A 2-element array containing the gains in dB applied to the A and B.</p>
+<dt>levels <em>=[0,0]</em></dt><dd><p>A 2-element array containing the gains in dB applied to the A and B.</p>
 </dd>
-<dt>pad</dt><dd><p>A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
+<dt>pad <em>=[0,0,0,0]</em></dt><dd><p>A 4-element array that specifies the before and after padding of A and B (in seconds): <code class="docutils literal notranslate"><span class="pre">[A.before,</span> <span class="pre">A.after,</span> <span class="pre">B.before,</span> <span class="pre">B.after]</span></code>.
 Note that this could also be done with sub-queries, but doing it here will reduce the number of cache files generated.</p>
 </dd>
-<dt>align</dt><dd><p>‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
+<dt>align <em>=’left’</em></dt><dd><p>‘left’, ‘center’, or ‘right’. When the two sounds files are not the same length,
 the shorter one will be padded so as to be aligned as described with the other one. This is
 applied after padding.</p>
 </dd>
@@ -1027,10 +1027,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.</
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>The base folder will be read from the <code class="docutils literal notranslate"><span class="pre">in_filename</span></code> of the process function. If the
-gibberrish module is used at the top of the stack, this will be the content of the <code class="docutils literal notranslate"><span class="pre">file</span></code>
-attribute of the main query. If is used lower in the stack, there may be unexpected results
-as the folder will be the cache folder of the previous module.</p>
+<p><strong>This module is intended to be used at the top of the stack</strong></p>
 <p>If the source files have different sampling frequencies, the sampling frequency of the first chunk
 will be used as reference, and all the following segments will be resampled to that sampling frequency.
 Alternatively, it is possible to specify <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> to impose a sampling frequency. If <code class="docutils literal notranslate"><span class="pre">force_fs</span></code> is
@@ -1045,7 +1042,10 @@ for multi-channel audio.</p>
 <div class="section" id="files">
 <h3>Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h3>
 <p>The module will look through the provided <code class="docutils literal notranslate"><span class="pre">files</span></code> to generate the output. As much as possible, it will try to
-not reuse a file, but will loop through the list if necessary.</p>
+not reuse a file, but will recycle the list if necessary.</p>
+<p>If the module is first in the stack, the filenames provided in <code class="docutils literal notranslate"><span class="pre">files</span></code> (or <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code>, or <code class="docutils literal notranslate"><span class="pre">re_pattern</span></code>)
+are relative to the folder specified in the <code class="docutils literal notranslate"><span class="pre">file</span></code> field of the query. Make sure that the folder name ends with a <cite>/</cite>.</p>
+<p>However, note that if the module is not used at the top of the stack, but lower, there may be unexpected results as the folder will be the cache folder of the previous module.</p>
 <p>The list will be shuffled randomly based on the <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter.</p>
 <p>Instead of <code class="docutils literal notranslate"><span class="pre">files</span></code>, we can have <code class="docutils literal notranslate"><span class="pre">shell_pattern</span></code> which defines a shell-like patterns as an object:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>

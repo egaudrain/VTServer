@@ -518,6 +518,8 @@ def multi_process(req, force_sync=False):
 
 def multi_process_async(files, req, h, out_filename):
 
+    vsl.LOG.debug("[%s] Starting multi_process_async..." % (h))
+
     while True:
 
         j = JOBS[h]
@@ -529,7 +531,6 @@ def multi_process_async(files, req, h, out_filename):
                 o.append( {'out': 'ok', 'details': f} )
             else:
                 r = dict()
-                r['action'] = req['action']
                 r['file'] = f
                 r['mode'] = req['mode']
                 r['stack'] = req['stack'][i]
