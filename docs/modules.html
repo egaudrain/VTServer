@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Available modules" href="vt_modules.html" /> 
+    <link rel="prev" title="How to make a module" href="module_howto.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,8 +86,8 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_manual.html">User manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vt_modules.html">Available modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Source documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server">vt_server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#vt-server-brain">vt_server_brain</a></li>
@@ -599,7 +599,7 @@ If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of
 <code class="sig-prename descclassname">vt_server_modules.</code><code class="sig-name descname">process_slice</code><span class="sig-paren">(</span><em class="sig-param">in_filename</em>, <em class="sig-param">m</em>, <em class="sig-param">out_filename</em><span class="sig-paren">)</span><a class="headerlink" href="#vt_server_modules.process_slice" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>“slice”</cite> selects a portion of a sound. It takes the following arguments:</p>
 <dl class="simple">
-<dt>start</dt><dd><p>The onset point, in seconds. [0 is omitted.]</p>
+<dt>start</dt><dd><p>The onset point, in seconds. [0 if omitted.]</p>
 </dd>
 <dt>end</dt><dd><p>The offset point, in seconds. Negative number are counted
 from the end. Values exceding the length of the file will lead to zero padding.
@@ -1218,7 +1218,7 @@ the directory structure).</p></li>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="vt_modules.html" class="btn btn-neutral float-left" title="Available modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="module_howto.html" class="btn btn-neutral float-left" title="How to make a module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

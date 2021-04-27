@@ -111,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#synthesis">synthesis</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#world"><code class="docutils literal notranslate"><span class="pre">world</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module_howto.html">How to make a module</a></li>
@@ -181,8 +182,8 @@
             
   <div class="section" id="available-modules">
 <span id="id1"></span><h1>Available modules<a class="headerlink" href="#available-modules" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-</div>
+<p>The modules are found either in <a class="reference internal" href="modules.html#module-vt_server_modules" title="vt_server_modules"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_modules</span></code></a>, or defined individual as Python modules. Each module
+is called with a keyword that is used for the <code class="docutils literal notranslate"><span class="pre">module</span></code> field in the query.</p>
 <hr class="docutils" />
 <div class="section" id="gibberish">
 <h2><code class="docutils literal notranslate"><span class="pre">gibberish</span></code><a class="headerlink" href="#gibberish" title="Permalink to this headline">¶</a></h2>
@@ -307,7 +308,7 @@ If a vector is given, then it specifies <cite>[onset, offset]</cite>. A value of
 <blockquote>
 <div><p><cite>“slice”</cite> selects a portion of a sound. It takes the following arguments:</p>
 <dl class="simple">
-<dt>start</dt><dd><p>The onset point, in seconds. [0 is omitted.]</p>
+<dt>start</dt><dd><p>The onset point, in seconds. [0 if omitted.]</p>
 </dd>
 <dt>end</dt><dd><p>The offset point, in seconds. Negative number are counted
 from the end. Values exceding the length of the file will lead to zero padding.
@@ -480,6 +481,50 @@ as is rather than re-generated. To generate truely random files, provide a rando
 <p>If the <cite>carrier</cite> is <cite>sin</cite>, the center frequency of each band will be determined based on the scale
 that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.</p>
 </div>
+</div>
+<hr class="docutils" />
+<div class="section" id="world">
+<h2><code class="docutils literal notranslate"><span class="pre">world</span></code><a class="headerlink" href="#world" title="Permalink to this headline">¶</a></h2>
+<p>This module defines the <em>world</em> processor based on <a class="reference external" href="https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder">pyworld</a>,
+a module wrapping <a class="reference external" href="https://github.com/mmorise/World">Morise’s WORLD vocoder</a>.</p>
+<p>Here are some examples of module instructions:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;f0&quot;</span><span class="p">:</span>     <span class="s2">&quot;*2&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;vtl&quot;</span><span class="p">:</span>    <span class="s2">&quot;-3.8st&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If a key is missing (here, <strong>duration</strong>) it is considered as <code class="docutils literal notranslate"><span class="pre">None</span></code>, which means this part is left unchanged.</p>
+<p><strong>f0</strong> can take the following forms:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> followed by a number, in which case it is multiplicating ratio applied to the
+whole f0 contour. For instance <code class="docutils literal notranslate"><span class="pre">*2</span></code>.</p></li>
+<li><p>a positive or negative number followed by a unit (<code class="docutils literal notranslate"><span class="pre">Hz</span></code> or <code class="docutils literal notranslate"><span class="pre">st</span></code>). This will behave
+like an offset, adding so many Hertz or so many semitones to the f0 contour.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~</span></code> followed by a number, followed by a unit (only <code class="docutils literal notranslate"><span class="pre">Hz</span></code>). This will
+set the <em>average</em> f0 to the defined value.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>vtl</strong> is defined similarly:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> represents a multiplier for the vocal-tract length. Beware, this is not a multiplier
+for the spectral envelope, but its inverse.</p></li>
+<li><p>offsets are defined using the unit <code class="docutils literal notranslate"><span class="pre">st</span></code> only.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>duration</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">*</span></code> multiplier can also be used.</p></li>
+<li><p>an offset can be defined in seconds (using unit <code class="docutils literal notranslate"><span class="pre">s</span></code>).</p></li>
+<li><p>the absolute duration can be set using <code class="docutils literal notranslate"><span class="pre">~</span></code> followed by a value and the <code class="docutils literal notranslate"><span class="pre">s</span></code> unit.</p></li>
+</ul>
+</div></blockquote>
+<p>Note that in v0.2.8, WORLD is making the sounds 1 frame (5 ms) too long if no duration is specified. If you
+specify the duration, it is generated accurately.</p>
 </div>
 </div>
 
