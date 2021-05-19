@@ -17,6 +17,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.
         "chunk_dur_min": 0.2,
         "chunk_dur_max": 0.7,
         "total_dur": 1.2,
+        "prevent_chunk_overlap": true,
         "ramp": 0.05,
         "force_nb_channels": 1,
         "force_fs": 44100,
@@ -81,7 +82,7 @@ Segment properties
 ------------------
 
 ``chunk_dur_min`` and ``chunk_dur_max`` define the minimum and maximum segment duration. ``total_dur`` is the total duration we are aiming to generate. ``ramp`` defines the duration of the ramps applied to each segment.
-
+``prevent_chunk_overlap`` defines whether the algorithm tries to select intervals that do not overlap (default is true). This is only relevant if all the sound files have a similar structure (like in the CRM).
 
 Stack
 -----
@@ -208,6 +209,8 @@ def process_gibberish(in_filename, m, out_filename):
             m[k] = float(m[k])
         except:
             raise ValueError("[gibberish] Argument '%s' needs to be a float (%s provided)" % (k, repr(m[k])))
+    if 'prevent_chunk_overlap' not in m:
+        m['prevent_chunk_overlap'] = True
 
     # Ramp
     if 'ramp' not in m:
@@ -266,6 +269,8 @@ def process_gibberish(in_filename, m, out_filename):
 
     source_files = list()
 
+    previous_chunk_interval = [-1,-1]
+
     while d < m['total_dur']:
 
         try:
@@ -311,8 +316,20 @@ def process_gibberish(in_filename, m, out_filename):
         chunk_duration = rnd.uniform(m['chunk_dur_min'], m['chunk_dur_max'])
         chunk_duration = int(chunk_duration * fs_ref)
 
-        chunk_start = rnd.randint(0, y.shape[0]-chunk_duration)
-        chunk_ind = chunk_start + np.array([0, chunk_duration])
+        itv_iter = 0
+        # We only try so much to find an acceptable interval...
+        if m['prevent_chunk_overlap']:
+            itv_iter_max = 1000
+        else:
+            itv_iter_max = 1
+        while itv_iter<itv_iter_max:
+            chunk_start = rnd.randint(0, y.shape[0]-chunk_duration)
+            chunk_ind = chunk_start + np.array([0, chunk_duration])
+            # Is it not overlapping with the previous interval?
+            if not ((chunk_ind[0] >= previous_chunk_interval[0] and chunk_ind[0] <= previous_chunk_interval[1]) or (chunk_ind[1] >= previous_chunk_interval[0] and chunk_ind[1] <= previous_chunk_interval[1])):
+                previous_chunk_interval = np.copy(chunk_ind)
+                break
+            itv_iter += 1
 
         #curr_maskerfile = {'soundfile': soundfile, 'chunk_indices': chunk_ind}
         #masker_struct.append(curr_maskerfile)
@@ -391,6 +408,7 @@ if __name__ == '__main__':
     m['module'] = 'gibberish'
     m['seed'] = 1
     m['shell_pattern'] = {'include': '*.wav'}
+    m['prevent_chunk_overlap'] = True
     m['force_fs'] = 22050
     m['chunk_dur_min'] = .4
     m['chunk_dur_max'] = .5
@@ -398,6 +416,6 @@ if __name__ == '__main__':
     m['ramp'] = .05
 
 
-    f, s = process_gibberish('../test/gibberish_stereo/', m, '../test/test_gibberish.wav')
+    f, s = process_gibberish('../test/spk1F-en_gb/', m, '../test/test_gibberish.wav')
     print(f)
     print(s)

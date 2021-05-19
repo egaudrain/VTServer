@@ -33,6 +33,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.
         "chunk_dur_min": 0.2,
         "chunk_dur_max": 0.7,
         "total_dur": 1.2,
+        "prevent_chunk_overlap": true,
         "ramp": 0.05,
         "force_nb_channels": 1,
         "force_fs": 44100,
@@ -97,7 +98,7 @@ Segment properties
 ^^^^^^^^^^^^^^^^^^
 
 ``chunk_dur_min`` and ``chunk_dur_max`` define the minimum and maximum segment duration. ``total_dur`` is the total duration we are aiming to generate. ``ramp`` defines the duration of the ramps applied to each segment.
-
+~~prevent_chunk_overlap`` defines whether the algorithm tries to select intervals that do not overlap (default is true). This is only relevant if all the sound files have a similar structure (like in the CRM).
 
 Stack
 ^^^^^

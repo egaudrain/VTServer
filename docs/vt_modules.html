@@ -196,6 +196,7 @@ created out of random sentence chunks, that can be used in the CRM experiment.</
     <span class="nt">&quot;chunk_dur_min&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
     <span class="nt">&quot;chunk_dur_max&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
     <span class="nt">&quot;total_dur&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+    <span class="nt">&quot;prevent_chunk_overlap&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
     <span class="nt">&quot;ramp&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
     <span class="nt">&quot;force_nb_channels&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="nt">&quot;force_fs&quot;</span><span class="p">:</span> <span class="mi">44100</span><span class="p">,</span>
@@ -247,7 +248,8 @@ are relative to the folder specified in the <code class="docutils literal notran
 </div>
 <div class="section" id="segment-properties">
 <h3>Segment properties<a class="headerlink" href="#segment-properties" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">chunk_dur_min</span></code> and <code class="docutils literal notranslate"><span class="pre">chunk_dur_max</span></code> define the minimum and maximum segment duration. <code class="docutils literal notranslate"><span class="pre">total_dur</span></code> is the total duration we are aiming to generate. <code class="docutils literal notranslate"><span class="pre">ramp</span></code> defines the duration of the ramps applied to each segment.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chunk_dur_min</span></code> and <code class="docutils literal notranslate"><span class="pre">chunk_dur_max</span></code> define the minimum and maximum segment duration. <code class="docutils literal notranslate"><span class="pre">total_dur</span></code> is the total duration we are aiming to generate. <code class="docutils literal notranslate"><span class="pre">ramp</span></code> defines the duration of the ramps applied to each segment.
+~~prevent_chunk_overlap`` defines whether the algorithm tries to select intervals that do not overlap (default is true). This is only relevant if all the sound files have a similar structure (like in the CRM).</p>
 </div>
 <div class="section" id="stack">
 <h3>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h3>
