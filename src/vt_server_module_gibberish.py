@@ -199,7 +199,7 @@ def process_gibberish(in_filename, m, out_filename):
     try:
         rnd = random.Random(m['seed'])
     except Exception as e:
-        raise ValueError("[gibberish] Could not initialise random number generator with seed '%s': %s" (repr(m['seed']), e))
+        raise ValueError("[gibberish] Could not initialise random number generator with seed '%s': %s" % (repr(m['seed']), e))
 
     # Segments
     for k in ['chunk_dur_min', 'chunk_dur_max', 'total_dur']:
@@ -228,7 +228,7 @@ def process_gibberish(in_filename, m, out_filename):
             m[k] = None
         else:
             try:
-                if m[k] is not None and m[k] is not 0:
+                if m[k] is not None and m[k]!=0:
                     m[k] = int(m[k])
             except:
                 raise ValueError("[gibberish] Argument '%s' needs to be an int or None (%s provided)" % (k,repr(m[k])))
