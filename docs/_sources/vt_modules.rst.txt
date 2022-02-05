@@ -15,6 +15,25 @@ is called with a keyword that is used for the ``module`` field in the query.
 ________________________________________
 
 
+``channel-patch``
+-----------------
+
+
+    `"channel-patch"` copies the input signal onto various channels. The arguments are:
+
+    coefs
+        An array of coefficients applied to each channel. If the input signal is X, and
+        the coefficients are [a1, a2], the output will be [a1⋅X, a2⋅X]. In a two-channel
+        (stereo) file, the first channel is the left channel, and the second channel is
+        the right channel.
+
+    
+
+
+
+________________________________________
+
+
 ``gibberish``
 -------------
 
@@ -210,7 +229,7 @@ ________________________________________
 
 
     `"time-reverse"` flips temporally the input. It doesn't take any argument.
-    
+
     
 
 

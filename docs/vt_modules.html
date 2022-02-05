@@ -88,6 +88,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_manual.html">User manual</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Available modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#channel-patch"><code class="docutils literal notranslate"><span class="pre">channel-patch</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gibberish"><code class="docutils literal notranslate"><span class="pre">gibberish</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#files">Files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#segment-properties">Segment properties</a></li>
@@ -184,6 +185,20 @@
 <span id="id1"></span><h1>Available modules<a class="headerlink" href="#available-modules" title="Permalink to this headline">¶</a></h1>
 <p>The modules are found either in <a class="reference internal" href="modules.html#module-vt_server_modules" title="vt_server_modules"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_modules</span></code></a>, or defined individual as Python modules. Each module
 is called with a keyword that is used for the <code class="docutils literal notranslate"><span class="pre">module</span></code> field in the query.</p>
+<hr class="docutils" />
+<div class="section" id="channel-patch">
+<h2><code class="docutils literal notranslate"><span class="pre">channel-patch</span></code><a class="headerlink" href="#channel-patch" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><cite>“channel-patch”</cite> copies the input signal onto various channels. The arguments are:</p>
+<dl class="simple">
+<dt>coefs</dt><dd><p>An array of coefficients applied to each channel. If the input signal is X, and
+the coefficients are [a1, a2], the output will be [a1⋅X, a2⋅X]. In a two-channel
+(stereo) file, the first channel is the left channel, and the second channel is
+the right channel.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
 <hr class="docutils" />
 <div class="section" id="gibberish">
 <h2><code class="docutils literal notranslate"><span class="pre">gibberish</span></code><a class="headerlink" href="#gibberish" title="Permalink to this headline">¶</a></h2>
