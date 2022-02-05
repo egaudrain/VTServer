@@ -68,13 +68,46 @@ MODULES = dict()
 def process_time_reverse(in_filename, m, out_filename):
     """
     `"time-reverse"` flips temporally the input. It doesn't take any argument.
-    
+
     """
     x, fs = sf.read(in_filename)
     sf.write(out_filename, np.flip(x, axis=0), fs)
     return out_filename
 
 MODULES['time-reverse'] = vt_module(process_time_reverse, 'time-reverse')
+
+
+#-------------------------------------------------------
+
+def process_channel_patch(in_filename, m, out_filename):
+    """
+    `"channel-patch"` copies the input signal onto various channels. The arguments are:
+
+    coefs
+        An array of coefficients applied to each channel. If the input signal is X, and
+        the coefficients are [a1, a2], the output will be [a1⋅X, a2⋅X]. In a two-channel
+        (stereo) file, the first channel is the left channel, and the second channel is
+        the right channel.
+
+    """
+
+    if 'coefs' not in m:
+        raise ValueError("[channel-patch] `coefs` needs to be provided.")
+
+    x, fs = sf.read(in_filename)
+
+    if len(x.shape)>1 and x.shape[1]>1:
+        raise ValueError("[channel-patch] Can only be applied to mono signals.")
+
+    y = np.zeros((x.shape[0], len(m['coefs'])))
+    for i,a in enumerate(m['coefs']):
+        y[:,i] = a * x
+
+    sf.write(out_filename, y, fs)
+
+    return out_filename
+
+MODULES['channel-patch'] = vt_module(process_channel_patch, 'channel-patch')
 
 #-------------------------------------------------------
 
