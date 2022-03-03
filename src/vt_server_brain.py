@@ -58,6 +58,8 @@ manager = Manager()
 JOBS = manager.dict()
 N_REQUESTS = 0 # This is just for information purposes.
 
+SUPPORTED_SOUND_EXTENSIONS = [x.lower() for x in sf.available_formats().keys()]
+
 class Janitor():
     """
     The janitor periodically checks the job list to see if there are any finished jobs, and then gets rid of them.
@@ -204,6 +206,10 @@ def process(req, force_sync=False):
         if not os.access(req['file'], os.R_OK):
             vsl.LOG.debug("File '%s' was requested but cannot be accessed." % req['file'])
             return {'out': 'error', 'details': "File '%s' cannot be accessed" % req['file']}
+
+        if os.path.splitext(req['file'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS:
+            vsl.LOG.debug("Sound format not supported for '%s'." % (req['file']))
+            return {'out': 'error', 'details': "Format of '%s' is not supported." % req['file']}
 
     # For compatibility with multi-file queries
     if len(req['stack'])!=0 and isinstance(req['stack'][0], list):
@@ -561,7 +567,26 @@ def multi_process_async(files, req, h, out_filename):
             fs_y = None
             for oj in o:
                 #job_info['used_files'].append(j['details'])
-                x, fs = sf.read(oj['details'])
+                if os.path.splitext(oj['details'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS:
+                    vsl.LOG.debug("[%s] Sound format not supported for '%s'." % (h, oj['details']))
+                    j['out'] = 'error'
+                    j['details'] = "Sound format not supported for '%s'." % (oj['details'])
+                    j['finished'] = True
+                    JOBS[h] = j
+                    vsl.LOG.debug("[%s] Job is done!" % (h))
+                    return
+
+                try:
+                    x, fs = sf.read(oj['details'])
+                except Exception as e:
+                    vsl.LOG.debug("[%s] Error while reading %s...\n%s" % (h, oj['details'],e))
+                    j['out'] = 'error'
+                    j['details'] = err
+                    j['finished'] = True
+                    JOBS[h] = j
+                    vsl.LOG.debug("[%s] Job is done!" % (h))
+                    return
+
                 if y is None:
                     y = x
                     fs_y = fs
