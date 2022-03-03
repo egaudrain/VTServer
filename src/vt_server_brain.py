@@ -145,7 +145,13 @@ def job_signature(req):
         return vsct.signature((os.path.abspath(req['file']), req['stack']))
 
 def _job_signature_multi(files, stack):
-    return 'M'+vsct.signature((" >> ".join([os.path.abspath(x) for x in files]), stack))
+    signs = list()
+    for x in files:
+        if isinstance(x, dict):
+            signs.append(job_signature(x))
+        else:
+            signs.append(os.path.abspath(x))
+    return 'M'+vsct.signature((" >> ".join(signs), stack))
 
 def process(req, force_sync=False):
     """
