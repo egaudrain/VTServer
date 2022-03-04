@@ -9,11 +9,11 @@ This module contains function that may be useful across other VTServer modules.
 
 """
 
-import pickle, hashlib, os, datetime
+import pickle, hashlib, os, datetime, base64
 import numpy as np
 
 def signature(desc):
-    return hashlib.md5(pickle.dumps(desc, 2)).hexdigest()
+    return base64.b32encode( hashlib.blake2b(pickle.dumps(desc, 2), digest_size=30).digest() ).decode().lower()
 
 def job_file(target_file, source_files, cache_expiration=None, stack=None, error=None):
     """
