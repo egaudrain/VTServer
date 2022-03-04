@@ -3,3 +3,4 @@ __pycache__/
 .doctrees/
 test/
 *.odg#
+unit-test/vt_server.conf.json
