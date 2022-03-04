@@ -185,14 +185,16 @@ For `"hash"` and `"process"`, the query also needs to contain a **file** field,
 and a **stack** field.
 
     file
-        The sound file(s) that will be processed. This can be an array
-        of files, in which case they are all processed and then concatenated. This
-        can also be a string where the files are separated with ``" >> "``
-        (note that this includes a space before, and a space after). The file
-        path is relative to where the *server* is running from (not the client).
+        The sound file(s) that will be processed. This can also be an array
+        of files or of queries. The stack is applied to the concatenated result.
+        The file path is relative to where the *server* is running from (not the client).
         *It is highly recommended to use absolute paths instead of relative paths.*
         Also note that the input sound files should be in a format understood by
         `linsndfile <http://www.mega-nerd.com/libsndfile/#Features>`__.
+
+        Note: In version 2.2 it was possible to use " >> " to separate files. This
+        has been removed in 2.3, but you can still use arrays. Support for subqueries
+        as `file` of the main query has been added in 2.3.
 
     stack
         The list of processes that will be run on the file. Each item
@@ -206,22 +208,27 @@ and a **stack** field.
 In addition to these mandatory field, a number of optional fields can also be provided:
 
     mode
-        `"sync"` [default], `"async"` or `"hash"`. In `sync` mode, the server will only
+        `"async"` [default], `"sync"` or `"hash"`. In `sync` mode, the server will only
         send a response when the file is processed. In `async` mode, the server
         will respond immediately with a `"wait"` response. The client can probe
         periodically with the same request until the file is returned. `hash` only
         returns the hash of the request that is used as identifier (see below).
 
+        Note: In 2.3, `"async"` became the default.
+
     format
         Specifies the output format of the sound files. Can be `"flac"`, `"wav"`
         (or anything else supported by `libsndfile <http://www.mega-nerd.com/libsndfile/>`_, or `"mp3"`
         (if `LAME <http://www.mega-nerd.com/libsndfile/>`_ is installed). If none is provided,
-        then the default cache format is used (see :mod:`vt_server_config`).
+        then the default cache format is used (see :mod:`vt_server_config`). For sub-queries,
+        this is automatically changed to the server's cache format.
 
     format_options
         Specifies options (as a dictionary) for the selected
         format. At the moment, only `bitrate` is specified (as an integer in kbps)
         for format `"mp3"` (see :py:func:`vt_server_brain.encode_to_format` for details).
+        For sub-queries, this is automatically changed to the server's cache format
+        options.
 
 Query hash
 ^^^^^^^^^^
@@ -357,7 +364,7 @@ and the VTL has been shifter -5 semitones, and attenuated by 6 dB:
 
     q = {
         'action': "process",
-        'file':   "/home/toto/audio/Beer.wav",
+        'file':   "Beer.wav",
         'stack': list()
     }
 
@@ -365,7 +372,7 @@ and the VTL has been shifter -5 semitones, and attenuated by 6 dB:
         'module': "mixin",
         'file': {
             'action': "process",
-            'file': '/Users/egaudrain/Sources/VTServer/test/Beer.wav',
+            'file': 'Beer.wav',
             'stack': [
                 {
                     'module': "world",
@@ -385,13 +392,13 @@ This produces the following JSON query:
 
     {
         "action": "process",
-        "file": "/home/toto/audio/Beer.wav",
+        "file": "Beer.wav",
         "stack": [
             {
                 "module": "mixin",
                 "file": {
                     "action": "process",
-                    "file": "/home/toto/audio/Beer.wav",
+                    "file": "Beer.wav",
                     "stack": [
                         {
                             "module": "world",
@@ -406,6 +413,38 @@ This produces the following JSON query:
             }
         ]
     }
+
+Similarly, subqueries can be used as the main input, even with an empty stack:
+
+.. code-block:: json
+
+    {
+        "action": "process",
+        "file": [
+            {
+                "file": "Beer.wav",
+                "stack": [
+                    {
+                        "module": "world",
+                        "f0": "+12st"
+                    }
+                ]
+            },
+            {
+                "file": "Beer.wav",
+                "stack": [
+                    {
+                        "module": "world",
+                        "f0": "-12st"
+                    }
+                ]
+            }
+        ]
+        "stack": []
+    }
+
+The example above will produce the word "Beer" shifted up 1-octave, followed by the same word
+shifted down 1-octave.
 
 Using `async`
 -------------

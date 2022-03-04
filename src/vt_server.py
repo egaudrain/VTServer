@@ -21,7 +21,7 @@ import vt_server_brain
 import threading
 
 
-__version__ = "2.2"
+__version__ = "2.3"
 __author__  = "Etienne Gaudrain"
 
 
@@ -37,10 +37,15 @@ class VTHandler(socketserver.StreamRequestHandler):
     If **action** is  `"process"`, then the following fields are required:
 
         file
-          The sound file(s) that will be processed. This can be an array
-          of files, in which case they are all processed and then concatenated. This
-          can also be a string where the files are separated with ``" >> "``
-          (note that this includes a space before, and a space after).
+          The sound file(s) that will be processed. This can also be an array
+          of files or of queries. The stack is applied to the concatenated result.
+          The file path is relative to where the *server* is running from (not the client).
+          *It is highly recommended to use absolute paths instead of relative paths.*
+          Also note that the input sound files should be in a format understood by
+          `linsndfile <http://www.mega-nerd.com/libsndfile/#Features>`__.
+
+          Note: In version 2.2 it was possible to use " >> " to separate files. This
+          has been removed in 2.3. Support for subqueries as `file` has been added in 2.3.
 
         stack
           The list of processes that will be run on the file. Each item
@@ -83,12 +88,11 @@ class VTHandler(socketserver.StreamRequestHandler):
     The response is also JSON and has the following form:
 
         out
-          `"ok"` or `"error"`
+          `"ok"`, `"error"`, or `"wait"`
 
         details
-          In case of success, this contains the outcome of the processing
-          (or `"wait"` for the `"async"` mode). In case of error, this has some
-          details about the error.
+          In case of success, this contains the outcome of the processing. In case of error,
+          this has some details about the error.
     """
     def handle(self):
         """

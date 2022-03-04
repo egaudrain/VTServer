@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -486,6 +486,8 @@ is a sinewave (see Crew et al., 2012, JASA).</p>
 (default is <cite>true</cite>). Keep in mind that if you filter broadband carriers both
 before and after modulation you may alter the spectral shape of your signal.</p>
 </dd>
+<dt>random_seed</dt><dd><p><cite>[optional]</cite> For noise carriers only.</p>
+</dd>
 </dl>
 </div></blockquote>
 <p>If the <cite>carrier</cite> is <cite>noise</cite>, then a random seed can be provided in <cite>random_seed</cite>
@@ -494,7 +496,8 @@ current clock. Note that for multi-channel audio files, the seed is used for eac
 channel. If no seed is given, the various bands will have different noises as
 carriers. To have correlated noise across bands, pass in a (random) seed. Also note
 that the cache system also means that once an output file is generated, it will be served
-as is rather than re-generated. To generate truely random files, provide a random seed.</p>
+as is rather than re-generated. To generate truely random files, provide a random seed on each
+request.</p>
 <p>If the <cite>carrier</cite> is <cite>sin</cite>, the center frequency of each band will be determined based on the scale
 that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.</p>
 </div>

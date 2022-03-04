@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -320,15 +320,16 @@ server, and how many jobs are in the <code class="xref py py-data docutils liter
 <p>For <cite>“hash”</cite> and <cite>“process”</cite>, the query also needs to contain a <strong>file</strong> field,
 and a <strong>stack</strong> field.</p>
 <blockquote>
-<div><dl class="simple">
-<dt>file</dt><dd><p>The sound file(s) that will be processed. This can be an array
-of files, in which case they are all processed and then concatenated. This
-can also be a string where the files are separated with <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">&gt;&gt;</span> <span class="pre">&quot;</span></code>
-(note that this includes a space before, and a space after). The file
-path is relative to where the <em>server</em> is running from (not the client).
+<div><dl>
+<dt>file</dt><dd><p>The sound file(s) that will be processed. This can also be an array
+of files or of queries. The stack is applied to the concatenated result.
+The file path is relative to where the <em>server</em> is running from (not the client).
 <em>It is highly recommended to use absolute paths instead of relative paths.</em>
 Also note that the input sound files should be in a format understood by
 <a class="reference external" href="http://www.mega-nerd.com/libsndfile/#Features">linsndfile</a>.</p>
+<p>Note: In version 2.2 it was possible to use ” &gt;&gt; ” to separate files. This
+has been removed in 2.3, but you can still use arrays. Support for subqueries
+as <cite>file</cite> of the main query has been added in 2.3.</p>
 </dd>
 <dt>stack</dt><dd><p>The list of processes that will be run on the file. Each item
 in the stack is an object that is specific to the type of processing.
@@ -342,21 +343,25 @@ definition.</p>
 </div></blockquote>
 <p>In addition to these mandatory field, a number of optional fields can also be provided:</p>
 <blockquote>
-<div><dl class="simple">
-<dt>mode</dt><dd><p><cite>“sync”</cite> [default], <cite>“async”</cite> or <cite>“hash”</cite>. In <cite>sync</cite> mode, the server will only
+<div><dl>
+<dt>mode</dt><dd><p><cite>“async”</cite> [default], <cite>“sync”</cite> or <cite>“hash”</cite>. In <cite>sync</cite> mode, the server will only
 send a response when the file is processed. In <cite>async</cite> mode, the server
 will respond immediately with a <cite>“wait”</cite> response. The client can probe
 periodically with the same request until the file is returned. <cite>hash</cite> only
 returns the hash of the request that is used as identifier (see below).</p>
+<p>Note: In 2.3, <cite>“async”</cite> became the default.</p>
 </dd>
 <dt>format</dt><dd><p>Specifies the output format of the sound files. Can be <cite>“flac”</cite>, <cite>“wav”</cite>
 (or anything else supported by <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">libsndfile</a>, or <cite>“mp3”</cite>
 (if <a class="reference external" href="http://www.mega-nerd.com/libsndfile/">LAME</a> is installed). If none is provided,
-then the default cache format is used (see <a class="reference internal" href="modules.html#module-vt_server_config" title="vt_server_config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_config</span></code></a>).</p>
+then the default cache format is used (see <a class="reference internal" href="modules.html#module-vt_server_config" title="vt_server_config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">vt_server_config</span></code></a>). For sub-queries,
+this is automatically changed to the server’s cache format.</p>
 </dd>
 <dt>format_options</dt><dd><p>Specifies options (as a dictionary) for the selected
 format. At the moment, only <cite>bitrate</cite> is specified (as an integer in kbps)
-for format <cite>“mp3”</cite> (see <a class="reference internal" href="modules.html#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).</p>
+for format <cite>“mp3”</cite> (see <a class="reference internal" href="modules.html#vt_server_brain.encode_to_format" title="vt_server_brain.encode_to_format"><code class="xref py py-func docutils literal notranslate"><span class="pre">vt_server_brain.encode_to_format()</span></code></a> for details).
+For sub-queries, this is automatically changed to the server’s cache format
+options.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -473,7 +478,7 @@ right away, and 1 s later, the same word, where the F0 has been shifted up 12 s
 and the VTL has been shifter -5 semitones, and attenuated by 6 dB:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;file&#39;</span><span class="p">:</span>   <span class="s2">&quot;/home/toto/audio/Beer.wav&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;file&#39;</span><span class="p">:</span>   <span class="s2">&quot;Beer.wav&quot;</span><span class="p">,</span>
     <span class="s1">&#39;stack&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
 <span class="p">}</span>
 
@@ -481,7 +486,7 @@ and the VTL has been shifter -5 semitones, and attenuated by 6 dB:</p>
     <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s2">&quot;mixin&quot;</span><span class="p">,</span>
     <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
-        <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="s1">&#39;/Users/egaudrain/Sources/VTServer/test/Beer.wav&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="s1">&#39;Beer.wav&#39;</span><span class="p">,</span>
         <span class="s1">&#39;stack&#39;</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
                 <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
@@ -499,13 +504,13 @@ and the VTL has been shifter -5 semitones, and attenuated by 6 dB:</p>
 <p>This produces the following JSON query:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
-    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/toto/audio/Beer.wav&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Beer.wav&quot;</span><span class="p">,</span>
     <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
             <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;mixin&quot;</span><span class="p">,</span>
             <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="nt">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
-                <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;/home/toto/audio/Beer.wav&quot;</span><span class="p">,</span>
+                <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Beer.wav&quot;</span><span class="p">,</span>
                 <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
                     <span class="p">{</span>
                         <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
@@ -522,6 +527,35 @@ and the VTL has been shifter -5 semitones, and attenuated by 6 dB:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
+<p>Similarly, subqueries can be used as the main input, even with an empty stack:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;process&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Beer.wav&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;f0&quot;</span><span class="p">:</span> <span class="s2">&quot;+12st&quot;</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;Beer.wav&quot;</span><span class="p">,</span>
+            <span class="nt">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;world&quot;</span><span class="p">,</span>
+                    <span class="nt">&quot;f0&quot;</span><span class="p">:</span> <span class="s2">&quot;-12st&quot;</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+    <span class="s2">&quot;stack&quot;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The example above will produce the word “Beer” shifted up 1-octave, followed by the same word
+shifted down 1-octave.</p>
 </div>
 <div class="section" id="using-async">
 <h3>Using <cite>async</cite><a class="headerlink" href="#using-async" title="Permalink to this headline">¶</a></h3>

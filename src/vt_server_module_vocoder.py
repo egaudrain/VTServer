@@ -160,13 +160,17 @@ The **synthesis** field describes how the resynthesis should be performed.
         (default is `true`). Keep in mind that if you filter broadband carriers both
         before and after modulation you may alter the spectral shape of your signal.
 
+    random_seed
+        `[optional]` For noise carriers only.
+
 If the `carrier` is `noise`, then a random seed can be provided in `random_seed`
 to have frozen noise. If not the random number generator will be initialized with the
 current clock. Note that for multi-channel audio files, the seed is used for each
 channel. If no seed is given, the various bands will have different noises as
 carriers. To have correlated noise across bands, pass in a (random) seed. Also note
 that the cache system also means that once an output file is generated, it will be served
-as is rather than re-generated. To generate truely random files, provide a random seed.
+as is rather than re-generated. To generate truely random files, provide a random seed on each
+request.
 
 If the `carrier` is `sin`, the center frequency of each band will be determined based on the scale
 that is used. If cutoffs are manually provided, the geometric mean is used as center frequency.

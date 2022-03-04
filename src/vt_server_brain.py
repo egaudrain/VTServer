@@ -26,7 +26,7 @@ creates the job and starts the process.
 
 In `'sync'` mode, the dispatcher waits for the process to be completed.
 
-In `'async'` mode it returns right away and sends a `'wait'` message. The client can
+In `'async'` mode (default) it returns right away and sends a `'wait'` message. The client can
 send the same request a bit later. If the job is still being processed, the server
 sends the same `'wait'` response. If the job is completed, then the job target file
 exists and is returned right away.
@@ -49,6 +49,7 @@ import os, datetime, pickle, copy, traceback
 from multiprocessing import Process, Manager, active_children
 from threading import Event, Thread
 import subprocess
+from enum import IntEnum
 
 import soundfile as sf
 import numpy as np
@@ -134,24 +135,32 @@ class Janitor():
 JOB_JANITOR = None # now instantiated manually
 
 def job_signature(req):
-    if " >> " in req['file']:
-        files = req['file'].split(" >> ")
-        return _job_signature_multi(files, req['stack'])
-    elif isinstance(req['file'], list):
-        return _job_signature_multi(req['file'], req['stack'])
-    elif isinstance(req['file'], dict):
-        return 'S'+vsct.signature((job_signature(req['file']), req['stack']))
-    else:
-        return vsct.signature((os.path.abspath(req['file']), req['stack']))
 
-def _job_signature_multi(files, stack):
-    signs = list()
-    for x in files:
-        if isinstance(x, dict):
-            signs.append(job_signature(x))
+    if isinstance(req, dict):
+        if isinstance(req['file'], list):
+            return 'M'+vsct.signature(([job_signature(x) for x in req['file']], req['stack']))
+        elif isinstance(req['file'], dict):
+            return 'S'+vsct.signature((job_signature(req['file']), req['stack']))
         else:
-            signs.append(os.path.abspath(x))
-    return 'M'+vsct.signature((" >> ".join(signs), stack))
+            return vsct.signature((os.path.abspath(req['file']), req['stack']))
+    else:
+        # req is a filename
+        return vsct.signature((os.path.abspath(req), []))
+
+# def _job_signature_multi(files, stack):
+#     signs = list()
+#     for x in files:
+#         if isinstance(x, dict):
+#             signs.append(job_signature(x))
+#         else:
+#             signs.append(os.path.abspath(x))
+#     return 'M'+vsct.signature((" >> ".join(signs), stack))
+
+class QueryInType(IntEnum):
+    FILE = 0
+    QUERY = 1
+    GENERATOR = 2
+    LIST = 3
 
 def process(req, force_sync=False):
     """
@@ -165,7 +174,7 @@ def process(req, force_sync=False):
     N_REQUESTS += 1
 
     if 'mode' not in req:
-        req['mode'] = 'sync'
+        req['mode'] = 'async'
     if req['mode'] not in ['sync', 'async', 'hash']:
         return {'out': 'error', 'details': "'mode' has to be 'sync' or 'async' ('%s' provided)" % (req['mode'])}
 
@@ -193,17 +202,19 @@ def process(req, force_sync=False):
     else:
         return {'out': 'error', 'details':  "The 'cache' field could not be interpreted: %s." % repr(req['cache'])}
 
-    if isinstance(req['file'], list) or (' >> ' in req['file']):
-        # Send to multi-process if there are multiple input files
-        return multi_process(req, force_sync)
-
-    if isinstance(req['file'], dict):
-        sub_query = True
+    if isinstance(req['file'], list): # or (' >> ' in req['file']):
+        req['in_type'] = QueryInType.LIST
+    elif isinstance(req['file'], dict):
+        req['in_type'] = QueryInType.QUERY
     else:
-        sub_query = False
+        if req['file'].startswith('@') and req['file'].endswith(')'):
+            req['in_type'] = QueryInType.GENERATOR
+            return {'out': 'error', 'details': "Generators are not supported yet (%s)." % req['file']}
+        else:
+            req['in_type'] = QueryInType.FILE
 
     # TODO: Handle generators for file
-    if not sub_query:
+    if req['in_type'] == QueryInType.FILE:
         if req['file'].endswith(os.path.sep):
             req['file'] = os.path.abspath(req['file']) + os.path.sep
         else:
@@ -218,11 +229,11 @@ def process(req, force_sync=False):
             return {'out': 'error', 'details': "Format of '%s' is not supported." % req['file']}
 
     # For compatibility with multi-file queries
-    if len(req['stack'])!=0 and isinstance(req['stack'][0], list):
-        if len(req['stack'])>1:
-            # We have a list of stacks with more than one stack...
-            return {'out': 'error', 'details': "Cannot have a list of stacks (with more than one stack) when passing in a single file."}
-        req['stack'] = req['stack'][0]
+    # if len(req['stack'])!=0 and isinstance(req['stack'][0], list):
+    #     if len(req['stack'])>1:
+    #         # We have a list of stacks with more than one stack...
+    #         return {'out': 'error', 'details': "Cannot have a list of stacks (with more than one stack) when passing in a single file."}
+    #     req['stack'] = req['stack'][0]
 
     #----------------------------
     # From here on, we are ready to call job_signature
@@ -234,7 +245,11 @@ def process(req, force_sync=False):
     if req['mode'] == 'hash':
         return {'out': 'ok', 'details': h}
 
-    out_filename = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), h+"."+req['format'])
+    out_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), h[0])
+    out_filename = os.path.join(out_path, h+"."+req['format'])
+
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
 
     if os.access(out_filename, os.R_OK):
         # The file already exists and is accessible, we return it
@@ -262,11 +277,16 @@ def process(req, force_sync=False):
 
         JOBS[h] = {'finished': False, 'started_at': datetime.datetime.now(), 'pid': None}
 
-        if sub_query:
-            vsl.LOG.debug("[%s] Starting sub-query process." % (h))
-            p = Process(target=subquery_process_async, args=(req, h, out_filename))
+        # if req['in_type'] == QueryInType.QUERY:
+        #     vsl.LOG.debug("[%s] Starting sub-query process." % (h))
+        #     p = Process(target=subquery_process_async, args=(req, h, out_filename))
+        # else:
+        if req['in_type'] == QueryInType.LIST:
+            proc_target = multi_process_async
         else:
-            p = Process(target=process_async, args=(req, h, out_filename))
+            proc_target = process_async
+
+        p = Process(target=proc_target, args=(req, h, out_filename))
 
         p.start()
 
@@ -351,10 +371,33 @@ def process_async(req, h, out_filename):
 
     vsl.LOG.debug("[%s] Processing request %s." % (h, repr(req)))
 
-    # TODO: handle generators for file
-    f = req['file']
-
     j = JOBS[h]
+
+    # TODO: handle generators for file
+    if req['in_type'] == QueryInType.FILE:
+        f = req['file']
+    elif req['in_type'] == QueryInType.QUERY:
+        r = req['file']
+        r['format'] = vsc.CONFIG['cacheformat']
+        r['format_options'] = vsc.CONFIG['cacheformatoptions']
+        o = process(r, force_sync=True)
+        if o['out']=='error':
+            j['out'] = 'error'
+            j['details'] = o['details']
+            j['finished'] = True
+            JOBS[h] = j
+            vsl.LOG.debug("[%s] There was an error while processing the subquery: %s" % (h, j['details']))
+            return
+        else:
+            f = o['details']
+    elif req['in_type'] == QueryInType.GENERATOR:
+        j['out'] = 'error'
+        j['details'] = "Generators are not supported yet (%s)." % req['file']
+        j['finished'] = True
+        JOBS[h] = j
+        vsl.LOG.debug("[%s] %s" % (h, j['details']))
+        return
+
 
     # job_info = dict()
     # job_info['source_files'] = [f] # If source file does not exist anymore, the job is deleted
@@ -407,165 +450,183 @@ def process_async(req, h, out_filename):
 
         vsl.LOG.debug("[%s] Finished with processing the stack." % (h))
 
-def subquery_process_async(req, h, out_filename):
+# def subquery_process_async(req, h, out_filename):
+#
+#
+#     j = JOBS[h]
+#
+#     o = process(req['file'], force_sync=True)
+#
+#     if o['out']=='error':
+#         j['out'] = 'error'
+#         j['details'] = o['details']
+#         j['finished'] = True
+#         JOBS[h] = j
+#         vsl.LOG.debug("[%s] There was an error while processing the subquery: %s" % (h, j['details']))
+#         return
+#
+#     # elif o['out']=='wait':
+#     #     j['out'] = 'wait'
+#     #     j['details'] = o['details']
+#     #     JOBS[h] = j
+#     #     vsl.LOG.debug("[%s] Subquery is not done yet" % (h))
+#
+#     elif o['out']=='ok':
+#         vsl.LOG.debug("[%s] Subquery is done" % (h))
+#         req['file'] = o['details']
+#
+#         o = process(req, force_sync=True)
+#
+#     if o['out']!='ok':
+#         j = JOBS[h]
+#         j['out'] = 'error'
+#         j['details'] = o['details']
+#         j['finished'] = True
+#         JOBS[h] = j
+#         vsl.LOG.debug("[%s] There was an error while processing the main query: %s" % (h, j['details']))
+#         return
+#
+#     vsl.LOG.debug("[%s] Main query is completed in `%s`" % (h, o['details']))
+#
+#     if cast_outfile(o['details'], out_filename, req, h):
+#         j = JOBS[h]
+#         j['out'] = 'ok'
+#         j['details'] = o['details']
+#         j['finished'] = True
+#         JOBS[h] = j
 
+# def multi_process(req, force_sync=False):
+#     """
+#     This is called from :py:func:`process` if multiple files have been provided as input.
+#     """
+#
+#     if isinstance(req['file'], list):
+#         files = req['file']
+#     # else:
+#     #     files = req['file'].split(' >> ')
+#     #     # TODO: if files are separated with "<" they are concatenated prior to being passed in the stack
+#     #     # Note that as much as possible, this is not desirable for caching reasons, but that could be useful.
+#
+#     # if len(req['stack'])!=0:
+#     #     if type(req['stack'][0])==type({}):
+#     #         # We are dealing with a single stack applied to all elements: we duplicate it
+#     #         req['stack'] = [req['stack']]
+#     #     if len(req['stack'])==1 and len(files)>1:
+#     #         # We are dealing with a list of stacks, but of length 1
+#     #         req['stack'] = [ copy.deepcopy(req['stack'][0]) for f in files ]
+#     #     if len(req['stack'])!=len(files):
+#     #         return {'out': 'error', 'details': 'If a stack list is used, it must be of length 1 or of length equal to the number of files.'}
+#     # else:
+#     #     req['stack'] = [[]]*len(files)
+#     #
+#
+#     h = job_signature(files, req['stack'])
+#
+#     vsl.LOG.info("[%s] Multi-file processing request: %s" % (h, req))
+#
+#     if req['mode'] == 'hash':
+#         return {'out': 'ok', 'details': h}
+#
+#     out_filename = os.path.join(vsc.CONFIG['cachefolder'], h+"."+req['format'])
+#
+#     if os.access(out_filename, os.R_OK):
+#         # The file already exists and is accessible, we return it
+#         vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
+#
+#         try:
+#             vsct.update_job_file(out_filename)
+#         except:
+#             vsl.LOG.warning("Something went wrong while updating the job-file associated with %s" % out_filename)
+#
+#         return {"out": "ok", "details": out_filename}
+#
+#     elif h in JOBS:
+#         if JOBS[h]['finished']:
+#             if JOBS[h]['out']!='ok':
+#                 return {"out": JOBS[h]['out'], "details": JOBS[h]['details']}
+#             else:
+#                 # Job is marked finished and ok, but cache couldn't be accessed, we need to regenerate it
+#                 vsl.LOG.info("[%s] Found job in JOBS, started at %s, marked finished and ok, but cache (%s) couldn't be accessed, we need to regenerate it" % (h, JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S"), out_filename))
+#                 JOBS.pop(h)
+#         else:
+#             vsl.LOG.debug('[%s] Found job in JOBS, started at %s, not finished yet' % (h ,JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")));
+#             return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
+#
+#     vsl.LOG.debug("[%s] Adding multi job to the job list." % (h))
+#
+#     p = Process(target=multi_process_async, args=(files, req, h, out_filename))
+#     p.start()
+#     JOBS[h] = {'finished': False, 'started_at': datetime.datetime.now(), 'pid': p.pid}
+#
+#     vsl.LOG.debug("[%s] Job is running in process %d." % (h, p.pid))
+#
+#     if req['mode']=='async' and not force_sync:
+#         return {"out": "wait", "details": "Multi-job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
+#     elif req['mode']=='sync' or force_sync:
+#         p.join()
+#         j = JOBS[h]
+#         if 'out' in j:
+#             output = {"out": j['out'], "details": j['details']}
+#             JOBS.pop(h)
+#             return output
+#         else:
+#             return {'out': 'error', 'details': "Not sure what happened here... JOB=%s" % repr(j)}
 
-    j = JOBS[h]
-
-    o = process(req['file'], force_sync=True)
-
-    if o['out']=='error':
-        j['out'] = 'error'
-        j['details'] = o['details']
-        j['finished'] = True
-        JOBS[h] = j
-        vsl.LOG.debug("[%s] There was an error while processing the subquery: %s" % (h, j['details']))
-        return
-
-    # elif o['out']=='wait':
-    #     j['out'] = 'wait'
-    #     j['details'] = o['details']
-    #     JOBS[h] = j
-    #     vsl.LOG.debug("[%s] Subquery is not done yet" % (h))
-
-    elif o['out']=='ok':
-        vsl.LOG.debug("[%s] Subquery is done" % (h))
-        req['file'] = o['details']
-
-        o = process(req, force_sync=True)
-
-    if o['out']!='ok':
-        j = JOBS[h]
-        j['out'] = 'error'
-        j['details'] = o['details']
-        j['finished'] = True
-        JOBS[h] = j
-        vsl.LOG.debug("[%s] There was an error while processing the main query: %s" % (h, j['details']))
-        return
-
-    vsl.LOG.debug("[%s] Main query is completed in `%s`" % (h, o['details']))
-
-    if cast_outfile(o['details'], out_filename, req, h):
-        j = JOBS[h]
-        j['out'] = 'ok'
-        j['details'] = o['details']
-        j['finished'] = True
-        JOBS[h] = j
-
-def multi_process(req, force_sync=False):
-    """
-    This is called from :py:func:`process` if multiple files have been provided as input.
-    """
-
-    if isinstance(req['file'], list):
-        files = req['file']
-    else:
-        files = req['file'].split(' >> ')
-        # TODO: if files are separated with "<" they are concatenated prior to being passed in the stack
-        # Note that as much as possible, this is not desirable for caching reasons, but that could be useful.
-
-    if len(req['stack'])!=0:
-        if type(req['stack'][0])==type({}):
-            # We are dealing with a single stack applied to all elements: we duplicate it
-            req['stack'] = [req['stack']]
-        if len(req['stack'])==1 and len(files)>1:
-            # We are dealing with a list of stacks, but of length 1
-            req['stack'] = [ copy.deepcopy(req['stack'][0]) for f in files ]
-        if len(req['stack'])!=len(files):
-            return {'out': 'error', 'details': 'If a stack list is used, it must be of length 1 or of length equal to the number of files.'}
-    else:
-        req['stack'] = [[]]*len(files)
-
-    h = _job_signature_multi(files, req['stack'])
-
-    vsl.LOG.info("[%s] Multi-file processing request: %s" % (h, req))
-
-    if req['mode'] == 'hash':
-        return {'out': 'ok', 'details': h}
-
-    out_filename = os.path.join(vsc.CONFIG['cachefolder'], h+"."+req['format'])
-
-    if os.access(out_filename, os.R_OK):
-        # The file already exists and is accessible, we return it
-        vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
-
-        try:
-            vsct.update_job_file(out_filename)
-        except:
-            vsl.LOG.warning("Something went wrong while updating the job-file associated with %s" % out_filename)
-
-        return {"out": "ok", "details": out_filename}
-
-    elif h in JOBS:
-        if JOBS[h]['finished']:
-            if JOBS[h]['out']!='ok':
-                return {"out": JOBS[h]['out'], "details": JOBS[h]['details']}
-            else:
-                # Job is marked finished and ok, but cache couldn't be accessed, we need to regenerate it
-                vsl.LOG.info("[%s] Found job in JOBS, started at %s, marked finished and ok, but cache (%s) couldn't be accessed, we need to regenerate it" % (h, JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S"), out_filename))
-                JOBS.pop(h)
-        else:
-            vsl.LOG.debug('[%s] Found job in JOBS, started at %s, not finished yet' % (h ,JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")));
-            return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
-
-    vsl.LOG.debug("[%s] Adding multi job to the job list." % (h))
-
-    p = Process(target=multi_process_async, args=(files, req, h, out_filename))
-    p.start()
-    JOBS[h] = {'finished': False, 'started_at': datetime.datetime.now(), 'pid': p.pid}
-
-    vsl.LOG.debug("[%s] Job is running in process %d." % (h, p.pid))
-
-    if req['mode']=='async' and not force_sync:
-        return {"out": "wait", "details": "Multi-job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
-    elif req['mode']=='sync' or force_sync:
-        p.join()
-        j = JOBS[h]
-        if 'out' in j:
-            output = {"out": j['out'], "details": j['details']}
-            JOBS.pop(h)
-            return output
-        else:
-            return {'out': 'error', 'details': "Not sure what happened here... JOB=%s" % repr(j)}
-
-def multi_process_async(files, req, h, out_filename):
+def multi_process_async(req, h, out_filename):
 
     vsl.LOG.debug("[%s] Starting multi_process_async..." % (h))
 
-    while True:
+    r = req.copy()
+    r['stack'] = []
+    hc = job_signature(r)
+    concatenated_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), '_multi_', hc[0])
+    concatenated_filename = os.path.join(concatenated_path, hc+"."+req['format'])
 
-        j = JOBS[h]
+    if not os.path.exists(concatenated_path):
+        os.makedirs(concatenated_path)
+
+    j = JOBS[h]
+
+    if os.access(concatenated_filename, os.R_OK):
+        # The file already exists and is accessible, we skip creation
+        vsl.LOG.debug("[%s] Found concatenated file '%s' in cache." % (h, concatenated_filename))
+
+    else:
 
         o = list()
-        for i,f in enumerate(files):
-            if len(req['stack'][i]) == 0:
-                # If there is no stack, we bypass process altogether
-                o.append( {'out': 'ok', 'details': f} )
-            else:
-                r = dict()
-                r['file'] = f
-                r['mode'] = req['mode']
-                r['stack'] = req['stack'][i]
+        for i,f in enumerate(req['file']):
+            if isinstance(f, dict):
+                r = f
                 r['format'] = vsc.CONFIG['cacheformat']
                 r['format_options'] = vsc.CONFIG['cacheformatoptions']
-                o.append(process(r))
+                o.append(process(r, True))
+            elif isinstance(f, str): # This is a file
+                o.append( {'out': 'ok', 'details': f} )
+            else:
+                j['out'] = 'error'
+                j['details'] = "Element %d of multi-query is of unhandled type (%s)." % (i, type(f))
+                j['finished'] = True
+                JOBS[h] = j
+                vsl.LOG.debug("[%s] Element %d of multi-query is of unhandled type (%s)." % (h, i, type(f)))
+                return
 
-        if any([x['out']=='error' for x in o]):
-            j['out'] = 'error'
-            j['details'] = "\n".join([x['details'] for x in o])
-            j['finished'] = True
-            JOBS[h] = j
-            vsl.LOG.debug("[%s] There was an error while processing one the files: %s" % (h, j['details']))
-            return
-            #return {'out': 'error', 'details': j['details']}
+        # if any([x['out']=='error' for x in o]):
+        #     j['out'] = 'error'
+        #     j['details'] = "\n".join([x['details'] for x in o])
+        #     j['finished'] = True
+        #     JOBS[h] = j
+        #     vsl.LOG.debug("[%s] There was an error while processing one the files:\n%s" % (h, j['details']))
+        #     return
+        #     #return {'out': 'error', 'details': j['details']}
 
-        elif any([x['out']=='wait' for x in o]):
-            j['out'] = 'wait'
-            j['details'] = "\n".join([x['details'] for x in o])
-            JOBS[h] = j
-            vsl.LOG.debug("[%s] One of the file's processing is not done yet" % (h))
+        # if any([x['out']=='wait' for x in o]):
+        #     j['out'] = 'wait'
+        #     j['details'] = "\n".join([x['details'] for x in o])
+        #     JOBS[h] = j
+        #     vsl.LOG.debug("[%s] One of the file's processing is not done yet" % (h))
+        #     continue
 
-        elif all([x['out']=='ok' for x in o]):
+        if all([x['out']=='ok' for x in o]):
 
             vsl.LOG.debug("[%s] All files are ready, now concatenating..." % (h))
 
@@ -573,19 +634,21 @@ def multi_process_async(files, req, h, out_filename):
             fs_y = None
             for oj in o:
                 #job_info['used_files'].append(j['details'])
-                if os.path.splitext(oj['details'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS:
-                    vsl.LOG.debug("[%s] Sound format not supported for '%s'." % (h, oj['details']))
-                    j['out'] = 'error'
-                    j['details'] = "Sound format not supported for '%s'." % (oj['details'])
-                    j['finished'] = True
-                    JOBS[h] = j
-                    vsl.LOG.debug("[%s] Job is done!" % (h))
-                    return
+                # OJ DETAILS IS A DICT!
+                # if os.path.splitext(oj['details'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS:
+                #     vsl.LOG.debug("[%s] Sound format not supported for '%s'." % (h, oj['details']))
+                #     j['out'] = 'error'
+                #     j['details'] = "Sound format not supported for '%s'." % (oj['details'])
+                #     j['finished'] = True
+                #     JOBS[h] = j
+                #     vsl.LOG.debug("[%s] Job is done!" % (h))
+                #     return
 
                 try:
                     x, fs = sf.read(oj['details'])
                 except Exception as e:
-                    vsl.LOG.debug("[%s] Error while reading %s...\n%s" % (h, oj['details'],e))
+                    err = "Error while reading %s...\n%s" % (oj['details'],e)
+                    vsl.LOG.debug("[%s] %s" % (h, err))
                     j['out'] = 'error'
                     j['details'] = err
                     j['finished'] = True
@@ -604,47 +667,26 @@ def multi_process_async(files, req, h, out_filename):
                         JOBS[h] = j
                         vsl.LOG.debug("[%s] File `%s` has a mismatching sampling frequency (%d instead of %d)..." % (h, oj['details'], fs, fs_y))
                         return
+
                     y = np.concatenate((y, x), axis=0)
 
-            if req['format'] == 'mp3':
+            vsl.LOG.debug("[%s] Writing out concatenated sounds to `%s`..." % (h, concatenated_filename))
+            sf.write(concatenated_filename, y, fs_y)
 
-                tmp_filename = os.path.join(vsc.CONFIG['cachefolder'], h+".wav")
-                sf.write(tmp_filename, y, fs)
-                #job_info['created_files'].append(tmp_filename)
-
-                vsl.LOG.debug("[%s] Encoding %s to %s..." % (h, tmp_filename, req['format']))
-
-                try:
-                    encode_to_format(tmp_filename, out_filename, req['format'], req['format_options'])
-                    vsct.job_file(out_filename, files, req['cache'], req['stack'])
-                    vsl.LOG.debug("[%s] Encoding %s to %s done!" % (h, tmp_filename, req['format']))
-                except Exception as err:
-                    err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (tmp_filename, req['format'], err, err.output.decode('utf-8'))
-                    vsl.LOG.critical(err_msg)
-                    j['out'] = 'error'
-                    j['details'] = err_msg
-                    j['finished'] = True
-                    JOBS[h] = j
-                    return
-            else:
-                vsl.LOG.debug("[%s] Writing out concatenated sounds to `%s`..." % (h, out_filename))
-                sf.write(out_filename, y, fs_y)
-                vsct.job_file(out_filename, [x['details'] for x in o], req['cache'], req['stack'])
-
-            j['out'] = 'ok'
-            j['details'] = out_filename
+        else:
+            j['out'] = 'error'
+            j['details'] = "Something unexplained happened."
             j['finished'] = True
             JOBS[h] = j
-            vsl.LOG.debug("[%s] Job is done!" % (h))
-            return
+            vsl.LOG.debug("[%s] Error: Something unexplained happened." % (h))
 
-        #     # job_info['created_files'].append(out_filename)
-        #     # pickle.dump(job_info, open(job_filename, "wb"))
-        #
-        #     return {'out': 'ok', 'details': out_filename}
-        #
-        # else:
-        #     return {'out': 'error', 'details': "Huuuu... we multiple times shouldn't find ourselves here... %s" % repr(req)}
+
+    r = req.copy()
+    r['file'] = concatenated_filename
+    o = process(r, True)
+    JOBS[h] = o
+
+    vsl.LOG.debug("[%s] Multi-job is done!" % (h))
 
 
 def process_module(f, m, format, cache=None):
