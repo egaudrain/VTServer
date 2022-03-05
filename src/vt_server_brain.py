@@ -580,7 +580,7 @@ def multi_process_async(req, h, out_filename):
     r['stack'] = []
     hc = job_signature(r)
     concatenated_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), '_multi_', hc[0])
-    concatenated_filename = os.path.join(concatenated_path, hc+"."+req['format'])
+    concatenated_filename = os.path.join(concatenated_path, hc+"."+vsc.CONFIG['cacheformat'])
 
     if not os.path.exists(concatenated_path):
         os.makedirs(concatenated_path)
