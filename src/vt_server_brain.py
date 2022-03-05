@@ -685,22 +685,34 @@ def multi_process_async(req, h, out_filename):
         else:
             j = JOBS[h]
             j['out'] = 'error'
-            j['details'] = "Something unexplained happened."
+            j['details'] = "There was an error when processing one of the subqueries."
             j['finished'] = True
             JOBS[h] = j
-            vsl.LOG.debug("[%s] Error: Something unexplained happened." % (h))
+            vsl.LOG.debug("[%s] There was an error when processing one of the subqueries." % (h))
+            return
 
 
     r = req.copy()
     r['file'] = concatenated_filename
     o = process(r, True)
-    j = JOBS[h]
-    j['out'] = o['out']
-    j['details'] = o['details']
-    j['finished'] = True
-    JOBS[h] = j
 
-    vsl.LOG.debug("[%s] Multi-job is done!" % (h))
+    if o['out']!='ok':
+        j = JOBS[h]
+        j['out'] = o['out']
+        j['details'] = o['details']
+        j['finished'] = True
+        JOBS[h] = j
+        vsl.LOG.debug("[%s] Multi-job failed on concatenated file!" % (h))
+        return
+
+    if cast_outfile(o['details'], out_filename, req, h):
+        j = JOBS[h]
+        j['out'] = 'ok'
+        j['details'] = out_filename
+        j['finished'] = True
+        JOBS[h] = j
+
+        vsl.LOG.debug("[%s] Multi-job is done!" % (h))
 
 
 def process_module(f, m, format, cache=None):
