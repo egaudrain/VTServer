@@ -5,7 +5,7 @@ authors:
   given-names: "Etienne"
   orcid: "https://orcid.org/0000-0003-0490-0295"
 title: "VTServer"
-version: 2.2
+version: 2.3
 doi: 10.5281/zenodo.5801906
-date-released: 2021-12-23
+date-released: 2022-03-05
 url: "https://github.com/egaudrain/VTServer"
