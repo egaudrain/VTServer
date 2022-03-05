@@ -697,6 +697,7 @@ def multi_process_async(req, h, out_filename):
     j = JOBS[h]
     j['out'] = o['out']
     j['details'] = o['details']
+    j['finished'] = True
     JOBS[h] = j
 
     vsl.LOG.debug("[%s] Multi-job is done!" % (h))
