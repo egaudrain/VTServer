@@ -322,6 +322,7 @@ def cast_outfile(f, out_filename, req, h):
                 vsct.job_file(out_filename, [f], req['cache'], req['stack'])
             except Exception as err:
                 err_msg = "Encoding of '%s' to format '%s' failed with error: %s, %s" % (f, req['format'], err, err.output.decode('utf-8'))
+                j = JOB[h]
                 j['out'] = 'error'
                 j['details'] = err_msg
                 j['finished'] = True
@@ -382,6 +383,7 @@ def process_async(req, h, out_filename):
         r['format_options'] = vsc.CONFIG['cacheformatoptions']
         o = process(r, force_sync=True)
         if o['out']=='error':
+            j = JOBS[h]
             j['out'] = 'error'
             j['details'] = o['details']
             j['finished'] = True
@@ -391,6 +393,7 @@ def process_async(req, h, out_filename):
         else:
             f = o['details']
     elif req['in_type'] == QueryInType.GENERATOR:
+        j = JOBS[h]
         j['out'] = 'error'
         j['details'] = "Generators are not supported yet (%s)." % req['file']
         j['finished'] = True
@@ -410,6 +413,7 @@ def process_async(req, h, out_filename):
 
         if 'module' not in m:
             err_msg = "Item %d of the stack does not have a 'module' defined: %s" % (i, repr(m))
+            j = JOBS[h]
             j['out'] = 'error'
             j['details'] = err_msg
             j['finished'] = True
@@ -426,6 +430,7 @@ def process_async(req, h, out_filename):
             except Exception as err:
                 #err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, repr(err))
                 err_msg = "Something went wrong while running module '%s' on file '%s': %s" % (m['module'], f, traceback.format_exc())
+                j = JOBS[h]
                 j['out'] = 'error'
                 j['details'] = err_msg
                 j['finished'] = True
@@ -434,6 +439,7 @@ def process_async(req, h, out_filename):
                 return
         else:
             err_msg = "Calling unknown module '%s' while processing '%s'." % (m['module'], f)
+            j = JOBS[h]
             j['out'] = 'error'
             j['details'] = err_msg
             j['finished'] = True
@@ -442,7 +448,7 @@ def process_async(req, h, out_filename):
             return
 
     if cast_outfile(f, out_filename, req, h):
-
+        j = JOBS[h]
         j['out'] = 'ok'
         j['details'] = out_filename
         j['finished'] = True
@@ -603,6 +609,7 @@ def multi_process_async(req, h, out_filename):
             elif isinstance(f, str): # This is a file
                 o.append( {'out': 'ok', 'details': f} )
             else:
+                j = JOBS[h]
                 j['out'] = 'error'
                 j['details'] = "Element %d of multi-query is of unhandled type (%s)." % (i, type(f))
                 j['finished'] = True
@@ -649,6 +656,7 @@ def multi_process_async(req, h, out_filename):
                 except Exception as e:
                     err = "Error while reading %s...\n%s" % (oj['details'],e)
                     vsl.LOG.debug("[%s] %s" % (h, err))
+                    j = JOBS[h]
                     j['out'] = 'error'
                     j['details'] = err
                     j['finished'] = True
@@ -661,6 +669,7 @@ def multi_process_async(req, h, out_filename):
                     fs_y = fs
                 else:
                     if fs!=fs_y:
+                        j = JOBS[h]
                         j['out'] = 'error'
                         j['details'] = 'Mismatching sampling frequencies in ['+(", ".join(files))+'] (actually from ['+(", ".join([x['details'] for x in o]))+'])'
                         j['finished'] = True
@@ -674,6 +683,7 @@ def multi_process_async(req, h, out_filename):
             sf.write(concatenated_filename, y, fs_y)
 
         else:
+            j = JOBS[h]
             j['out'] = 'error'
             j['details'] = "Something unexplained happened."
             j['finished'] = True
@@ -684,7 +694,10 @@ def multi_process_async(req, h, out_filename):
     r = req.copy()
     r['file'] = concatenated_filename
     o = process(r, True)
-    JOBS[h] = o
+    j = JOBS[h]
+    j['out'] = o['out']
+    j['details'] = o['details']
+    JOBS[h] = j
 
     vsl.LOG.debug("[%s] Multi-job is done!" % (h))
 
