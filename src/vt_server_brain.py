@@ -671,7 +671,7 @@ def multi_process_async(req, h, out_filename):
                     if fs!=fs_y:
                         j = JOBS[h]
                         j['out'] = 'error'
-                        j['details'] = 'Mismatching sampling frequencies in ['+(", ".join(files))+'] (actually from ['+(", ".join([x['details'] for x in o]))+'])'
+                        j['details'] = 'Mismatching sampling frequencies between ['+oj['details']+'] and ['+(", ".join([x['details'] for x in o if x['details']!=oj['details']]))+'])'
                         j['finished'] = True
                         JOBS[h] = j
                         vsl.LOG.debug("[%s] File `%s` has a mismatching sampling frequency (%d instead of %d)..." % (h, oj['details'], fs, fs_y))
