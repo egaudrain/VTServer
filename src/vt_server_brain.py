@@ -224,7 +224,7 @@ def process(req, force_sync=False):
             vsl.LOG.debug("File '%s' was requested but cannot be accessed." % req['file'])
             return {'out': 'error', 'details': "File '%s' cannot be accessed" % req['file']}
 
-        if os.path.splitext(req['file'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS:
+        if (not os.path.isdir(req['file'])) and (os.path.splitext(req['file'])[1].strip('.').lower() not in SUPPORTED_SOUND_EXTENSIONS):
             vsl.LOG.debug("Sound format not supported for '%s'." % (req['file']))
             return {'out': 'error', 'details': "Format of '%s' is not supported." % req['file']}
 
