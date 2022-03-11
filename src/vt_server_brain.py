@@ -734,7 +734,8 @@ def process_module(f, m, format, cache=None):
 
     if hm in JOBS:
         j = JOBS[hm]
-        j['lock'].wait(5)
+        if not j['finished']:
+            j['lock'].wait(5)
     else:
         j = {'finished': False, 'started_at': datetime.datetime.now(), 'lock': manager.Condition()}
         j['lock'].acquire()
