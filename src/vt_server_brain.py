@@ -790,6 +790,8 @@ def process_module(f, m, format, cache=None):
 
     j = JOBS[hm]
     j.release()
+    j['finished'] = True
+    JOBS[hm] = j
 
     return f
 
