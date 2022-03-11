@@ -46,7 +46,7 @@ import vt_server_common_tools as vsct
 import vt_server_modules as vsm
 
 import os, datetime, pickle, copy, traceback
-from multiprocessing import Process, Manager, active_children, Condition
+from multiprocessing import Process, Manager, active_children
 from threading import Event, Thread
 import subprocess
 from enum import IntEnum
