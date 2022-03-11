@@ -737,8 +737,7 @@ def process_module(f, m, format, cache=None):
         if not j['finished']:
             j['lock'].wait(5)
     else:
-        j = {'finished': False, 'started_at': datetime.datetime.now(), 'lock': manager.Condition()}
-        j['lock'].acquire()
+        j = {'finished': False, 'started_at': datetime.datetime.now(), 'lock': manager.Event()}
         JOBS[hm] = j
 
     module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
@@ -790,7 +789,7 @@ def process_module(f, m, format, cache=None):
         f = o
 
     j = JOBS[hm]
-    j['lock'].release()
+    j['lock'].set()
     j['finished'] = True
     JOBS[hm] = j
 
