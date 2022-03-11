@@ -46,7 +46,7 @@ import vt_server_common_tools as vsct
 import vt_server_modules as vsm
 
 import os, datetime, pickle, copy, traceback
-from multiprocessing import Process, Manager, active_children
+from multiprocessing import Process, Manager, active_children, Condition
 from threading import Event, Thread
 import subprocess
 from enum import IntEnum
@@ -731,6 +731,15 @@ def process_module(f, m, format, cache=None):
     """
     # Do we have this already in cache?
     hm = vsct.signature((os.path.abspath(f), m))
+
+    if hm in JOBS:
+        j = JOBS[hm]
+        j['lock'].wait(5)
+    else:
+        j = {'finished': False, 'started_at': datetime.datetime.now(), 'lock': Condition()}
+        j.acquire()
+        JOBS[hm] = j
+
     module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
     if format=='mp3':
         # We save in wav first, and will convert to mp3 at the end
@@ -778,6 +787,9 @@ def process_module(f, m, format, cache=None):
         vsct.job_file(o, source_files, cache, m)
 
         f = o
+
+    j = JOBS[hm]
+    j.release()
 
     return f
 
