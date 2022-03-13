@@ -241,6 +241,7 @@ def process_world(in_filename, m, out_filename):
 
         except portalocker.exceptions.AlreadyLocked:
             # Another process is already making the analysis, we wait for it to be finished
+            vsl.LOG.info("[world (v%s)] Another process is already making the analysis file '%s'. We wait." % (pyworld.__version__, dat_filename))
             process_world(in_filename, m, out_filename)
 
 
