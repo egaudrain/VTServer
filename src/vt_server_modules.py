@@ -295,7 +295,9 @@ def process_ramp(in_filename, m, out_filename):
     elif type(m['duration']) != type([]):
         raise ValueError("[ramp] Duration must be number or a list (%s given)." % repr(m['duration']))
 
-    if m['shape'] not in ['linear', 'cosine']:
+    if 'shape' not in m:
+        m['shape'] = 'linear'
+    elif m['shape'] not in ['linear', 'cosine']:
         raise ValueError("[ramp] Shape is not recognized (%s given)." % repr(m['shape']))
 
     x = vsct.ramp(x, fs, dur, m['shape'])
