@@ -64,6 +64,8 @@ import scipy.interpolate as spi
 import pyworld
 import soundfile as sf
 
+import portalocker
+
 RE = dict()
 RE['f0'] = re.compile(r"([*+-~]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(Hz|st)?")
 RE['vtl'] = re.compile(r"([*+-]?)\s*((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][-+]?[0-9]+)?)\s*(st)?")
@@ -185,46 +187,62 @@ def process_world(in_filename, m, out_filename):
     # pyworld.default_frame_period
 
     dat_filename = os.path.join(dat_folder, "dat_"+vsct.signature((os.path.abspath(in_filename), 'world v'+pyworld.__version__))+'.pickle')
+
+    # if os.access(dat_filename, os.R_OK):
+    #     mode = 'rb'
+    # else:
+    #     mode = 'wb'
+
     try:
         # The file already exists so we just load it
         t1 = time.time()
         tp1 = time.process_time()
 
-        dat = pickle.load(open(dat_filename, "rb"))
+        with portalocker.Lock(dat_filename, mode='rb') as fh:
+            dat = pickle.load(fh)
 
-        # No need to update because cache is set to None
-        #vsct.update_job_file(dat_filename)
+            # No need to update because cache is set to None
+            #vsct.update_job_file(dat_filename)
 
-        # We could check some things here like the file and the World version, but it should
-        # be builtin the file signature.
-        #f0, sp, ap, fs, rms_x, sp_interp, ap_interp = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms'], dat['sp_interp'], dat['ap_interp']
-        f0, sp, ap, fs, rms_x = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms']
+            # We could check some things here like the file and the World version, but it should
+            # be builtin the file signature.
+            #f0, sp, ap, fs, rms_x, sp_interp, ap_interp = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms'], dat['sp_interp'], dat['ap_interp']
+            f0, sp, ap, fs, rms_x = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms']
 
-        if 'frame_period' in dat and pyworld.default_frame_period != dat['frame_period']:
-            raise Exception("The frame period in the pickled file does not match that of the version of pyworld. We regenerate it.")
+            if 'frame_period' in dat and pyworld.default_frame_period != dat['frame_period']:
+                raise Exception("The frame period in the pickled file does not match that of the version of pyworld. We regenerate it.")
 
-        t2 = time.time()
-        tp2 = time.process_time()
-        vsl.LOG.info("[world (v%s)] Loaded f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, dat_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
+            t2 = time.time()
+            tp2 = time.process_time()
+            vsl.LOG.info("[world (v%s)] Loaded f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, dat_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
         # used_files.append(dat_filename)
 
     except:
-        t1 = time.time()
-        tp1 = time.process_time()
-        x, fs = sf.read(in_filename)
-        rms_x = vsct.rms(x)
-        f0, sp, ap = pyworld.wav2world(x, fs)
+        # The file did not exist or could not be loaded properly
+        try:
+            with portalocker.Lock(dat_filename, mode='wb', fail_when_locked=True) as fh:
 
-        # Note: I thought of keeping the interpolant in the pickle file, but it
-        # makes it way too big and the processing gain is relatively small
+                t1 = time.time()
+                tp1 = time.process_time()
+                x, fs = sf.read(in_filename)
+                rms_x = vsct.rms(x)
+                f0, sp, ap = pyworld.wav2world(x, fs)
 
-        pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__, 'frame_period': pyworld.default_frame_period}, open(dat_filename, 'wb'))
-        vsct.job_file(dat_filename, [in_filename], None)
+                # Note: I thought of keeping the interpolant in the pickle file, but it
+                # makes it way too big and the processing gain is relatively small
 
-        t2 = time.time()
-        tp2 = time.process_time()
-        vsl.LOG.info("[world (v%s)] Extracted f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, in_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
+                pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__, 'frame_period': pyworld.default_frame_period}, fh)
+                vsct.job_file(dat_filename, [in_filename], None)
+
+                t2 = time.time()
+                tp2 = time.process_time()
+                vsl.LOG.info("[world (v%s)] Extracted f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, in_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
+
+        except portalocker.exceptions.AlreadyLocked:
+            # Another process is already making the analysis, we wait for it to be finished
+            process_world(in_filename, m, out_filename)
+
 
         # created_files.append(dat_filename)
 
