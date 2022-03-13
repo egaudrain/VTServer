@@ -315,7 +315,11 @@ def process_world(in_filename, m, out_filename):
             uv = new_f0==0 # The unvoiced samples
             # We first interpolate over the unvoiced samples and stretch
             new_f0_tmp = new_f0[np.logical_not(uv)]
-            new_f0 = spi.interp1d(t[np.logical_not(uv)], new_f0_tmp, kind='cubic', fill_value=(new_f0_tmp[0], new_f0_tmp[-1]), bounds_error=False, assume_sorted=True)(new_t)
+            try:
+                new_f0 = spi.interp1d(t[np.logical_not(uv)], new_f0_tmp, kind='cubic', fill_value=(new_f0_tmp[0], new_f0_tmp[-1]), bounds_error=False, assume_sorted=True)(new_t)
+            except ValueError as err:
+                vsl.LOG.info("[world (v%s)] Couldn't using cubic interpolation for F0 in '%s'. Falling back to linear interpolation.\nF0 = %s" % (pyworld.__version__, in_filename, repr(new_f0_tmp)))
+                new_f0 = spi.interp1d(t[np.logical_not(uv)], new_f0_tmp, kind='linear', fill_value=(new_f0_tmp[0], new_f0_tmp[-1]), bounds_error=False, assume_sorted=True)(new_t)
             # Then we stretch the voice/unvoice information
             new_uv = spi.interp1d(t, uv*1.0, assume_sorted=True)(new_t)>.5
             new_f0[new_uv] = 0
