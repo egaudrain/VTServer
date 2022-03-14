@@ -228,13 +228,6 @@ def process(req, force_sync=False):
             vsl.LOG.debug("Sound format not supported for '%s'." % (req['file']))
             return {'out': 'error', 'details': "Format of '%s' is not supported." % req['file']}
 
-    # For compatibility with multi-file queries
-    # if len(req['stack'])!=0 and isinstance(req['stack'][0], list):
-    #     if len(req['stack'])>1:
-    #         # We have a list of stacks with more than one stack...
-    #         return {'out': 'error', 'details': "Cannot have a list of stacks (with more than one stack) when passing in a single file."}
-    #     req['stack'] = req['stack'][0]
-
     #----------------------------
     # From here on, we are ready to call job_signature
 
@@ -248,10 +241,29 @@ def process(req, force_sync=False):
     out_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), h[0])
     out_filename = os.path.join(out_path, h+"."+req['format'])
 
-    if not os.path.exists(out_path):
-        os.makedirs(out_path)
+    # First we check if we have this job in the job-list
+    if h in JOBS:
+        # The job is already being processed
+        if JOBS[h]['finished']:
+            if JOBS[h]['out']!='ok':
+                return {"out": JOBS[h]['out'], "details": JOBS[h]['details']}
+            elif os.access(out_filename, os.R_OK):
+                # Job is marked finished and ok, but cache couldn't be accessed, we need to regenerate it
+                vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
+                try:
+                    vsct.update_job_file(out_filename)
+                except:
+                    vsl.LOG.warning("[%s] Something went wrong while updating the job-file associated with %s" % (h,out_filename))
+                return {"out": "ok", "details": out_filename}
+            else:
+                vsl.LOG.info("[%s] Found job in JOBS, started at %s, marked finished and ok, but cache (%s) couldn't be accessed, we need to regenerate it" % (h, JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S"), out_filename))
+                JOBS.pop(h)
+        else:
+            vsl.LOG.debug('[%s] Found job in JOBS, started at %s, not finished yet' % (h ,JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")));
+            return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
 
-    if os.access(out_filename, os.R_OK):
+    # If the job was finished, it could be that it's been removed from the job list already, we then check if the file was created already
+    elif os.access(out_filename, os.R_OK):
         # The file already exists and is accessible, we return it
         vsl.LOG.debug("[%s] Found %s in cache. Done." % (h, out_filename))
         try:
@@ -259,54 +271,45 @@ def process(req, force_sync=False):
         except:
             vsl.LOG.warning("[%s] Something went wrong while updating the job-file associated with %s" % (h,out_filename))
         return {"out": "ok", "details": out_filename}
+
+
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+
+    vsl.LOG.debug("[%s] Adding job to the JOBS list." % h)
+
+    JOBS[h] = {'finished': False, 'started_at': datetime.datetime.now(), 'pid': None}
+
+    # if req['in_type'] == QueryInType.QUERY:
+    #     vsl.LOG.debug("[%s] Starting sub-query process." % (h))
+    #     p = Process(target=subquery_process_async, args=(req, h, out_filename))
+    # else:
+    if req['in_type'] == QueryInType.LIST:
+        proc_target = multi_process_async
     else:
-        if h in JOBS:
-            # The job is already being processed
-            if JOBS[h]['finished']:
-                if JOBS[h]['out']!='ok':
-                    return {"out": JOBS[h]['out'], "details": JOBS[h]['details']}
-                else:
-                    # Job is marked finished and ok, but cache couldn't be accessed, we need to regenerate it
-                    vsl.LOG.info("[%s] Found job in JOBS, started at %s, marked finished and ok, but cache (%s) couldn't be accessed, we need to regenerate it" % (h, JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S"), out_filename))
-                    JOBS.pop(h)
-            else:
-                vsl.LOG.debug('[%s] Found job in JOBS, started at %s, not finished yet' % (h ,JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")));
-                return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
+        proc_target = process_async
 
-        vsl.LOG.debug("[%s] Adding job to the JOBS list." % h)
+    p = Process(target=proc_target, args=(req, h, out_filename))
 
-        JOBS[h] = {'finished': False, 'started_at': datetime.datetime.now(), 'pid': None}
+    p.start()
 
-        # if req['in_type'] == QueryInType.QUERY:
-        #     vsl.LOG.debug("[%s] Starting sub-query process." % (h))
-        #     p = Process(target=subquery_process_async, args=(req, h, out_filename))
-        # else:
-        if req['in_type'] == QueryInType.LIST:
-            proc_target = multi_process_async
-        else:
-            proc_target = process_async
+    j = JOBS[h]
+    j['pid'] = p.pid
+    JOBS[h] = j
 
-        p = Process(target=proc_target, args=(req, h, out_filename))
+    vsl.LOG.debug("[%s] Job is running in process %d." % (h, p.pid))
 
-        p.start()
-
+    if req['mode']=='async' and not force_sync:
+        return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
+    elif req['mode']=='sync' or force_sync:
+        p.join()
         j = JOBS[h]
-        j['pid'] = p.pid
-        JOBS[h] = j
-
-        vsl.LOG.debug("[%s] Job is running in process %d." % (h, p.pid))
-
-        if req['mode']=='async' and not force_sync:
-            return {"out": "wait", "details": "Job started at %s" % JOBS[h]['started_at'].strftime("%m/%d/%Y, %H:%M:%S")}
-        elif req['mode']=='sync' or force_sync:
-            p.join()
-            j = JOBS[h]
-            if 'out' in j:
-                output = {"out": j['out'], "details": j['details']}
-                JOBS.pop(h)
-                return output
-            else:
-                return {'out': 'error', 'details': "Not sure what happened here... JOB=%s" % repr(j)}
+        if 'out' in j:
+            output = {"out": j['out'], "details": j['details']}
+            JOBS.pop(h)
+            return output
+        else:
+            return {'out': 'error', 'details': "Not sure what happened here... JOB=%s" % repr(j)}
 
 def cast_outfile(f, out_filename, req, h):
 
