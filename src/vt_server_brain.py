@@ -739,14 +739,15 @@ def process_module(f, m, format, cache=None):
     """
     # Do we have this already in cache?
     hm = vsct.signature((os.path.abspath(f), m))
+    hm_job = m['module']+'/'+hm
 
     if hm in JOBS:
-        j = JOBS[hm]
+        j = JOBS[hm_job]
         if not j['finished']:
             j['lock'].wait(5)
     else:
         j = {'finished': False, 'started_at': datetime.datetime.now(), 'lock': manager.Event()}
-        JOBS[hm] = j
+        JOBS[hm_job] = j
 
     module_cache_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), m['module'])
     if format=='mp3':
@@ -802,10 +803,10 @@ def process_module(f, m, format, cache=None):
 
         f = o
 
-    j = JOBS[hm]
+    j = JOBS[hm_job]
     j['lock'].set()
     j['finished'] = True
-    JOBS[hm] = j
+    JOBS[hm_job] = j
 
     return f
 
