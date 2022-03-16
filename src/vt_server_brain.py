@@ -761,12 +761,18 @@ def process_module(f, m, format, cache=None):
 
         f = cache_filename
     else:
-        if 'file' in m and type(m['file'])==type(dict()):
-            # This is a module that takes a file as argument, and the file is a query
-            # We run the query first and substitute the file with the result
-            q = copy.deepcopy(m['file'])
-            q['mode'] = 'sync'
-            res = process(q)
+        if 'file' in m:
+            if type(m['file'])==type(dict()):
+                # This is a module that takes a file as argument, and the file is a query
+                # We run the query first and substitute the file with the result
+                q = copy.deepcopy(m['file'])
+            elif type(m['file'])==type(list()):
+                q = {'file': copy.deepcopy(m['file']), 'stack': list()}
+            else:
+                raise Exception("`file` is of type %s, which is not recognized (expecting list or dict)." % (type(m['file'])))
+
+            res = process(q, True)
+
             if res['out']=='ok':
                 m['file'] = res['details']
             else:
