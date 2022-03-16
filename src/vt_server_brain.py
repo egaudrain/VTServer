@@ -415,6 +415,8 @@ def process_async(req, h, out_filename):
     # job_info['cache_expiration'] = req['cache']
     # job_filename = os.path.splitext(out_filename)[0]+".job"
 
+    vsl.LOG.debug("[%s] Going through modules of '%s'" % (h, repr(req['stack'])))
+
     for i, m in enumerate(req['stack']):
 
         if 'module' not in m:
