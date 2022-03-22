@@ -136,10 +136,10 @@ JOB_JANITOR = None # now instantiated manually
 
 def job_signature(req):
 
-    if 'stack' not in req:
-        req['stack'] = list()
-
     if isinstance(req, dict):
+        if 'stack' not in req:
+            req['stack'] = list()
+
         if isinstance(req['file'], list):
             return 'M'+vsct.signature(([job_signature(x) for x in req['file']], req['stack']))
         elif isinstance(req['file'], dict):
