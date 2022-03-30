@@ -244,6 +244,8 @@ def process(req, force_sync=False):
     out_path = os.path.join(os.path.abspath(vsc.CONFIG['cachefolder']), h[0])
     out_filename = os.path.join(out_path, h+"."+req['format'])
 
+    vsl.LOG.debug("[%s] Checking if job exists or if cache file `%s` is accessible" % (h, out_filename))
+
     # First we check if we have this job in the job-list
     if h in JOBS:
         # The job is already being processed
@@ -339,6 +341,8 @@ def cast_outfile(f, out_filename, req, h):
             x, fs = sf.read(f)
             sf.write(out_filename, x, fs)
             vsct.job_file(out_filename, [f], req['cache'], req['stack'])
+
+    vsl.LOG.debug("[%s] Casting `%s` into `%s` was successful." % (h, f, out_filename))
 
     return True
 
@@ -463,6 +467,8 @@ def process_async(req, h, out_filename):
         JOBS[h] = j
 
         vsl.LOG.debug("[%s] Finished with processing the stack." % (h))
+    else:
+        vsl.LOG.debug("[%s] Could not cast the file." % (h))
 
 # def subquery_process_async(req, h, out_filename):
 #
@@ -721,6 +727,8 @@ def multi_process_async(req, h, out_filename):
         JOBS[h] = j
 
         vsl.LOG.debug("[%s] Multi-job is done!" % (h))
+    else:
+        vsl.LOG.debug("[%s] Casting failed." % (h))
 
 
 def process_module(f, m, format, cache=None):
