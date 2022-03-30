@@ -24,7 +24,7 @@ class VTServerLogFormatter(logging.Formatter):
         return super().format(record).strip().replace("\n", "\n\t")
 
 def get_FileHandler(logfile):
-    rtf = logging.handlers.RotatingFileHandler(logfile, maxBytes=1000000, backupCount=5)
+    rtf = logging.handlers.RotatingFileHandler(logfile, maxBytes=2000000, backupCount=10)
     rtf.setFormatter(VTServerLogFormatter())
     rtf.setLevel('DEBUG')
     return rtf
