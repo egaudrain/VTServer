@@ -321,8 +321,20 @@ def cast_outfile(f, out_filename, req, h):
     vsl.LOG.debug("[%s] Casting `%s` into `%s`" % (h, f, out_filename))
 
     if os.path.splitext(f)[1] == os.path.splitext(out_filename)[1]:
-        os.symlink(f, out_filename)
-        vsct.job_file(out_filename, [f], req['cache'], req['stack'])
+        try:
+            if os.path.exists(out_filename):
+                os.remove(out_filename)
+            os.symlink(f, out_filename)
+            vsct.job_file(out_filename, [f], req['cache'], req['stack'])
+        except Exception as err:
+            err_msg = "Symlinking '%s' to '%s' failed with error: %s, %s" % (f, out_filename, err, err.output.decode('utf-8'))
+            j = JOB[h]
+            j['out'] = 'error'
+            j['details'] = err_msg
+            j['finished'] = True
+            JOBS[h] = j
+            vsl.LOG.critical(err_msg)
+            return False
     else:
         if req['format'] == 'mp3':
             try:
