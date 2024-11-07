@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+MODULE_TYPE = 'modifier'
+
 """
 vt_server_module_world
 ======================
@@ -88,11 +90,6 @@ def check_arguments(mo, purpose):
 
                 `~`
                     if ``True``, then it denotes an absolute (average) value instead of an offset.
-
-
-
-
-
     """
 
     if mo is None:
@@ -134,7 +131,6 @@ def check_arguments(mo, purpose):
 
         return True, {'v': v_f, 'u': unit, '~': False} # o for offset
 
-
 def parse_arguments(m):
     for k in ['f0', 'vtl', 'duration']:
         if k not in m:
@@ -154,6 +150,65 @@ def parse_arguments(m):
 
     return m
 
+class Fast2DInterp():
+    """
+    Creates an interpolant object using modern scipy interpolation methods.
+    For linear interpolation, uses RegularGridInterpolator.
+    For cubic interpolation, uses RectBivariateSpline.
+    """
+    def __init__(self, x, y, z, ofrv=None, type='linear'):
+        self.type = type
+        self.x = x
+        self.y = y
+        self.z = z.copy()  # Make a copy to ensure we don't modify the original data
+        
+        if self.type == 'cubic':
+            self.interpolant = spi.RectBivariateSpline(x, y, z)
+        elif self.type == 'linear':
+	    # normalization	
+            z_min, z_max = np.min(z), np.max(z)
+            self.z = np.clip(z, z_min, z_max)
+            # Ensure z is in the correct orientation for RegularGridInterpolator
+            if z.shape[0] == len(x) and z.shape[1] == len(y):
+                self.z = z
+            else:
+                self.z = z.T
+            
+	    # z_min for out of range values
+            self.interpolant = spi.RegularGridInterpolator(
+                (self.x, self.y), 
+                self.z,
+                method='linear',
+                bounds_error=False,
+                fill_value=ofrv if ofrv is not None else z_min
+            )
+
+        self.x_range = (x[0], x[-1])
+        self.y_range = (y[0], y[-1])
+        self.ofrv = ofrv
+
+    def is_in_range(self, w, r):
+        return np.logical_and(w >= r[0], w <= r[1])
+
+    def __call__(self, x, y):
+        return self.interp(x, y)
+
+    def interp(self, x, y):
+        if self.type == 'cubic':
+            return self.interpolant(x, y)
+        elif self.type == 'linear':
+            if np.isscalar(x) and np.isscalar(y):
+                points = np.array([[x, y]])
+                result = self.interpolant(points)
+                return result[0]
+            else:
+                X, Y = np.meshgrid(x, y, indexing='ij')
+                points = np.stack([X.flatten(), Y.flatten()], axis=-1)
+                result = self.interpolant(points)
+                result = result.reshape(len(x), len(y))  # define results
+                # control min value
+                result = np.maximum(result, np.min(self.z) * 0.1)
+                return result
 
 def process_world(in_filename, m, out_filename):
     """
@@ -165,24 +220,14 @@ def process_world(in_filename, m, out_filename):
     The parameters for this module are:
 
     :param f0: Either an absolute f0 value in Hertz ``{### Hz}``, a change in semitones ``{### st}`` or a ratio ``{\*###}``.
-
     :param vtl: Same for vocal-tract length (only semitones and ratio).
-
     :param duration: Either an absolute duration in seconds ``{~###s}``, an offset in seconds ``{+/-###s}``, or a ratio ``{\*###}``.
-
-    Just to be clear, these parameters must be keys of the dictionary **m**.
     """
 
-    # created_files = list()
-    # used_files    = list()
-
     # Analysis
-    dat_folder   = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
+    dat_folder = os.path.join(vsc.CONFIG['cachefolder'], m['module'])
     if not os.path.exists(dat_folder):
         os.makedirs(dat_folder)
-
-    # To change the frame period, the default_frame_period has to be changed
-    # pyworld.default_frame_period
 
     dat_filename = os.path.join(dat_folder, "dat_"+vsct.signature((os.path.abspath(in_filename), 'world v'+pyworld.__version__))+'.pickle')
     try:
@@ -191,13 +236,6 @@ def process_world(in_filename, m, out_filename):
         tp1 = time.process_time()
 
         dat = pickle.load(open(dat_filename, "rb"))
-
-        # No need to update because cache is set to None
-        #vsct.update_job_file(dat_filename)
-
-        # We could check some things here like the file and the World version, but it should
-        # be builtin the file signature.
-        #f0, sp, ap, fs, rms_x, sp_interp, ap_interp = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms'], dat['sp_interp'], dat['ap_interp']
         f0, sp, ap, fs, rms_x = dat['f0'], dat['sp'], dat['ap'], dat['fs'], dat['rms']
 
         if 'frame_period' in dat and pyworld.default_frame_period != dat['frame_period']:
@@ -207,17 +245,12 @@ def process_world(in_filename, m, out_filename):
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Loaded f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, dat_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
-        # used_files.append(dat_filename)
-
     except:
         t1 = time.time()
         tp1 = time.process_time()
         x, fs = sf.read(in_filename)
         rms_x = vsct.rms(x)
         f0, sp, ap = pyworld.wav2world(x, fs)
-
-        # Note: I thought of keeping the interpolant in the pickle file, but it
-        # makes it way too big and the processing gain is relatively small
 
         pickle.dump({'f0': f0, 'sp': sp, 'ap': ap, 'fs': fs, 'rms': rms_x, 'file': in_filename, 'world_version': pyworld.__version__, 'frame_period': pyworld.default_frame_period}, open(dat_filename, 'wb'))
         vsct.job_file(dat_filename, [in_filename], None)
@@ -226,19 +259,15 @@ def process_world(in_filename, m, out_filename):
         tp2 = time.process_time()
         vsl.LOG.info("[world (v%s)] Extracted f0, sp and ap from '%s' in %.2f ms (%.2f ms of processing time)" % (pyworld.__version__, in_filename, (t2-t1)*1e3, (tp2-tp1)*1e3))
 
-        # created_files.append(dat_filename)
-
-
     # Modification of decomposition
     m = parse_arguments(m)
 
     nfft = (sp.shape[1]-1)*2
-    f = np.arange( sp.shape[1] ) / nfft * fs
-    t = np.arange( sp.shape[0] ) * pyworld.default_frame_period / 1e3
+    f = np.arange(sp.shape[1]) / nfft * fs
+    t = np.arange(sp.shape[0]) * pyworld.default_frame_period / 1e3
 
     # F0
     if (m['f0'] is None) or (m['f0']['u'] is None and m['f0']['v']==1) or (m['f0']['u'] is not None and m['f0']['v']==0 and not m['f0']['~']):
-        # No change
         new_f0 = f0
     elif m['f0']['u'] is None:
         new_f0 = f0*m['f0']['v']
@@ -260,54 +289,61 @@ def process_world(in_filename, m, out_filename):
             vtl_ratio = m['vtl']['v']
         elif m['vtl']['u']=='st':
             vtl_ratio = 2**(m['vtl']['v']/12)
+            vsl.LOG.info("[world] VTL modification - st: %.2f, ratio: %.3f" % (m['vtl']['v'], vtl_ratio))  
         new_f = f * vtl_ratio
+
+        if np.any(new_f > fs/2):
+            vsl.LOG.warning("[world] Some frequencies exceed Nyquist frequency, capping at %.1f Hz" % (fs/2))
+            new_f = np.minimum(new_f, fs/2)
+
 
     # Duration
     if (m['duration'] is None) or (m['duration']['u'] is None and m['duration']['v']==1) or (m['duration']['u'] is not None and m['duration']['v']==0 and not m['duration']['~']):
         new_t = None
     else:
         if m['duration']['u'] is None:
-            # A ratio
             new_t = np.linspace(t[0], t[-1], int(m['duration']['v']*len(t)))
         elif m['duration']['u']=='s':
             if m['duration']['~']:
-                # We assign a new duration
                 new_t = np.linspace(t[0], t[-1], int(m['duration']['v']/pyworld.default_frame_period*1e3))
             else:
-                # We extend the duration with a certain offset
-                new_duration = m['duration']['v'] + t[-1] #len(t)/pyworld.default_frame_period
+                new_duration = m['duration']['v'] + t[-1]
                 if new_duration<=0:
                     raise ValueError("[world] This is not good, the new duration is negative or null (%.3f s)... This is what we parsed: %s." % (new_duration, repr(m['duration'])))
                 new_t = np.linspace(t[0], t[-1], int(new_duration/pyworld.default_frame_period*1e3))
 
     # Now we rescale f0, sp and ap if necessary
     if new_f is None and new_t is None:
-        # Both VTL and duration are unchanged
         new_sp = sp
         new_ap = ap
     else:
         if new_t is None:
-            # Duration is not changed, we keep f0 as it is
             new_t = t
         else:
-            # Duration is changed, we need to interpolate f0
-            # This is a bit of a tricky business because there are zeros and we do
-            # not want to interpolate those.
-            uv = new_f0==0 # The unvoiced samples
-            # We first interpolate over the unvoiced samples and stretch
+            uv = new_f0==0
             new_f0_tmp = new_f0[np.logical_not(uv)]
             new_f0 = spi.interp1d(t[np.logical_not(uv)], new_f0_tmp, kind='cubic', fill_value=(new_f0_tmp[0], new_f0_tmp[-1]), bounds_error=False, assume_sorted=True)(new_t)
-            # Then we stretch the voice/unvoice information
             new_uv = spi.interp1d(t, uv*1.0, assume_sorted=True)(new_t)>.5
             new_f0[new_uv] = 0
 
         if new_f is None:
-            # VTL is not changed
             new_f = f
 
         # Interp of spectral envelope and aperiodicity map
         new_sp = Fast2DInterp(t, f, sp)(new_t, new_f)
         new_ap = Fast2DInterp(t, f, ap)(new_t, new_f)
+        
+        # control for spectral envelope
+        if np.any(np.isnan(new_sp)) or np.any(new_sp <= 0):
+            vsl.LOG.warning("[world] Invalid spectral envelope values detected, applying fixes...")
+            new_sp = np.nan_to_num(new_sp, nan=np.min(sp[sp > 0]))
+            new_sp = np.maximum(new_sp, np.min(sp[sp > 0]))
+
+        # control for aperiodicity
+        if np.any(np.isnan(new_ap)) or np.any(new_ap < 0) or np.any(new_ap > 1):
+            vsl.LOG.warning("[world] Invalid aperiodicity values detected, applying fixes...")
+            new_ap = np.clip(np.nan_to_num(new_ap, nan=0), 0, 1)
+
 
     new_f0, new_sp, new_ap = regularize_arrays(new_f0, new_sp, new_ap)
     y = pyworld.synthesize(new_f0, new_sp, new_ap, fs)
@@ -318,11 +354,9 @@ def process_world(in_filename, m, out_filename):
     if s!=1:
         vsl.LOG.info("[world (v%s)] Clipping was avoided during processing of '%s' to '%s' by rescaling with a factor of %.3f (%.1f dB)." % (pyworld.__version__, in_filename, out_filename, s, 20*np.log10(s)))
 
-
     sf.write(out_filename, y, fs)
 
     return out_filename
-
 
 def regularize_arrays(*args):
     """
@@ -330,74 +364,8 @@ def regularize_arrays(*args):
     """
     out = list()
     for x in args:
-        out.append( np.require(x, requirements='C'))
+        out.append(np.require(x, requirements='C'))
     return tuple(out)
-
-
-class Fast2DInterp():
-    """
-    Creates an interpolant object based on ``scipy.interpolate.RectBivariateSpline`` but
-    dealing with out of range values.
-
-    The constructor is: ``Fast2DInterp(x, y, z, ofrv=None)`` where ``x`` and ``y``
-    are 1D arrays and ``z`` is a 2D array. The optional argument ``ofrv`` defines
-    the value used for out of range inputs. If ``ofrv`` is ``None``, then the
-    default behaviour of ``RectBivariateSpline`` is kept, i.e. the closest value is
-    returned.
-
-    The default type is ``linear``, which then makes use of ``scipy.interpolate.interp2d``.
-    With ``cubic``, the ``RectBivariateSpline`` is used.
-
-    Note that the class is not so useful in the end when used with ``linear``, but
-    is useful if you want to use cubic-splines.
-    """
-
-    def __init__(self, x, y, z, ofrv=None, type='linear'):
-        self.type = type
-
-        if self.type=='cubic':
-            self.interpolant = spi.RectBivariateSpline(x, y, z)
-        elif self.type=='linear':
-            self.interpolant = spi.interp2d(y, x, z, kind='linear')
-        else:
-            raise ValueError('Interpolant type unknown: "%s"' % type)
-
-        self.x_range = (x[0], x[-1])
-        self.y_range = (y[0], y[-1])
-
-        # Out of range value:
-        self.ofrv = ofrv
-
-    def is_in_range(self, w, r):
-        return np.logical_and(w>=r[0], w<=r[1])
-
-    def __call__(self, x, y):
-        return self.interp(x, y)
-
-    def interp_(self, x, y):
-        if self.type=='cubic':
-            return self.interpolant(x, y)
-        elif self.type=='linear':
-            return self.interpolant(y, x)
-
-    def interp(self, x, y):
-        if (np.isscalar(x) or len(x)==1) and (np.isscalar(y) or len(y)==1):
-            if self.ofrv is not None:
-                if self.is_in_range(x, self.x_range) and self.is_in_range(y, self.y_range):
-                    o = self.interp_(x, y)[0,0]
-                else:
-                    o = self.ofrv
-            else:
-                o = self.interp_(x, y)[0,0]
-        else:
-            o = self.interp_(x, y)
-
-            if self.ofrv is not None:
-                s = np.logical_and(self.is_in_range(xx, self.x_range), self.is_in_range(yy, self.y_range))
-                o[s] = self.ofrv
-
-        return o
-
 
 if __name__=="__main__":
     # test parse_arguments
@@ -411,8 +379,6 @@ if __name__=="__main__":
     vsl.LOG.addHandler(vsl.get_FileHandler(vsc.CONFIG['logfile']))
 
     m = {'module': 'world', 'duration': '~.2s'}
-    #in_file  = "test/Beer.wav"
-    #out_file = "test/Beer_test_cubic.wav"
     in_file  = "../test/Man480.wav"
     out_file = "../test/Man480_test.wav"
     print("Starting to process files...")
