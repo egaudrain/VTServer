@@ -345,9 +345,6 @@ class Fast2DInterp():
     default behaviour of ``RectBivariateSpline`` is kept, i.e. the closest value is
     returned.
 
-    The default type is ``linear``, which then makes use of ``scipy.interpolate.interp2d``.
-    With ``cubic``, the ``RectBivariateSpline`` is used.
-
     Note that the class is not so useful in the end when used with ``linear``, but
     is useful if you want to use cubic-splines.
     """
@@ -356,11 +353,13 @@ class Fast2DInterp():
         self.type = type
 
         if self.type=='cubic':
-            self.interpolant = spi.RectBivariateSpline(x, y, z)
+            k = 3
         elif self.type=='linear':
-            self.interpolant = spi.interp2d(y, x, z, kind='linear')
+            k = 1
         else:
             raise ValueError('Interpolant type unknown: "%s"' % type)
+
+        self.interpolant = spi.RectBivariateSpline(x, y, z, kx=k, ky=k)
 
         self.x_range = (x[0], x[-1])
         self.y_range = (y[0], y[-1])
@@ -374,25 +373,20 @@ class Fast2DInterp():
     def __call__(self, x, y):
         return self.interp(x, y)
 
-    def interp_(self, x, y):
-        if self.type=='cubic':
-            return self.interpolant(x, y)
-        elif self.type=='linear':
-            return self.interpolant(y, x)
-
     def interp(self, x, y):
         if (np.isscalar(x) or len(x)==1) and (np.isscalar(y) or len(y)==1):
             if self.ofrv is not None:
                 if self.is_in_range(x, self.x_range) and self.is_in_range(y, self.y_range):
-                    o = self.interp_(x, y)[0,0]
+                    o = self.interpolant(x, y)[0,0]
                 else:
                     o = self.ofrv
             else:
-                o = self.interp_(x, y)[0,0]
+                o = self.interpolant(x, y)[0,0]
         else:
-            o = self.interp_(x, y)
+            o = self.interpolant(x, y)
 
             if self.ofrv is not None:
+                xx, yy = np.meshgrid(x, y, indexing='ij')
                 s = np.logical_and(self.is_in_range(xx, self.x_range), self.is_in_range(yy, self.y_range))
                 o[s] = self.ofrv
 

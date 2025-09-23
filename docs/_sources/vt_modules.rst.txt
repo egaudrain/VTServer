@@ -314,59 +314,65 @@ Otherwise **f** is a dictionary with the following items:
     shift
         `[optional]` A shift in millimiters, towards the base. Note that the shift is applied
         after all other calculations so the `fmin` and `fmax` boundaries will
-        not be respected anymore.
+        not be respected any
 
-Filtering *method*
-~~~~~~~~~~~~~~~~~~
-
-A dictionary with the following elements:
-
-    family
-        The type of filter. At the moment only `butterworth` is implemented.
-
-        For `butterworth`, the following parameters have to be provided:
-
-        order
-            The actual order of the filter. Watch out, that this is the order that
-            is actually achieved. Choosing `true` for `zero-phase` means only
-            even numbers can be provided.
-
-        zero-phase
-            Whether a zero-phase filter is being used. If `true`, then :func:`filtfilt`
-            is used instead of :func:`filt`.
-
-        Unlike in the MATLAB version, this is implemented with second-order section
-        filters (:func:`sosfiltfilt` and :func:`sosfilt`).
+________________________________________
 
 
-synthesis_filters
-^^^^^^^^^^^^^^^^^
-
-It can be the string `"analysis_filters"` to make them identical to the analysis filters.
-This is also what happens if the element is omitted or ``null``.
-
-Otherwise it can be a dictionary similar to `analysis_filters`. The number of channels
-has to be the same. If it differs, an error will be returned.
+``world``
+---------
 
 
-envelope
-^^^^^^^^
 
-That specifies how the envelope is extracted.
 
-    method
-        Can be `low-pass` or `hilbert`.
+This module defines the *world* processor based on `pyworld <https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder>`_,
+a module wrapping `Morise's WORLD vocoder <https://github.com/mmorise/World>`_.
 
-        For `low-pass`, the envelope is extracted with rectification and low-pass
-        filtering. The following parameters are required:
+Here are some examples of module instructions:
 
-            rectify
-                The wave rectification method: `half-wave` or `full-wave`.
+.. code-block:: json
 
-            order
-                The order of the filter used for envelope extraction. Again, this
-                is the effective order, so only even numbered are accepted because
-                the envelope is extracted with a zero-phase filter.
+    {
+        "module": "world",
+        "f0":     "*2",
+        "vtl":    "-3.8st"
+    }
+
+If a key is missing (here, **duration**) it is considered as ``None``, which means this part is left unchanged.
+
+**f0** can take the following forms:
+
+    * ``*`` followed by a number, in which case it is multiplicating ratio applied to the
+      whole f0 contour. For instance ``*2``.
+
+    * a positive or negative number followed by a unit (``Hz`` or ``st``). This will behave
+      like an offset, adding so many Hertz or so many semitones to the f0 contour.
+
+    * ``~`` followed by a number, followed by a unit (only ``Hz``). This will
+      set the *average* f0 to the defined value.
+
+**vtl** is defined similarly:
+
+    * ``*`` represents a multiplier for the vocal-tract length. Beware, this is not a multiplier
+      for the spectral envelope, but its inverse.
+
+    * offsets are defined using the unit ``st`` only.
+
+**duration**:
+
+    * the ``*`` multiplier can also be used.
+
+    * an offset can be defined in seconds (using unit ``s``).
+
+    * the absolute duration can be set using ``~`` followed by a value and the ``s`` unit.
+
+Note that in v0.2.8, WORLD is making the sounds 1 frame (5 ms) too long if no duration is specified. If you
+specify the duration, it is generated accurately.
+
+.. Created on 2020-03-20.
+
+
+e envelope is extracted with a zero-phase filter.
 
             fc
                 The cutoff of the envelope extraction in Hertz. Can be a single

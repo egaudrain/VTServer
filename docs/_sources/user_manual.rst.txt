@@ -5,7 +5,7 @@ User manual
 Installation
 ============
 
-Download the server from https://github.com/egaudrain/VTServer/archive/master.zip.
+Download the server from https://github.com/egaudrain/VTServer/.
 
 Note that the server hasn't been tested on Windows, only on macOS and Linux. In principle
 it should also work, but so far nobody tried.
@@ -13,38 +13,23 @@ it should also work, but so far nobody tried.
 Dependencies
 ------------
 
-The server is written for Python 3.5+, so you'll need to make sure you have this installed. On all platforms
-you can use `Conda <https://www.anaconda.com/products/individual#Downloads>`_, or install your own Python if
-it is not already there.
+The server is written for Python 3.5+, so you'll need to make sure you have this installed.
 
 Once Python installed, you'll need to get `pip <https://pip.pypa.io/en/stable/installing/>`_ to be able to install
-the external dependencies. If you used Conda as you package manager, you can also do these through it. On (Debian/Ubuntu) Linux
-you can get pip through:
+the external dependencies.
+
+On all platforms, you will need to run:
 
 .. code-block:: text
 
-    $ sudo apt install python3-pip
+    $ pip install numpy scipy soundfile pyworld samplerate portalocker
 
-VTServer uses **pysoundfile** to read sound files. On Linux you will need to install `libsndfile1 <http://www.mega-nerd.com/libsndfile>`_ directly:
-
-.. code-block:: text
-
-    $ sudo apt install libsndfile1
-
-It is also recommended to install **samplerate** for precise and efficient resampling. On Linux, that means you need to install `libsamplerate <http://www.mega-nerd.com/libsamplerate/>`_:
+However, on Linux/Ubuntu, if you want to run the server as a service, you can use the provided install script. Before doing so, make sure to run:
 
 .. code-block:: text
 
-    $ sudo apt install libsamplerate0
+    $ sudo apt install python3-full libsndfile1 libsamplerate0
 
-The Numpy and Scipy packages of the current Ubuntu 18.04 LTS are not new enough, so just get the latest with pip.
-On macOS, it is also recommended to use pip to install these dependencies.
-
-This can be done as follows:
-
-.. code-block:: text
-
-    $ sudo -H pip3 install numpy scipy pysoundfile pyworld samplerate
 
 To use 'mp3' as an output format, you need to install `LAME <https://lame.sourceforge.io/>`__.
 

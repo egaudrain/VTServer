@@ -15,8 +15,9 @@ adduser vt_server syslog
 DEST=/usr/local/lib/vt_server
 
 mkdir -p $DEST
-install -C -g vt_server -o vt_server -v -t $DEST/ src/*.py README.md
+install -C -g vt_server -o vt_server -v -t $DEST/ src/*.py README.md src/*.sh
 chmod 755 $DEST/vt_server.py
+chmod 755 $DEST/vt_server_systemd.sh
 
 # Configuration file
 mkdir -p /usr/local/etc/vt_server/
@@ -30,7 +31,7 @@ chown vt_server:www-data $CACHE
 chmod 773 $CACHE
 
 # Installing the systemd service
-ln -s $DEST/vt_server_systemd.py /usr/local/sbin/vt_server
+ln -s $DEST/vt_server_systemd.sh /usr/local/sbin/vt_server
 chown vt_server /usr/local/sbin/vt_server
 chmod 755 /usr/local/sbin/vt_server
 
@@ -39,6 +40,11 @@ install -C -m 644 -v src/vt_server.service /etc/systemd/system/
 touch /var/log/vt_server.log
 chown vt_server:adm /var/log/vt_server.log
 chmod 664 /var/log/vt_server.log
+
+python3 -m venv /usr/local/lib/vt_server/venv
+# TODO: move this into requirements.txt
+/usr/local/lib/vt_server/venv/bin/pip3 install numpy scipy soundfile pyworld setuptools portalocker samplerate cysystemd
+chown -R vt_server:vt_server /usr/local/lib/vt_server/venv
 
 systemctl stop vt_server
 systemctl daemon-reload

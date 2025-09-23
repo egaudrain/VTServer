@@ -60,20 +60,13 @@ Installation as a daemon on Ubuntu Linux
 
 The server is written for Python 3.5+.
 
-For `pysoundfile` you will need to install `libsndfile1` directly:
+Install the following dependencies:
 
 ```
-$ sudo apt install libsndfile1 python3-pip
+$ sudo apt install libsndfile1 python3-full cmake
 ```
 
-The Numpy and Scipy packages of the current Ubuntu 18.04 LTS are not new enough, so just get the latest
-with `pip`.
-
-Before running the server you will need to install external dependencies:
-
-```
-$ sudo -H pip3 install numpy scipy pysoundfile pyworld systemd
-```
+The installation script will create a virtual environment in the `/usr/local/lib/vt_server/venv` where the right packages will be installed.
 
 Then, download the repository, e.g.:
 
