@@ -24,12 +24,7 @@ On all platforms, you will need to run:
 
     $ pip install numpy scipy soundfile pyworld samplerate portalocker
 
-However, on Linux/Ubuntu, if you want to run the server as a service, you can use the provided install script. Before doing so, make sure to run:
-
-.. code-block:: text
-
-    $ sudo apt install python3-full libsndfile1 libsamplerate0
-
+However, on Linux/Ubuntu, if you want to run the server as a service, you can use the provided install script which will take care of this for you (see `Running as a daemon`_ below).
 
 To use 'mp3' as an output format, you need to install `LAME <https://lame.sourceforge.io/>`__.
 
@@ -87,11 +82,11 @@ Running as a daemon
 For production, you'll want to run the server as a daemon. That's relatively easy to do on most platforms.
 Here are provided facilities for Linux systems that support `systemd <https://www.freedesktop.org/wiki/Software/systemd/>`_ (Debian, Ubuntu).
 
-You'll need to first install the Python systemd module:
+You will need to make sure the following packages are installed
 
 .. code-block:: text
 
-    $ sudo -H pip3 install systemd
+    $ sudo apt install python3-full libsndfile1 libsamplerate0
 
 Then just run :file:`install.ubuntu.sh` and it should do everything that's needed. Note that this is a very rudimentary script.
 It will install everything necessary in :file:`/usr/local/lib/vt_server`. Once installed, the server runs as user `vt_server`.

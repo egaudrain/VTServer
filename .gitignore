@@ -4,3 +4,4 @@ __pycache__/
 test/
 *.odg#
 unit-test/vt_server.conf.json
+.DS_Store

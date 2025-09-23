@@ -114,10 +114,7 @@ the external dependencies.</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ pip install numpy scipy soundfile pyworld samplerate portalocker
 </pre></div>
 </div>
-<p>However, on Linux/Ubuntu, if you want to run the server as a service, you can use the provided install script. Before doing so, make sure to run:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ sudo apt install python3-full libsndfile1 libsamplerate0
-</pre></div>
-</div>
+<p>However, on Linux/Ubuntu, if you want to run the server as a service, you can use the provided install script which will take care of this for you (see <a class="reference internal" href="#running-as-a-daemon">Running as a daemon</a> below).</p>
 <p>To use ‘mp3’ as an output format, you need to install <a class="reference external" href="https://lame.sourceforge.io/">LAME</a>.</p>
 <p>On Linux:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ sudo apt install lame
@@ -160,8 +157,8 @@ To see more, check the log file (in a new terminal):</p>
 <h3>Running as a daemon<a class="headerlink" href="#running-as-a-daemon" title="Link to this heading"></a></h3>
 <p>For production, you’ll want to run the server as a daemon. That’s relatively easy to do on most platforms.
 Here are provided facilities for Linux systems that support <a class="reference external" href="https://www.freedesktop.org/wiki/Software/systemd/">systemd</a> (Debian, Ubuntu).</p>
-<p>You’ll need to first install the Python systemd module:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ sudo -H pip3 install systemd
+<p>You will need to make sure the following packages are installed</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ sudo apt install python3-full libsndfile1 libsamplerate0
 </pre></div>
 </div>
 <p>Then just run <code class="file docutils literal notranslate"><span class="pre">install.ubuntu.sh</span></code> and it should do everything that’s needed. Note that this is a very rudimentary script.
