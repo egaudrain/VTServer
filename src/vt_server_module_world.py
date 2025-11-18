@@ -164,11 +164,11 @@ def process_world(in_filename, m, out_filename):
 
     The parameters for this module are:
 
-    :param f0: Either an absolute f0 value in Hertz ``{### Hz}``, a change in semitones ``{### st}`` or a ratio ``{\*###}``.
+    :param f0: Either an absolute f0 value in Hertz ``{### Hz}``, a change in semitones ``{### st}`` or a ratio ``{\\*###}``.
 
     :param vtl: Same for vocal-tract length (only semitones and ratio).
 
-    :param duration: Either an absolute duration in seconds ``{~###s}``, an offset in seconds ``{+/-###s}``, or a ratio ``{\*###}``.
+    :param duration: Either an absolute duration in seconds ``{~###s}``, an offset in seconds ``{+/-###s}``, or a ratio ``{\\*###}``.
 
     Just to be clear, these parameters must be keys of the dictionary **m**.
     """
